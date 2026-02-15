@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provider Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .user-info {
+      color: white;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 14px;
+    }
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <h2>ServiceSphere</h2>
+  <nav>
+    <a href="#">Dashboard</a>
+    <a href="#">Bookings</a>
+    <a href="#">Profile</a>
+  </nav>
+  <div class="user-info">
+    <span>Welcome, <strong id="userName"></strong></span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<section class="dashboard">
+  <h2>Booking Requests</h2>
+
+  <div class="provider-card">
+    <p>Customer: Rahul</p>
+    <button>Accept</button>
+    <button>Reject</button>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+  // Display user name on load
+  window.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    document.getElementById("userName").textContent = user.name || "User";
+  });
+</script>
+
+</body>
+</html>

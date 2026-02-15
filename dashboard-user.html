@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang ="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .user-info {
+      color: white;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 14px;
+    }
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <h2>ServiceSphere</h2>
+  <nav>
+    <a href="#">Dashboard</a>
+    <a href="#">My Bookings</a>
+    <a href="#">Profile</a>
+  </nav>
+  <div class="user-info">
+    <span>Welcome, <strong id="userName"></strong></span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<section class="dashboard">
+  <h2>Recommended Providers</h2>
+
+  <div class="card-container">
+    <div class="provider-card">
+      <h3>Ramesh Electrician</h3>
+      <p>⭐ 4.5</p>
+      <button onclick="bookService('Electrician', 'Ramesh Electrician')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <h3>Suresh Plumber</h3>
+      <p>⭐ 4.2</p>
+      <button onclick="bookService('Plumber', 'Suresh Plumber')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <h3>Raj Driver</h3>
+      <p>⭐ 4.8</p>
+      <button onclick="bookService('Driver', 'Raj Driver')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <h3>Priya Chef</h3>
+      <p>⭐ 4.6</p>
+      <button onclick="bookService('Chef', 'Priya Chef')">Book Now</button>
+    </div>
+  </div>
+</section>
+
+<section class="booking-section" style="padding: 50px 40px;">
+  <h2>My Bookings</h2>
+  
+  <div id="bookings-container" style="margin-bottom: 40px;">
+    <p style="text-align: center; color: #666;">Loading bookings...</p>
+  </div>
+</section>
+
+<section class="booking-section" style="padding: 50px 40px;">
+  <h2>Book a Service</h2>
+
+  <div class="booking-form">
+    <input type="text" id="customer_name" placeholder="Your Name">
+
+    <select id="service">
+      <option value="">Select a Service</option>
+      <option value="Electrician">Electrician</option>
+      <option value="Plumber">Plumber</option>
+      <option value="Driver">Driver</option>
+      <option value="Chef">Chef</option>
+    </select>
+
+    <input type="text" id="provider" placeholder="Preferred Provider Name">
+
+    <input type="date" id="booking_date">
+
+    <input type="time" id="booking_time">
+
+    <input type="text" id="address" placeholder="Service Address">
+
+    <textarea id="notes" placeholder="Additional Notes"></textarea>
+
+    <button onclick="createBooking()">Confirm Booking</button>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+  // Display user name on load
+  window.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    document.getElementById("userName").textContent = user.name || "User";
+    
+    // Pre-fill customer name
+    if (user.name) {
+      document.getElementById("customer_name").value = user.name;
+    }
+
+    // Load bookings
+    loadBookings();
+  });
+</script>
+
+</body>
+</html>

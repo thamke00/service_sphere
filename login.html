@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceSphere Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .success-message {
+            color: #388e3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .loading {
+            display: none;
+            color: #1e88e5;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #1e88e5;
+            box-shadow: 0 0 5px rgba(30, 136, 229, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm">
+        <h2>Register</h2>
+
+        <div class="input-group">
+            <input type="text" id="r_name" placeholder="Full Name">
+            <span class="error-message" id="r_name_error"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="email" id="r_email" placeholder="Email">
+            <span class="error-message" id="r_email_error"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="r_password" placeholder="Password (min 6 characters)">
+            <span class="error-message" id="r_password_error"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="r_confirm_password" placeholder="Confirm Password">
+            <span class="error-message" id="r_confirm_password_error"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="r_phone" placeholder="Phone">
+            <span class="error-message" id="r_phone_error"></span>
+        </div>
+
+        <div class="input-group">
+            <select id="r_role">
+                <option value="customer">Customer</option>
+                <option value="provider">Service Provider</option>
+            </select>
+        </div>
+
+        <button onclick="registerUser()" style="width: 100%;">Register</button>
+        <span class="loading" id="register_loading">Creating account...</span>
+        <span class="success-message" id="register_success">Registration successful! Logging in...</span>
+        <span class="error-message" id="register_error"></span>
+
+        <p onclick="showLogin()" class="switch-text">
+            Already have account? Login
+        </p>
+    </div>
+
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm" style="display:none;">
+        <h2>Login</h2>
+
+        <div class="input-group">
+            <input type="email" id="l_email" placeholder="Email">
+            <span class="error-message" id="l_email_error"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="l_password" placeholder="Password">
+            <span class="error-message" id="l_password_error"></span>
+        </div>
+
+        <button onclick="loginUser()" style="width: 100%;">Login</button>
+        <span class="loading" id="login_loading">Logging in...</span>
+        <span class="success-message" id="login_success">Login successful!</span>
+        <span class="error-message" id="login_error"></span>
+
+        <p onclick="showRegister()" class="switch-text">
+            Create new account
+        </p>
+    </div>
+
+</div>
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
+

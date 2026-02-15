@@ -1,0 +1,304 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f4f8fc;
+  color: #333;
+}
+
+/* ================= NAVBAR ================= */
+.navbar {
+  background: linear-gradient(90deg, #1565c0, #1e88e5);
+  color: white;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar h2 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 400;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+/* ================= HERO ================= */
+.hero {
+  padding: 70px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #e3f2fd, #ffffff);
+}
+
+.hero h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  margin-top: 25px;
+}
+
+.search-box input {
+  padding: 12px;
+  width: 220px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  outline: none;
+}
+
+.search-box button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #1e88e5;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.search-box button:hover {
+  background: #1565c0;
+}
+
+/* ================= SECTIONS ================= */
+.categories, .dashboard, .how-it-works {
+  padding: 50px 40px;
+}
+
+.categories h2, .how-it-works h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* ================= CARDS ================= */
+.card-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  width: 160px;
+  padding: 25px 15px;
+  border-radius: 16px;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* ================= HOW IT WORKS ================= */
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 18px;
+  flex-wrap: wrap;
+}
+
+/* ================= PROVIDER CARDS ================= */
+.provider-card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  width: 260px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: transform 0.3s;
+}
+
+.provider-card:hover {
+  transform: translateY(-5px);
+}
+
+.provider-card h3 {
+  margin-top: 0;
+}
+
+.provider-card button {
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* ================= BUTTONS ================= */
+button {
+  background: linear-gradient(90deg, #1e88e5, #1565c0);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* ================= FORMS ================= */
+.form-container {
+  width: 340px;
+  margin: 90px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-container input,
+.form-container select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.form-container input:focus,
+.form-container select:focus {
+  border-color: #1e88e5;
+}
+
+/* ================= FOOTER ================= */
+footer {
+  background: #1e88e5;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  margin-top: 50px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-box input {
+    width: 90%;
+  }
+
+  .steps {
+    gap: 20px;
+  }
+}
+/* ===== LOGIN / REGISTER PAGE ===== */
+
+body {
+    background: #f4f7fb;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Center container */
+.container {
+    width: 380px;
+    margin: 70px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Heading */
+.container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1e88e5;
+}
+
+/* Inputs */
+.container input,
+.container select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* Input focus effect */
+.container input:focus,
+.container select:focus {
+    border-color: #1e88e5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(30,136,229,0.3);
+}
+
+/* Button */
+.container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: #1e88e5;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.container button:hover {
+    background: #1565c0;
+}
+
+/* Switch text */
+.switch-text {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.switch-text span {
+    color: #1e88e5;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.switch-text span:hover {
+    text-decoration: underline;
+}
+.booking-form {
+    width: 400px;
+    margin: 20px auto;
+}
+
+.booking-form input,
+.booking-form select,
+.booking-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
