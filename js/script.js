@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:3000";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://servicesphere-production.up.railway.app";
+
 
 /* ===================================================
    UTILITY FUNCTIONS
