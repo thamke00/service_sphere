@@ -1,9 +1,10 @@
 {
   "name": "servicesphere-backend",
   "version": "1.0.0",
+  "description": "ServiceSphere Backend Server",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node backend/setup.js && node backend/server.js",
     "setup": "node backend/setup.js"
   },
   "dependencies": {
@@ -14,5 +15,8 @@
     "express-validator": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^3.6.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
