@@ -4,8 +4,7 @@
   "description": "ServiceSphere Backend Server",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/setup.js && node backend/server.js",
-    "setup": "node backend/setup.js"
+    "start": "node backend/server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
