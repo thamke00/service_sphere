@@ -1,3 +1,4 @@
+const path = require("path");
 require("dotenv").config();
 
 const express = require("express");
@@ -16,6 +17,13 @@ app.use(cors({
     credentials: false
 }));
 app.use(express.json());
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, "..")));
+
+// Default route (homepage)
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "index.html"));
+});
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
