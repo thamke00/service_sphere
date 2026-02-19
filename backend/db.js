@@ -37,6 +37,7 @@ db.connect((err) => {
     const bookingsTable = `
     CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT,
         customer_name VARCHAR(100),
         service VARCHAR(100),
         provider VARCHAR(100),
