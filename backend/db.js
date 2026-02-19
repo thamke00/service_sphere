@@ -1,34 +1,22 @@
 const mysql = require("mysql2");
 require("dotenv").config();
 
-/* ===================================================
-   DATABASE CONNECTION (LOCAL ENV VERSION)
-=================================================== */
-
 const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: 3306,
+    host: process.env.MYSQLHOST || process.env.DB_HOST,
+    user: process.env.MYSQLUSER || process.env.DB_USER,
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME,
+    port: process.env.MYSQLPORT || 3306,
 
     waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    connectionLimit: 10
 });
 
-
-/* ===================================================
-   TEST DATABASE CONNECTION
-=================================================== */
-
 db.getConnection((err, connection) => {
-
     if (err) {
-        console.error("❌ Database Connection Error:", err.message);
+        console.error("❌ Database Connection Error:", err);
         return;
     }
-
     console.log("✓ MySQL connected successfully");
     connection.release();
 });
