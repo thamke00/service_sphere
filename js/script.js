@@ -1,3 +1,32 @@
+// Login form handler: connects frontend to backend API
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Login successful!');
+                    // Save token, redirect, etc.
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            })
+            .catch(err => {
+                alert('Error connecting to server');
+                console.error(err);
+            });
+        });
+    }
+});
 const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"

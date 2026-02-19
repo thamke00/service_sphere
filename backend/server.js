@@ -94,115 +94,51 @@ app.post("/register", [
 });
 
 /* ================= LOGIN USER ================= */
-app.post("/login", [
-    body("email").isEmail().withMessage("Valid email is required"),
-    body("password").notEmpty().withMessage("Password is required")
-], (req, res) => {
+app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+    console.log("Login attempt:", email, password); // DEBUG
 
-    try {
-        // Validate input
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+    const sql = "SELECT id, name, email, password, role FROM users WHERE email = ?";
+    db.query(sql, [email], async (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).json({ success: false, message: "Database error" });
         }
+        console.log("SQL results:", results); // DEBUG
 
-        const { email, password } = req.body;
-
-        const sql = "SELECT id, name, email, password, role FROM users WHERE email = ?";
-        db.query(sql, [email], async (err, results) => {
-
-            if (err) {
-                console.error("Database Error:", err);
-                return res.status(500).json({ success: false, message: "Database error" });
-            }
-
-            if (results.length === 0) {
-                return res.status(401).json({ success: false, message: "Invalid email or password" });
-            }
-
-            // Compare passwords
-            const user = results[0];
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-
-            if (!isPasswordValid) {
-                return res.status(401).json({ success: false, message: "Invalid email or password" });
-            }
-
-            // Generate JWT token
-            const token = jwt.sign(
-                { id: user.id, email: user.email, role: user.role },
-                JWT_SECRET,
-                { expiresIn: "24h" }
-            );
-
-            // Return user data (without password) and token
-            return res.json({
-                success: true,
-                message: "Login successful",
-                token: token,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role
-                }
-            });
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-});
-
-/* ================= CREATE BOOKING ================= */
-app.post("/booking", verifyToken, [
-    body("customer_name").trim().notEmpty().withMessage("Customer name is required"),
-    body("service").trim().notEmpty().withMessage("Service is required"),
-    body("provider").trim().notEmpty().withMessage("Provider is required"),
-    body("booking_date").notEmpty().withMessage("Booking date is required"),
-    body("booking_time").notEmpty().withMessage("Booking time is required"),
-    body("address").trim().notEmpty().withMessage("Address is required")
-], (req, res) => {
-
-    try {
-        // Validate input
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+        if (results.length === 0) {
+            console.log("No user found for email:", email); // DEBUG
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
         }
+        const user = results[0];
+        let isPasswordValid = false;
+        try {
+            isPasswordValid = await bcrypt.compare(password, user.password);
+        } catch (e) {
+            console.error("Bcrypt error:", e);
+        }
+        console.log("Password valid?", isPasswordValid); // DEBUG
 
-        const {
-            customer_name,
-            service,
-            provider,
-            booking_date,
-            booking_time,
-            address,
-            notes
-        } = req.body;
-
-        const sql = `
-            INSERT INTO bookings (customer_id, customer_name, service, provider, booking_date, booking_time, address, notes, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
-        `;
-
-        db.query(
-            sql,
-            [req.user.id, customer_name, service, provider, booking_date, booking_time, address, notes || ""],
-            (err) => {
-                if (err) {
-                    console.error("Booking DB Error:", err);
-                    return res.status(500).json({ success: false, message: "Booking failed" });
-                }
-                return res.json({ success: true, message: "Booking confirmed!" });
-            }
+        if (!isPasswordValid) {
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
+        }
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: "24h" }
         );
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
+        return res.json({
+            success: true,
+            message: "Login successful",
+            token: token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    });
 });
 
 /* ================= GET BOOKINGS ================= */
