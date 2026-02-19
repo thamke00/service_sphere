@@ -9,6 +9,24 @@ const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 const db = require("./db");
 
+/* ===================================================
+   TEST DATABASE CONNECTION
+=================================================== */
+
+db.getConnection((err, connection) => {
+
+    if (err) {
+        console.error("❌ Database Connection Error:", err);
+        return;
+    }
+
+    console.log("✓ MySQL connected successfully (Pool)");
+    connection.release();
+});
+
+
+module.exports = db;
+
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key_change_in_production";
 
@@ -94,43 +112,48 @@ app.post("/register", [
 });
 
 /* ================= LOGIN USER ================= */
-app.post("/login", (req, res) => {
+/* ================= LOGIN USER ================= */
+app.post("/login", async (req, res) => {
+
+    console.log("LOGIN BODY:", req.body);
+
     const { email, password } = req.body;
-    console.log("Login attempt:", email, password); // DEBUG
 
-    const sql = "SELECT id, name, email, password, role FROM users WHERE email = ?";
+    const sql = "SELECT id, name, email, password, role FROM users WHERE email=?";
+
     db.query(sql, [email], async (err, results) => {
+
         if (err) {
-            console.error("Database Error:", err);
-            return res.status(500).json({ success: false, message: "Database error" });
+    console.error("LOGIN DATABASE ERROR:", err); // ⭐ IMPORTANT
+    return res.status(500).json({
+        success:false,
+        message:"Database error"
+        });
         }
-        console.log("SQL results:", results); // DEBUG
-
         if (results.length === 0) {
-            console.log("No user found for email:", email); // DEBUG
-            return res.status(401).json({ success: false, message: "Invalid email or password" });
+            return res.json({ success: false, message: "Invalid email or password" });
         }
-        const user = results[0];
-        let isPasswordValid = false;
-        try {
-            isPasswordValid = await bcrypt.compare(password, user.password);
-        } catch (e) {
-            console.error("Bcrypt error:", e);
-        }
-        console.log("Password valid?", isPasswordValid); // DEBUG
 
-        if (!isPasswordValid) {
-            return res.status(401).json({ success: false, message: "Invalid email or password" });
+        const user = results[0];
+
+        // ✅ compare hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.json({ success: false, message: "Invalid email or password" });
         }
+
+        // ✅ create token
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             JWT_SECRET,
             { expiresIn: "24h" }
         );
-        return res.json({
+
+        // ✅ send response
+        res.json({
             success: true,
-            message: "Login successful",
-            token: token,
+            token,
             user: {
                 id: user.id,
                 name: user.name,
@@ -140,6 +163,7 @@ app.post("/login", (req, res) => {
         });
     });
 });
+
 
 /* ================= GET BOOKINGS ================= */
 app.get("/bookings", verifyToken, (req, res) => {

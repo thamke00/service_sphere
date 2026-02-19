@@ -55,7 +55,79 @@
   window.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     document.getElementById("userName").textContent = user.name || "User";
+
+    // Fetch and display bookings for provider
+    fetchProviderBookings();
   });
+
+  function fetchProviderBookings() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      document.getElementById('bookingContainer').innerHTML = '<p>Please log in to view bookings.</p>';
+      return;
+    }
+    fetch('http://localhost:3000/bookings', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && Array.isArray(data.bookings)) {
+        displayBookings(data.bookings);
+      } else {
+        document.getElementById('bookingContainer').innerHTML = '<p>No bookings found or unauthorized.</p>';
+      }
+    })
+    .catch(err => {
+      document.getElementById('bookingContainer').innerHTML = '<p>Error loading bookings.</p>';
+      console.error(err);
+    });
+  }
+
+  function displayBookings(bookings) {
+    const container = document.getElementById('bookingContainer');
+    if (!bookings.length) {
+      container.innerHTML = '<p>No booking requests yet.</p>';
+      return;
+    }
+    container.innerHTML = bookings.map(booking => `
+      <div class="booking-card">
+        <h3>${booking.service}</h3>
+        <p><strong>Customer:</strong> ${booking.customer_name}</p>
+        <p><strong>Date:</strong> ${booking.booking_date} ${booking.booking_time}</p>
+        <p><strong>Address:</strong> ${booking.address}</p>
+        <p><strong>Status:</strong> ${booking.status}</p>
+        <button onclick="updateBookingStatus(${booking.id}, 'Accepted')">Accept</button>
+        <button onclick="updateBookingStatus(${booking.id}, 'Completed')">Complete</button>
+        <button onclick="updateBookingStatus(${booking.id}, 'Cancelled')">Cancel</button>
+      </div>
+    `).join('');
+  }
+
+  // Update booking status
+  function updateBookingStatus(bookingId, status) {
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:3000/booking/${bookingId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || 'Status updated');
+      fetchProviderBookings(); // Refresh bookings
+    })
+    .catch(err => {
+      alert('Error updating booking');
+      console.error(err);
+    });
+  }
 </script>
 
 </body>
