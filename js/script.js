@@ -309,3 +309,18 @@ function logout() {
 =================================================== */
 
 window.addEventListener("DOMContentLoaded", loadBookings);
+function bookService(service, provider) {
+
+    // Scroll to booking form (if exists)
+    const form = document.querySelector(".booking-form");
+    if (form) {
+        form.scrollIntoView({ behavior: "smooth" });
+    }
+
+    // Fill booking fields automatically
+    const serviceInput = document.getElementById("service");
+    const providerInput = document.getElementById("provider");
+
+    if (serviceInput) serviceInput.value = service;
+    if (providerInput) providerInput.value = provider;
+}

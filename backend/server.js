@@ -144,11 +144,16 @@ app.post("/login", async (req, res) => {
         }
 
         // ✅ create token
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            JWT_SECRET,
-            { expiresIn: "24h" }
-        );
+       const token = jwt.sign(
+    {
+        id: user.id,
+        name: user.name,   // ⭐ ADD THIS
+        email: user.email,
+        role: user.role
+     },
+     JWT_SECRET,
+      { expiresIn: "24h" }
+    );
 
         // ✅ send response
         res.json({
@@ -256,17 +261,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✓ Server running on http://localhost:${PORT}`);
 });
+/* ===============PROVIDER BOOKINGS (For providers to view their bookings)================= */
 app.get("/provider-bookings", verifyToken, (req, res) => {
+
+    const providerName = req.user.name;
 
     const sql = `
         SELECT * FROM bookings
         WHERE provider = ?
-        ORDER BY created_at DESC
+        ORDER BY booking_date DESC
     `;
 
-    db.query(sql, [req.user.name], (err, results) => {
+    db.query(sql, [providerName], (err, results) => {
 
         if (err) {
+            console.log("Provider booking error:", err);
             return res.json({ success:false });
         }
 
