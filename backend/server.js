@@ -295,3 +295,33 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✓ Server running on http://localhost:${PORT}`);
 });
+/* ===== GET ALL BOOKINGS ===== */
+
+app.get("/bookings", (req, res) => {
+
+    const sql = "SELECT * FROM bookings";
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.json([]);
+        }
+        res.json(result);
+    });
+});
+/* ===== UPDATE BOOKING STATUS ===== */
+
+app.post("/updateBooking", (req, res) => {
+
+  const { id, status } = req.body;
+
+  const sql = "UPDATE bookings SET status=? WHERE id=?";
+
+  db.query(sql, [status, id], (err) => {
+      if (err) {
+          console.log(err);
+          return res.send("Update failed");
+      }
+      res.send("Booking Updated");
+  });
+});

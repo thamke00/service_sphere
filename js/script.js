@@ -522,3 +522,57 @@ function checkAuth() {
 
 // Check auth on page load
 window.addEventListener("DOMContentLoaded", checkAuth);
+
+
+function loadBookings() {
+
+  fetch("http://localhost:3000/bookings")
+    .then(res => res.json())
+    .then(bookings => {
+
+      const container = document.getElementById("bookingContainer");
+      container.innerHTML = "";
+
+      bookings.forEach(b => {
+
+        container.innerHTML += `
+          <div class="provider-card">
+            <div>
+              <p><strong>Customer:</strong> ${b.customer_name}</p>
+              <p><strong>Service:</strong> ${b.service}</p>
+              <p><strong>Date:</strong> ${b.booking_date}</p>
+              <p><strong>Status:</strong> ${b.status}</p>
+            </div>
+
+            <div>
+              <button onclick="updateStatus(${b.id}, 'Accepted')">
+                Accept
+              </button>
+              <button onclick="updateStatus(${b.id}, 'Rejected')">
+                Reject
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    });
+}
+
+function updateStatus(id, status) {
+
+  fetch("http://localhost:3000/updateBooking", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id, status })
+  })
+  .then(res => res.text())
+  .then(msg => {
+      alert(msg);
+      loadBookings();
+  });
+}
+
+window.addEventListener("DOMContentLoaded", loadBookings);
+
