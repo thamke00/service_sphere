@@ -256,3 +256,23 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✓ Server running on http://localhost:${PORT}`);
 });
+app.get("/provider-bookings", verifyToken, (req, res) => {
+
+    const sql = `
+        SELECT * FROM bookings
+        WHERE provider = ?
+        ORDER BY created_at DESC
+    `;
+
+    db.query(sql, [req.user.name], (err, results) => {
+
+        if (err) {
+            return res.json({ success:false });
+        }
+
+        res.json({
+            success:true,
+            bookings: results
+        });
+    });
+});
