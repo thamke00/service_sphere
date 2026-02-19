@@ -182,43 +182,53 @@ app.get("/bookings", verifyToken, (req, res) => {
 });
 
 /* ================= UPDATE BOOKING STATUS ================= */
-app.put("/booking/:id", verifyToken, [
-    body("status").isIn(["Pending", "Accepted", "Completed", "Cancelled"]).withMessage("Invalid status")
-], (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+app.post("/booking", verifyToken, (req, res) => {
+
+    const {
+        customer_name,
+        service,
+        provider,
+        booking_date,
+        booking_time,
+        address,
+        notes
+    } = req.body;
+
+    const customer_id = req.user.id; // ✅ from JWT token
+
+    const sql = `
+        INSERT INTO bookings
+        (customer_id, customer_name, service, provider,
+         booking_date, booking_time, address, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [
+        customer_id,
+        customer_name,
+        service,
+        provider,
+        booking_date,
+        booking_time,
+        address,
+        notes
+    ], (err, result) => {
+
+        if (err) {
+            console.error("BOOKING DB ERROR:", err);
+            return res.status(500).json({
+                success:false,
+                message:"Server error"
+            });
         }
 
-        const bookingId = req.params.id;
-        const { status } = req.body;
-
-        // Verify ownership
-        const checkSql = "SELECT customer_id FROM bookings WHERE id = ?";
-        db.query(checkSql, [bookingId], (err, results) => {
-            if (err || results.length === 0) {
-                return res.status(404).json({ success: false, message: "Booking not found" });
-            }
-
-            if (results[0].customer_id !== req.user.id) {
-                return res.status(403).json({ success: false, message: "Unauthorized" });
-            }
-
-            const updateSql = "UPDATE bookings SET status = ? WHERE id = ?";
-            db.query(updateSql, [status, bookingId], (err) => {
-                if (err) {
-                    console.error("Update Booking Error:", err);
-                    return res.status(500).json({ success: false, message: "Failed to update booking" });
-                }
-                res.json({ success: true, message: "Booking updated successfully" });
-            });
+        res.json({
+            success:true,
+            message:"Booking created successfully"
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
+    });
 });
+
 
 /* ================= CANCEL BOOKING ================= */
 app.delete("/booking/:id", verifyToken, (req, res) => {
