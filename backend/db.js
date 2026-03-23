@@ -1,20 +1,29 @@
 const mysql = require("mysql2");
-require("dotenv").config();
+const path  = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-const db = mysql.createPool({
-    host: process.env.MYSQLHOST || process.env.DB_HOST,
-    user: process.env.MYSQLUSER || process.env.DB_USER,
-    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
-    database: process.env.MYSQLDATABASE || process.env.DB_NAME,
-    port: process.env.MYSQLPORT || 3306,
+let poolConfig;
 
-    waitForConnections: true,
-    connectionLimit: 10
-});
+// Support: Render DATABASE_URL, Railway MYSQL* vars, or individual DB_* vars
+if (process.env.DATABASE_URL) {
+    poolConfig = { uri: process.env.DATABASE_URL, waitForConnections: true, connectionLimit: 10 };
+} else {
+    poolConfig = {
+        host:     process.env.MYSQLHOST     || process.env.DB_HOST     || "localhost",
+        user:     process.env.MYSQLUSER     || process.env.DB_USER     || "root",
+        password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || "",
+        database: process.env.MYSQLDATABASE || process.env.DB_NAME     || "servicesphere",
+        port:     process.env.MYSQLPORT     || process.env.DB_PORT     || 3306,
+        waitForConnections: true,
+        connectionLimit: 10
+    };
+}
+
+const db = mysql.createPool(poolConfig);
 
 db.getConnection((err, connection) => {
     if (err) {
-        console.error("❌ Database Connection Error:", err);
+        console.error("❌ Database Connection Error:", err.message);
         return;
     }
     console.log("✓ MySQL connected successfully");
