@@ -1,130 +1,264 @@
 <!DOCTYPE html>
-<html lang ="en">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard</title>
+  <title>My Dashboard – ServiceSphere</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .user-info {
-      color: white;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      font-size: 14px;
-    }
-    .logout-btn {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.5);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-title .cnt { background: var(--primary); color: #fff; font-size: 12px; padding: 2px 9px; border-radius: 99px; font-weight: 600; }
+    .bookings-list { display: flex; flex-direction: column; gap: 14px; }
+    .book-now-link { color: var(--primary-light); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; }
   </style>
 </head>
 <body>
+<div class="toast-container" id="toastContainer"></div>
 
+<!-- NAVBAR -->
 <header class="navbar">
-  <h2>ServiceSphere</h2>
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">⚡</div>
+    ServiceSphere
+  </a>
   <nav>
-    <a href="#">Dashboard</a>
-    <a href="#">My Bookings</a>
-    <a href="#">Profile</a>
+    <a href="#overview" class="active">Dashboard</a>
+    <a href="#bookings">My Bookings</a>
+    <a href="#book-service">Book Service</a>
   </nav>
-  <div class="user-info">
-    <span>Welcome, <strong id="userName"></strong></span>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+  <div class="user-info-nav">
+    <div class="user-avatar" id="userAvatar">U</div>
+    <span>Welcome, <strong id="userName">User</strong></span>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
   </div>
 </header>
 
-<section class="dashboard">
-  <h2>Recommended Providers</h2>
+<!-- MAIN -->
+<main class="dashboard-layout">
 
-  <div class="card-container">
-    <div class="provider-card">
-      <h3>Ramesh Electrician</h3>
-      <p>⭐ 4.5</p>
-      <button onclick="bookService('Electrician', 'Ramesh Electrician')">Book Now</button>
+  <!-- ── Overview ── -->
+  <div id="overview">
+    <div class="dashboard-top">
+      <div>
+        <h2 id="welcomeMsg">Good day! 👋</h2>
+        <p>Here's what's happening with your bookings.</p>
+      </div>
+      <a href="#book-service" class="btn btn-primary">+ New Booking</a>
     </div>
 
-    <div class="provider-card">
-      <h3>Suresh Plumber</h3>
-      <p>⭐ 4.2</p>
-      <button onclick="bookService('Plumber', 'Suresh Plumber')">Book Now</button>
-    </div>
-
-    <div class="provider-card">
-      <h3>Raj Driver</h3>
-      <p>⭐ 4.8</p>
-      <button onclick="bookService('Driver', 'Raj Driver')">Book Now</button>
-    </div>
-
-    <div class="provider-card">
-      <h3>Priya Chef</h3>
-      <p>⭐ 4.6</p>
-      <button onclick="bookService('Chef', 'Priya Chef')">Book Now</button>
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(99,102,241,0.15);">📅</div>
+        <div>
+          <div class="num" id="totalBookings">0</div>
+          <div class="lbl">Total Bookings</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(245,158,11,0.15);">⏳</div>
+        <div>
+          <div class="num" id="pendingCnt">0</div>
+          <div class="lbl">Pending</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(99,102,241,0.15);">🔵</div>
+        <div>
+          <div class="num" id="acceptedCnt">0</div>
+          <div class="lbl">Accepted</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(16,185,129,0.15);">✅</div>
+        <div>
+          <div class="num" id="completedCnt">0</div>
+          <div class="lbl">Completed</div>
+        </div>
+      </div>
     </div>
   </div>
-</section>
 
-<section class="booking-section" style="padding: 50px 40px;">
-  <h2>My Bookings</h2>
-  
-  <div id="bookings-container" style="margin-bottom: 40px;">
-    <p style="text-align: center; color: #666;">Loading bookings...</p>
+  <!-- ── Featured Providers ── -->
+  <div style="margin-bottom:40px;">
+    <div class="section-title">🌟 Recommended Providers</div>
+    <div class="providers-grid">
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-avatar">⚡</div>
+          <div><div class="provider-name">Ramesh Kumar</div><div class="provider-type">Electrician</div></div>
+        </div>
+        <div class="provider-rating">★ 4.8 <span style="color:var(--text-muted);font-weight:400">(132 reviews)</span></div>
+        <div class="provider-badge">✓ Verified</div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Electrician','Ramesh Kumar')">Book Now</button>
+      </div>
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-avatar">🔧</div>
+          <div><div class="provider-name">Suresh Plumber</div><div class="provider-type">Plumber</div></div>
+        </div>
+        <div class="provider-rating">★ 4.6 <span style="color:var(--text-muted);font-weight:400">(98 reviews)</span></div>
+        <div class="provider-badge">✓ Verified</div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Plumber','Suresh Plumber')">Book Now</button>
+      </div>
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-avatar">👨‍🍳</div>
+          <div><div class="provider-name">Priya Sharma</div><div class="provider-type">Chef / Cook</div></div>
+        </div>
+        <div class="provider-rating">★ 4.9 <span style="color:var(--text-muted);font-weight:400">(214 reviews)</span></div>
+        <div class="provider-badge">✓ Verified</div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Chef','Priya Sharma')">Book Now</button>
+      </div>
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-avatar">🚗</div>
+          <div><div class="provider-name">Raj Driver</div><div class="provider-type">Professional Driver</div></div>
+        </div>
+        <div class="provider-rating">★ 4.7 <span style="color:var(--text-muted);font-weight:400">(76 reviews)</span></div>
+        <div class="provider-badge">✓ Verified</div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Driver','Raj Driver')">Book Now</button>
+      </div>
+    </div>
   </div>
-</section>
 
-<section class="booking-section" style="padding: 50px 40px;">
-  <h2>Book a Service</h2>
+  <!-- ── My Bookings ── -->
+  <div id="bookings" style="margin-bottom:40px;">
+    <div class="section-title">
+      📋 My Bookings
+      <span class="cnt" id="bookingsBadge">0</span>
+    </div>
 
-  <div class="booking-form">
-    <input type="text" id="customer_name" placeholder="Your Name">
+    <!-- Tab Filter -->
+    <div class="tab-bar" style="margin-bottom:24px;">
+      <button class="tab-btn active" id="tab-all" onclick="filterBookings('all')">All</button>
+      <button class="tab-btn" id="tab-pending" onclick="filterBookings('pending')">Pending</button>
+      <button class="tab-btn" id="tab-accepted" onclick="filterBookings('accepted')">Accepted</button>
+      <button class="tab-btn" id="tab-completed" onclick="filterBookings('completed')">Completed</button>
+    </div>
 
-    <select id="service">
-      <option value="">Select a Service</option>
-      <option value="Electrician">Electrician</option>
-      <option value="Plumber">Plumber</option>
-      <option value="Driver">Driver</option>
-      <option value="Chef">Chef</option>
-    </select>
-
-    <input type="text" id="provider" placeholder="Preferred Provider Name">
-
-    <input type="date" id="booking_date">
-
-    <input type="time" id="booking_time">
-
-    <input type="text" id="address" placeholder="Service Address">
-
-    <textarea id="notes" placeholder="Additional Notes"></textarea>
-
-    <button onclick="createBooking()">Confirm Booking</button>
+    <div class="bookings-list" id="bookingsList">
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <h4>No bookings yet</h4>
+        <p>Book a service below to get started.</p>
+      </div>
+    </div>
   </div>
-</section>
+
+  <!-- ── Book a Service ── -->
+  <div id="book-service">
+    <div class="section-title">📝 Book a Service</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Your Name</label>
+          <input type="text" id="b_name" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label>Service Type</label>
+          <select id="b_service">
+            <option value="">Select a service</option>
+            <option value="Electrician">⚡ Electrician</option>
+            <option value="Plumber">🔧 Plumber</option>
+            <option value="Driver">🚗 Driver</option>
+            <option value="Maid">🏠 Maid / Cleaning</option>
+            <option value="Chef">👨‍🍳 Chef / Cook</option>
+            <option value="Tutor">📚 Tutor</option>
+            <option value="Carpenter">🪚 Carpenter</option>
+            <option value="Painter">🎨 Painter</option>
+            <option value="AC Repair">❄️ AC Repair</option>
+            <option value="Gardener">🌿 Gardener</option>
+            <option value="Pet Care">🐾 Pet Care</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preferred Provider</label>
+          <input type="text" id="b_provider" placeholder="Provider name (optional)">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="b_date">
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" id="b_time">
+        </div>
+        <div class="form-group full">
+          <label>Service Address</label>
+          <input type="text" id="b_address" placeholder="Enter your full address">
+        </div>
+        <div class="form-group full">
+          <label>Additional Notes</label>
+          <textarea id="b_notes" placeholder="Describe what you need..."></textarea>
+        </div>
+      </div>
+      <div style="margin-top:4px; display:flex; gap:12px;">
+        <button class="btn btn-primary btn-lg" id="bookBtn" onclick="createBooking()">
+          <span id="bookBtnText">Confirm Booking</span>
+          <span id="bookSpinner" class="spinner" style="display:none;"></span>
+        </button>
+        <button class="btn btn-ghost" onclick="clearBookingForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>© 2026 ServiceSphere · <a href="index.html">Home</a></p>
+</footer>
 
 <script src="js/script.js"></script>
 <script>
-  // Display user name on load
-  window.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    document.getElementById("userName").textContent = user.name || "User";
-    
-    // Pre-fill customer name
-    if (user.name) {
-      document.getElementById("customer_name").value = user.name;
-    }
+  // ── Init ──
+  window.addEventListener('DOMContentLoaded', () => {
+    checkAuth('customer');
 
-    // Load bookings
-    loadBookings();
+    const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+    const name = user.name || 'User';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('welcomeMsg').textContent = greet + ', ' + name.split(' ')[0] + '! 👋';
+
+    // pre-fill from homepage
+    const ps = sessionStorage.getItem('preselect_service');
+    const pp = sessionStorage.getItem('preselect_provider');
+    if (ps) { document.getElementById('b_service').value = ps; sessionStorage.removeItem('preselect_service'); }
+    if (pp) { document.getElementById('b_provider').value = pp; sessionStorage.removeItem('preselect_provider'); }
+    if (user.name) document.getElementById('b_name').value = user.name;
+
+    // default date = tomorrow
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('b_date').value = tomorrow.toISOString().split('T')[0];
+
+    renderBookings('all');
   });
-</script>
 
+  // ── Filter bookings ──
+  function filterBookings(status) {
+    ['all','pending','accepted','completed'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === status);
+    });
+    renderBookings(status);
+  }
+
+  // ── Pre-fill from provider card ──
+  function prefillBooking(service, provider) {
+    document.getElementById('b_service').value = service;
+    document.getElementById('b_provider').value = provider;
+    document.getElementById('book-service').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Clear form ──
+  function clearBookingForm() {
+    ['b_service','b_provider','b_address','b_notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
+</script>
 </body>
 </html>

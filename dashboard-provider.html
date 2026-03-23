@@ -1,299 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Provider Dashboard - ServiceSphere</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<style>
-
-/* ---------- NAVBAR ---------- */
-
-.user-info{
-  color:white;
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:15px;
-}
-
-.logout-btn{
-  background:rgba(255,255,255,0.2);
-  border:1px solid rgba(255,255,255,0.4);
-  padding:8px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  color:white;
-}
-
-.logout-btn:hover{
-  background:rgba(255,255,255,0.35);
-}
-
-/* ---------- DASHBOARD ---------- */
-
-.dashboard{
-  max-width:1100px;
-  margin:auto;
-  padding:30px;
-}
-
-.dashboard-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:25px;
-}
-
-.stats-card{
-  background:#1e88e5;
-  color:white;
-  padding:10px 18px;
-  border-radius:8px;
-  font-weight:bold;
-}
-
-/* ---------- BOOKING CARD ---------- */
-
-.booking-card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:18px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  transition:.3s;
-}
-
-.booking-card:hover{
-  transform:translateY(-3px);
-}
-
-.booking-card h3{
-  color:#1e88e5;
-  margin-bottom:8px;
-}
-
-.booking-card button{
-  margin-top:10px;
-  margin-right:8px;
-  padding:8px 14px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  color:white;
-}
-
-.accept-btn{ background:#28a745; }
-.complete-btn{ background:#007bff; }
-.cancel-btn{ background:#dc3545; }
-
-/* ---------- STATUS BADGES ---------- */
-
-.status{
-  padding:4px 10px;
-  border-radius:20px;
-  font-size:13px;
-  color:white;
-  margin-left:5px;
-}
-
-.status.pending{ background:orange; }
-.status.accepted{ background:#007bff; }
-.status.completed{ background:green; }
-.status.cancelled{ background:red; }
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provider Dashboard – ServiceSphere</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-title .cnt { background: var(--warning); color: #000; font-size: 12px; padding: 2px 9px; border-radius: 99px; font-weight: 700; }
+    .bookings-list { display: flex; flex-direction: column; gap: 14px; }
+    .provider-profile-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08));
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 700; flex-shrink: 0;
+    }
+    .profile-info h3 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .profile-info span { font-size: 14px; color: var(--text-secondary); }
+    .profile-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--success); font-size: 12px; font-weight: 600; padding: 3px 12px; border-radius: 99px; margin-top: 8px; }
+  </style>
 </head>
-
 <body>
+<div class="toast-container" id="toastContainer"></div>
 
-<!-- ================= NAVBAR ================= -->
-
+<!-- NAVBAR -->
 <header class="navbar">
-  <h2>ServiceSphere</h2>
-
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">⚡</div>
+    ServiceSphere
+  </a>
   <nav>
-    <a href="#">Dashboard</a>
-    <a href="#">Bookings</a>
-    <a href="#">Profile</a>
+    <a href="#" class="active">Dashboard</a>
+    <a href="#bookings">Bookings</a>
+    <a href="#profile">Profile</a>
   </nav>
-
-  <div class="user-info">
-    <span>Welcome, <strong id="userName"></strong></span>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+  <div class="user-info-nav">
+    <div class="user-avatar" id="userAvatar">P</div>
+    <span><strong id="userName">Provider</strong></span>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
   </div>
 </header>
 
+<!-- MAIN -->
+<main class="dashboard-layout">
 
-<!-- ================= DASHBOARD ================= -->
-
-<section class="dashboard">
-
-  <div class="dashboard-header">
-      <h2>Booking Requests</h2>
-
-      <div class="stats-card">
-          Pending Requests:
-          <span id="pendingCount">0</span>
-      </div>
+  <!-- Provider Profile Card -->
+  <div class="provider-profile-card" id="profile">
+    <div class="profile-avatar" id="profileAvatar">P</div>
+    <div class="profile-info">
+      <h3 id="profileName">Provider Name</h3>
+      <span id="profileService">Service Category</span><br>
+      <span id="profileLocation" style="font-size:13px; color:var(--text-muted);">📍 Location</span>
+      <div class="profile-badge">✓ Verified Provider</div>
+    </div>
   </div>
 
-  <!-- ⭐ IMPORTANT CONTAINER -->
-  <div id="bookingContainer"></div>
+  <!-- Stats -->
+  <div class="stats-row" style="margin-bottom:36px;">
+    <div class="stat-card">
+      <div class="icon-box" style="background:rgba(245,158,11,0.15);">⏳</div>
+      <div><div class="num" id="pendingCnt">0</div><div class="lbl">Pending Requests</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-box" style="background:rgba(99,102,241,0.15);">🔵</div>
+      <div><div class="num" id="acceptedCnt">0</div><div class="lbl">Accepted</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-box" style="background:rgba(16,185,129,0.15);">✅</div>
+      <div><div class="num" id="completedCnt">0</div><div class="lbl">Completed</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-box" style="background:rgba(239,68,68,0.15);">❌</div>
+      <div><div class="num" id="cancelledCnt">0</div><div class="lbl">Cancelled</div></div>
+    </div>
+  </div>
 
-</section>
-
-
-<script src="js/script.js"></script>
-
-<script>
-
-/* ================= LOAD USER ================= */
-
-window.addEventListener("DOMContentLoaded", () => {
-
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  document.getElementById("userName").textContent =
-      user.name || "Provider";
-
-  fetchProviderBookings();
-});
-
-
-/* ================= FETCH PROVIDER BOOKINGS ================= */
-
-function fetchProviderBookings(){
-
-  const token = localStorage.getItem("authToken");
-
-  const container = document.getElementById("bookingContainer");
-
-  if(!token){
-    container.innerHTML = "<p>Please login first.</p>";
-    return;
-  }
-
-  fetch("https://servicesphere-production.up.railway.app/provider-bookings",{
-    method:"GET",
-    headers:{
-      "Authorization":"Bearer " + token
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-
-      console.log("Bookings:",data);
-
-      if(data.success){
-          displayBookings(data.bookings);
-      }else{
-          container.innerHTML="<p>No bookings found.</p>";
-      }
-
-  })
-  .catch(err=>{
-      console.error(err);
-      container.innerHTML="<p>Error loading bookings.</p>";
-  });
-}
-
-
-/* ================= DISPLAY BOOKINGS ================= */
-
-function displayBookings(bookings){
-
-  const container = document.getElementById("bookingContainer");
-
-  if(!bookings.length){
-      container.innerHTML="<p>No booking requests yet.</p>";
-      return;
-  }
-
-  /* Count pending */
-  const pending = bookings.filter(
-      b => (b.status || "Pending") === "Pending"
-  ).length;
-
-  document.getElementById("pendingCount").textContent = pending;
-
-  container.innerHTML = bookings.map(b => `
-
-    <div class="booking-card">
-
-      <h3>${b.service}</h3>
-
-      <p><strong>Customer:</strong> ${b.customer_name}</p>
-      <p><strong>Date:</strong> ${b.booking_date} ${b.booking_time}</p>
-      <p><strong>Address:</strong> ${b.address}</p>
-
-      <p>
-        <strong>Status:</strong>
-        <span class="status ${(b.status || 'pending').toLowerCase()}">
-          ${b.status || 'Pending'}
-        </span>
-      </p>
-
-      <button class="accept-btn"
-        onclick="updateBookingStatus(${b.id},'Accepted')">
-        Accept
-      </button>
-
-      <button class="complete-btn"
-        onclick="updateBookingStatus(${b.id},'Completed')">
-        Complete
-      </button>
-
-      <button class="cancel-btn"
-        onclick="updateBookingStatus(${b.id},'Cancelled')">
-        Cancel
-      </button>
-
+  <!-- Bookings Section -->
+  <div id="bookings">
+    <div class="section-title">
+      📋 Booking Requests
+      <span class="cnt" id="pendingBadge">0</span>
     </div>
 
-  `).join("");
-}
+    <!-- Tab Filter -->
+    <div class="tab-bar" style="margin-bottom:24px;">
+      <button class="tab-btn active" id="tab-all" onclick="filterProviderBookings('all')">All</button>
+      <button class="tab-btn" id="tab-pending" onclick="filterProviderBookings('pending')">Pending</button>
+      <button class="tab-btn" id="tab-accepted" onclick="filterProviderBookings('accepted')">Accepted</button>
+      <button class="tab-btn" id="tab-completed" onclick="filterProviderBookings('completed')">Completed</button>
+    </div>
 
+    <div class="bookings-list" id="providerBookingsList">
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <h4>No booking requests yet</h4>
+        <p>When customers book your service, they'll appear here.</p>
+      </div>
+    </div>
+  </div>
 
-/* ================= UPDATE STATUS ================= */
+</main>
 
-function updateBookingStatus(id,status){
+<footer>
+  <p>© 2026 ServiceSphere · <a href="index.html">Home</a></p>
+</footer>
 
-  const token = localStorage.getItem("authToken");
+<script src="js/script.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    checkAuth('provider');
 
-  fetch(
-    `https://servicesphere-production.up.railway.app/booking/${id}`,
-    {
-      method:"PUT",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token
-      },
-      body:JSON.stringify({status})
-    }
-  )
-  .then(res=>res.json())
-  .then(data=>{
-      alert(data.message || "Status Updated");
-      fetchProviderBookings();
-  })
-  .catch(err=>{
-      console.error(err);
-      alert("Update failed");
+    const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+    const name = user.name || 'Provider';
+
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+
+    document.getElementById('profileService').textContent = user.service || 'Service Provider';
+    document.getElementById('profileLocation').textContent = '📍 ' + (user.location || 'Location not set');
+
+    renderProviderBookings('all');
   });
-}
 
-
-/* ================= LOGOUT ================= */
-
-function logout(){
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("user");
-  window.location.href="login.html";
-}
-
+  function filterProviderBookings(status) {
+    ['all','pending','accepted','completed'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === status);
+    });
+    renderProviderBookings(status);
+  }
 </script>
-
 </body>
 </html>

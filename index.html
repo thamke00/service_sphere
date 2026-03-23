@@ -3,54 +3,375 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ServiceSphere</title>
+  <title>ServiceSphere – Trusted Local Services at Your Fingertips</title>
+  <meta name="description" content="Book trusted local service professionals – electricians, plumbers, chefs, drivers and more. ServiceSphere connects you with verified experts near you.">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Floating orbs ── */
+    .orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px); }
+    .orb-1 { width: 400px; height: 400px; background: rgba(99,102,241,0.18); top: -100px; right: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: rgba(6,182,212,0.12); bottom: -60px; left: -60px; }
+
+    /* ── Animated gradient hero text ── */
+    @keyframes shimmer {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #818cf8, #06b6d4, #818cf8);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    /* ── Hero actions ── */
+    .hero-actions { display: flex; gap: 14px; justify-content: center; margin-bottom: 56px; flex-wrap: wrap; }
+
+    /* ── Testimonials ── */
+    .testimonial-section { background: rgba(255,255,255,0.02); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .testimonial-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: var(--transition);
+    }
+    .testimonial-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+    .testimonial-card .quote { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+    .testimonial-card .stars { color: var(--warning); font-size: 14px; margin-bottom: 12px; }
+    .testimonial-card .author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-card .author-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .testimonial-card .author-name { font-weight: 600; font-size: 14px; }
+    .testimonial-card .author-role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1));
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+      text-align: center;
+      padding: 80px 48px;
+    }
+    .cta-section h2 { font-size: 38px; font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { font-size: 16px; color: var(--text-secondary); margin-bottom: 36px; }
+    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  </style>
 </head>
 <body>
 
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- =============== NAVBAR =============== -->
 <header class="navbar">
-  <h2>ServiceSphere</h2>
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">⚡</div>
+    ServiceSphere
+  </a>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="index.html">Services</a>
-    <a href="login.html">Login / Register</a>
-    <a href="#">Contact</a>
+    <a href="index.html" class="active">Home</a>
+    <a href="#categories">Services</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#providers">Providers</a>
   </nav>
+  <div class="navbar-actions">
+    <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
+    <a href="login.html" class="btn btn-primary btn-sm">Get Started</a>
+  </div>
 </header>
 
-<section class="hero">
-  <h1>Connecting You to Trusted Local Services</h1>
+<!-- =============== HERO =============== -->
+<section class="hero" style="position:relative;">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-badge">✨ Trusted by 10,000+ customers</div>
+  <h1>
+    Connect with <span class="gradient-text">Trusted</span><br>
+    Local Service Pros
+  </h1>
+  <p>Book electricians, plumbers, chefs, drivers and more – all verified, rated, and ready for your schedule.</p>
+
   <div class="search-box">
-    <input type="text" placeholder="What service do you need?">
-    <input type="text" placeholder="Location">
-    <button>Search</button>
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="What service do you need?" autocomplete="off">
+    <div class="divider"></div>
+    <input type="text" id="locationInput" placeholder="Your location" style="max-width:160px;">
+    <button class="btn btn-primary" onclick="handleSearch()">Search</button>
+  </div>
+
+  <div class="hero-actions">
+    <a href="login.html" class="btn btn-primary btn-lg">Book a Service Now</a>
+    <a href="login.html?role=provider" class="btn btn-outline btn-lg">Join as Provider</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item"><div class="num">500+</div><div class="label">Verified Providers</div></div>
+    <div class="stat-item"><div class="num">10K+</div><div class="label">Happy Customers</div></div>
+    <div class="stat-item"><div class="num">4.8★</div><div class="label">Average Rating</div></div>
+    <div class="stat-item"><div class="num">12+</div><div class="label">Service Categories</div></div>
   </div>
 </section>
 
-<section class="categories">
-  <h2>Service Categories</h2>
-  <div class="card-container">
-    <div class="card">Electrician</div>
-    <div class="card">Plumber</div>
-    <div class="card">Driver</div>
-    <div class="card">Maid</div>
-    <div class="card">Chef</div>
+<!-- =============== CATEGORIES =============== -->
+<section id="categories">
+  <div class="section-header">
+    <div class="section-tag">What We Offer</div>
+    <h2>Browse Service Categories</h2>
+    <p>From home repairs to personal care – we've got you covered.</p>
+  </div>
+  <div class="categories-grid">
+    <div class="category-card" onclick="selectCategory('Electrician')">
+      <div class="icon">⚡</div>
+      <h3>Electrician</h3>
+      <span>48 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Plumber')">
+      <div class="icon">🔧</div>
+      <h3>Plumber</h3>
+      <span>35 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Driver')">
+      <div class="icon">🚗</div>
+      <h3>Driver</h3>
+      <span>62 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Maid')">
+      <div class="icon">🏠</div>
+      <h3>Maid / Cleaning</h3>
+      <span>54 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Chef')">
+      <div class="icon">👨‍🍳</div>
+      <h3>Chef / Cook</h3>
+      <span>29 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Tutor')">
+      <div class="icon">📚</div>
+      <h3>Tutor</h3>
+      <span>41 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Carpenter')">
+      <div class="icon">🪚</div>
+      <h3>Carpenter</h3>
+      <span>22 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Painter')">
+      <div class="icon">🎨</div>
+      <h3>Painter</h3>
+      <span>18 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('AC Repair')">
+      <div class="icon">❄️</div>
+      <h3>AC Repair</h3>
+      <span>31 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Security')">
+      <div class="icon">🛡️</div>
+      <h3>Security Guard</h3>
+      <span>14 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Gardener')">
+      <div class="icon">🌿</div>
+      <h3>Gardener</h3>
+      <span>16 providers</span>
+    </div>
+    <div class="category-card" onclick="selectCategory('Pet Care')">
+      <div class="icon">🐾</div>
+      <h3>Pet Care</h3>
+      <span>12 providers</span>
+    </div>
   </div>
 </section>
 
-<section class="how-it-works">
-  <h2>How It Works</h2>
-  <div class="steps">
-    <div>🔍 Search</div>
-    <div>👤 Select</div>
-    <div>📅 Book</div>
-    <div>✅ Service Done</div>
+<!-- =============== HOW IT WORKS =============== -->
+<section id="how-it-works" class="how-it-works">
+  <div class="section-header">
+    <div class="section-tag">Simple Process</div>
+    <h2>How ServiceSphere Works</h2>
+    <p>Get a professional at your door in just a few clicks.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-icon">🔍</div>
+      <h3>Search</h3>
+      <p>Browse or search the service category you need, filtered by location and ratings.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-icon">👤</div>
+      <h3>Select</h3>
+      <p>Pick from a list of verified professionals with real customer reviews and ratings.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-icon">📅</div>
+      <h3>Book</h3>
+      <p>Choose your preferred date and time. The provider gets notified instantly.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-icon">✅</div>
+      <h3>Done!</h3>
+      <p>Your service gets completed. Rate and review to help the community.</p>
+    </div>
   </div>
 </section>
 
+<!-- =============== FEATURED PROVIDERS =============== -->
+<section id="providers">
+  <div class="section-header">
+    <div class="section-tag">Top Rated</div>
+    <h2>Featured Providers</h2>
+    <p>Handpicked professionals with outstanding reviews.</p>
+  </div>
+  <div class="providers-grid">
+    <div class="provider-card">
+      <div class="provider-header">
+        <div class="provider-avatar">⚡</div>
+        <div>
+          <div class="provider-name">Ramesh Kumar</div>
+          <div class="provider-type">Electrician</div>
+        </div>
+      </div>
+      <div class="provider-rating">★ 4.8 <span style="color:var(--text-muted);font-weight:400">(132 reviews)</span></div>
+      <div class="provider-detail">📍 Andheri, Mumbai</div>
+      <div class="provider-detail">💼 8+ years experience</div>
+      <div class="provider-badge">✓ Verified</div>
+      <button class="btn btn-primary btn-block" onclick="bookProvider('Electrician','Ramesh Kumar')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <div class="provider-header">
+        <div class="provider-avatar">🔧</div>
+        <div>
+          <div class="provider-name">Suresh Plumber</div>
+          <div class="provider-type">Plumber</div>
+        </div>
+      </div>
+      <div class="provider-rating">★ 4.6 <span style="color:var(--text-muted);font-weight:400">(98 reviews)</span></div>
+      <div class="provider-detail">📍 Bandra, Mumbai</div>
+      <div class="provider-detail">💼 5+ years experience</div>
+      <div class="provider-badge">✓ Verified</div>
+      <button class="btn btn-primary btn-block" onclick="bookProvider('Plumber','Suresh Plumber')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <div class="provider-header">
+        <div class="provider-avatar">👨‍🍳</div>
+        <div>
+          <div class="provider-name">Priya Sharma</div>
+          <div class="provider-type">Chef / Cook</div>
+        </div>
+      </div>
+      <div class="provider-rating">★ 4.9 <span style="color:var(--text-muted);font-weight:400">(214 reviews)</span></div>
+      <div class="provider-detail">📍 Powai, Mumbai</div>
+      <div class="provider-detail">💼 10+ years experience</div>
+      <div class="provider-badge">✓ Verified</div>
+      <button class="btn btn-primary btn-block" onclick="bookProvider('Chef','Priya Sharma')">Book Now</button>
+    </div>
+
+    <div class="provider-card">
+      <div class="provider-header">
+        <div class="provider-avatar">🚗</div>
+        <div>
+          <div class="provider-name">Raj Driver</div>
+          <div class="provider-type">Professional Driver</div>
+        </div>
+      </div>
+      <div class="provider-rating">★ 4.7 <span style="color:var(--text-muted);font-weight:400">(76 reviews)</span></div>
+      <div class="provider-detail">📍 Thane, Mumbai</div>
+      <div class="provider-detail">💼 6+ years experience</div>
+      <div class="provider-badge">✓ Verified</div>
+      <button class="btn btn-primary btn-block" onclick="bookProvider('Driver','Raj Driver')">Book Now</button>
+    </div>
+  </div>
+</section>
+
+<!-- =============== TESTIMONIALS =============== -->
+<section class="testimonial-section">
+  <div class="section-header">
+    <div class="section-tag">What People Say</div>
+    <h2>Customer Reviews</h2>
+    <p>Real experiences from real customers.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <div class="quote">"Found an electrician within minutes. The booking was seamless and the professional arrived on time. Highly recommend!"</div>
+      <div class="author">
+        <div class="author-avatar">A</div>
+        <div>
+          <div class="author-name">Ananya Mehta</div>
+          <div class="author-role">Customer · Mumbai</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★★</div>
+      <div class="quote">"As a plumber, ServiceSphere has helped me grow my business. I get consistent bookings every week – amazing platform!"</div>
+      <div class="author">
+        <div class="author-avatar">V</div>
+        <div>
+          <div class="author-name">Vijay Patil</div>
+          <div class="author-role">Service Provider · Pune</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="stars">★★★★☆</div>
+      <div class="quote">"Clean UI, easy to book, great professional service. I've booked 5+ times now and never had a bad experience."</div>
+      <div class="author">
+        <div class="author-avatar">S</div>
+        <div>
+          <div class="author-name">Sneha Rao</div>
+          <div class="author-role">Customer · Bengaluru</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============== CTA =============== -->
+<section class="cta-section">
+  <h2>Ready to get started?</h2>
+  <p>Join thousands of customers and service providers on ServiceSphere today.</p>
+  <div class="cta-btns">
+    <a href="login.html" class="btn btn-primary btn-lg">Book a Service</a>
+    <a href="login.html?role=provider" class="btn btn-outline btn-lg">Become a Provider</a>
+  </div>
+</section>
+
+<!-- =============== FOOTER =============== -->
 <footer>
-  <p>© 2026 ServiceSphere | Privacy | Terms</p>
+  <p>© 2026 ServiceSphere · <a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a> · <a href="#">Contact</a></p>
 </footer>
 
+<script src="js/script.js"></script>
+<script>
+  function handleSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    window.location.href = 'login.html';
+  }
+  function selectCategory(cat) {
+    sessionStorage.setItem('preselect_service', cat);
+    window.location.href = 'login.html';
+  }
+  function bookProvider(service, provider) {
+    sessionStorage.setItem('preselect_service', service);
+    sessionStorage.setItem('preselect_provider', provider);
+    window.location.href = 'login.html';
+  }
+</script>
 </body>
 </html>

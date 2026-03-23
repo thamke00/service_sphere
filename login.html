@@ -1,129 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServiceSphere Login</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        .error-message {
-            color: #d32f2f;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        .success-message {
-            color: #388e3c;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        .loading {
-            display: none;
-            color: #1e88e5;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 5px;
-            outline: none;
-            font-family: 'Poppins', sans-serif;
-            box-sizing: border-box;
-        }
-        .input-group input:focus,
-        .input-group select:focus {
-            border-color: #1e88e5;
-            box-shadow: 0 0 5px rgba(30, 136, 229, 0.3);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – ServiceSphere</title>
+  <meta name="description" content="Login or register to ServiceSphere as a customer or service provider.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+    .left-panel {
+      background:
+        radial-gradient(ellipse 80% 80% at 0% 0%, rgba(99,102,241,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 80% at 100% 100%, rgba(6,182,212,0.2) 0%, transparent 60%),
+        var(--dark-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%);
+      bottom: -100px; right: -100px;
+      border-radius: 50%;
+    }
+    .left-panel .brand { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800; margin-bottom: 56px; }
+    .left-panel .brand .logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .left-panel h2 { font-size: 38px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+    .left-panel p { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 40px; }
+    .features { display: flex; flex-direction: column; gap: 16px; }
+    .feature { display: flex; align-items: center; gap: 14px; }
+    .feature .fi { width: 40px; height: 40px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .feature h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .feature span { font-size: 13px; color: var(--text-muted); }
+
+    .right-panel { display: flex; align-items: center; justify-content: center; padding: 40px 48px; background: var(--dark); }
+
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 40px 20px; min-height: 100vh; }
+    }
+
+    .provider-fields { display: none; }
+    .provider-fields.visible { display: block; }
+  </style>
 </head>
+<body class="auth-page" style="padding:0;">
 
-<body>
+<div class="toast-container" id="toastContainer"></div>
 
-<div class="container">
+<div class="two-col">
+  <!-- LEFT: Branding Panel -->
+  <div class="left-panel">
+    <div class="brand">
+      <div class="logo-icon">⚡</div>
+      ServiceSphere
+    </div>
+    <h2>Your trusted service<br>marketplace</h2>
+    <p>Connect with hundreds of verified professionals ready to help you right now.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="fi">✅</div>
+        <div><h4>Verified Providers</h4><span>All professionals are background-checked</span></div>
+      </div>
+      <div class="feature">
+        <div class="fi">📅</div>
+        <div><h4>Easy Booking</h4><span>Book in minutes, track in real-time</span></div>
+      </div>
+      <div class="feature">
+        <div class="fi">⭐</div>
+        <div><h4>Real Reviews</h4><span>Honest ratings from real customers</span></div>
+      </div>
+      <div class="feature">
+        <div class="fi">🔒</div>
+        <div><h4>Secure & Private</h4><span>Your data is always protected</span></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- REGISTER FORM -->
-    <div id="registerForm">
-        <h2>Register</h2>
+  <!-- RIGHT: Auth Form -->
+  <div class="right-panel">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon">⚡</div>
+        ServiceSphere
+      </div>
 
-        <div class="input-group">
-            <input type="text" id="r_name" placeholder="Full Name">
-            <span class="error-message" id="r_name_error"></span>
+      <!-- Tab: Login / Register -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">Register</div>
+      </div>
+
+      <!-- ══════ LOGIN FORM ══════ -->
+      <div id="loginForm">
+        <h2>Welcome back 👋</h2>
+        <p class="subtitle">Enter your credentials to access your account</p>
+
+        <div class="auth-form-group">
+          <label for="l_email">Email Address</label>
+          <input type="email" id="l_email" placeholder="you@example.com" autocomplete="email">
+          <span class="error-msg" id="l_email_err"></span>
         </div>
 
-        <div class="input-group">
-            <input type="email" id="r_email" placeholder="Email">
-            <span class="error-message" id="r_email_error"></span>
+        <div class="auth-form-group">
+          <label for="l_password">Password</label>
+          <input type="password" id="l_password" placeholder="••••••••" autocomplete="current-password">
+          <span class="error-msg" id="l_pass_err"></span>
         </div>
 
-        <div class="input-group">
-            <input type="password" id="r_password" placeholder="Password (min 6 characters)">
-            <span class="error-message" id="r_password_error"></span>
+        <button class="btn btn-primary btn-block btn-lg" id="loginBtn" onclick="loginUser()" style="margin-top:8px;">
+          <span id="loginBtnText">Sign In</span>
+          <span id="loginSpinner" class="spinner" style="display:none;"></span>
+        </button>
+
+        <div class="auth-divider">or</div>
+
+        <p style="text-align:center; font-size:14px; color:var(--text-muted);">
+          Don't have an account? 
+          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('register')">Register here</span>
+        </p>
+      </div>
+
+      <!-- ══════ REGISTER FORM ══════ -->
+      <div id="registerForm" style="display:none;">
+        <h2>Create account ✨</h2>
+        <p class="subtitle">Join as a customer or service provider</p>
+
+        <!-- Role Selector -->
+        <div class="role-selector">
+          <div class="role-option selected" id="role-customer" onclick="selectRole('customer')">
+            <div class="icon">👤</div>
+            <div class="name">Customer</div>
+            <div class="desc">Book services</div>
+          </div>
+          <div class="role-option" id="role-provider" onclick="selectRole('provider')">
+            <div class="icon">🛠️</div>
+            <div class="name">Provider</div>
+            <div class="desc">Offer services</div>
+          </div>
         </div>
 
-        <div class="input-group">
-            <input type="password" id="r_confirm_password" placeholder="Confirm Password">
-            <span class="error-message" id="r_confirm_password_error"></span>
+        <input type="hidden" id="r_role" value="customer">
+
+        <div class="auth-form-group">
+          <label>Full Name</label>
+          <input type="text" id="r_name" placeholder="John Doe">
+          <span class="error-msg" id="r_name_err"></span>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="r_phone" placeholder="Phone">
-            <span class="error-message" id="r_phone_error"></span>
+        <div class="auth-form-group">
+          <label>Email Address</label>
+          <input type="email" id="r_email" placeholder="you@example.com">
+          <span class="error-msg" id="r_email_err"></span>
         </div>
 
-        <div class="input-group">
-            <select id="r_role">
-                <option value="customer">Customer</option>
-                <option value="provider">Service Provider</option>
+        <div class="auth-form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="r_phone" placeholder="+91 98765 43210">
+        </div>
+
+        <div class="auth-form-group">
+          <label>Password</label>
+          <input type="password" id="r_password" placeholder="Min 6 characters">
+          <span class="error-msg" id="r_pass_err"></span>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="r_confirm" placeholder="Re-enter password">
+          <span class="error-msg" id="r_confirm_err"></span>
+        </div>
+
+        <!-- Extra fields for providers -->
+        <div class="provider-fields" id="providerFields">
+          <div class="auth-form-group">
+            <label>Service Category</label>
+            <select id="r_service">
+              <option value="">Select your service</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Driver">Driver</option>
+              <option value="Maid">Maid / Cleaning</option>
+              <option value="Chef">Chef / Cook</option>
+              <option value="Tutor">Tutor</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Painter">Painter</option>
+              <option value="AC Repair">AC Repair</option>
+              <option value="Gardener">Gardener</option>
+              <option value="Pet Care">Pet Care</option>
+              <option value="Security">Security Guard</option>
             </select>
+          </div>
+          <div class="auth-form-group">
+            <label>Location / Area</label>
+            <input type="text" id="r_location" placeholder="e.g. Andheri, Mumbai">
+          </div>
         </div>
 
-        <button onclick="registerUser()" style="width: 100%;">Register</button>
-        <span class="loading" id="register_loading">Creating account...</span>
-        <span class="success-message" id="register_success">Registration successful! Logging in...</span>
-        <span class="error-message" id="register_error"></span>
+        <button class="btn btn-primary btn-block btn-lg" id="registerBtn" onclick="registerUser()" style="margin-top:8px;">
+          <span id="registerBtnText">Create Account</span>
+          <span id="registerSpinner" class="spinner" style="display:none;"></span>
+        </button>
 
-        <p onclick="showLogin()" class="switch-text">
-            Already have account? Login
+        <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
+          Already have an account? 
+          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('login')">Sign in</span>
         </p>
+      </div>
+
     </div>
-
-
-    <!-- LOGIN FORM -->
-    <div id="loginForm" style="display:none;">
-        <h2>Login</h2>
-
-        <div class="input-group">
-            <input type="email" id="l_email" placeholder="Email">
-            <span class="error-message" id="l_email_error"></span>
-        </div>
-
-        <div class="input-group">
-            <input type="password" id="l_password" placeholder="Password">
-            <span class="error-message" id="l_password_error"></span>
-        </div>
-
-        <button onclick="loginUser()" style="width: 100%;">Login</button>
-        <span class="loading" id="login_loading">Logging in...</span>
-        <span class="success-message" id="login_success">Login successful!</span>
-        <span class="error-message" id="login_error"></span>
-
-        <p onclick="showRegister()" class="switch-text">
-            Create new account
-        </p>
-    </div>
-
+  </div>
 </div>
 
 <script src="js/script.js"></script>
+<script>
+  function switchAuthTab(tab) {
+    if (tab === 'login') {
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('loginTab').classList.add('active');
+      document.getElementById('registerTab').classList.remove('active');
+    } else {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+      document.getElementById('loginTab').classList.remove('active');
+      document.getElementById('registerTab').classList.add('active');
+    }
+  }
 
+  function selectRole(role) {
+    document.getElementById('r_role').value = role;
+    document.getElementById('role-customer').classList.toggle('selected', role === 'customer');
+    document.getElementById('role-provider').classList.toggle('selected', role === 'provider');
+    const pf = document.getElementById('providerFields');
+    pf.classList.toggle('visible', role === 'provider');
+  }
+
+  // Pre-select from homepage
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('role') === 'provider') {
+    switchAuthTab('register');
+    selectRole('provider');
+  }
+</script>
 </body>
 </html>
