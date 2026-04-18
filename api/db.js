@@ -59,21 +59,23 @@ CREATE TABLE IF NOT EXISTS bookings (
   FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL
 );
 `;
-console.log("Creating tables...");
-db.query(createUsersTable, (err) => {
-    if (err) {
-        console.error("❌ Error creating users table:", err.message);
-        process.exit(1);
-    }
-    console.log("✅ Users table ready!");
-
-    db.query(createBookingsTable, (err) => {
+if (require.main === module) {
+    console.log("Creating tables...");
+    db.query(createUsersTable, (err) => {
         if (err) {
-            console.error("❌ Error creating bookings table:", err.message);
+            console.error("❌ Error creating users table:", err.message);
             process.exit(1);
         }
-        console.log("✅ Bookings table ready!");
-        console.log("🚀 Database setup complete!");
-        process.exit(0);
+        console.log("✅ Users table ready!");
+
+        db.query(createBookingsTable, (err) => {
+            if (err) {
+                console.error("❌ Error creating bookings table:", err.message);
+                process.exit(1);
+            }
+            console.log("✅ Bookings table ready!");
+            console.log("🚀 Database setup complete!");
+            process.exit(0);
+        });
     });
-});
+}
