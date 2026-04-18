@@ -424,10 +424,14 @@ function renderProviderBookings(filter = 'all') {
 
   let bookings = getBookings()
     .filter(b => {
-      // Match by service category or by provider name
-      const byService  = user.service && b.service && b.service.toLowerCase() === user.service.toLowerCase();
-      const byName     = b.provider && b.provider.toLowerCase().includes(user.name?.toLowerCase());
-      return byService || byName;
+      // 1. Check for exact name match
+      const byName = b.provider && b.provider.trim().toLowerCase() === user.name?.toLowerCase();
+      
+      // 2. Check for service match if no specific provider was requested
+      const noProviderRequested = !b.provider || b.provider.trim() === "";
+      const byService = noProviderRequested && user.service && b.service && b.service.toLowerCase() === user.service.toLowerCase();
+      
+      return byName || byService;
     })
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -437,9 +441,10 @@ function renderProviderBookings(filter = 'all') {
 
   // Update stats
   const all        = getBookings().filter(b => {
-    const byService = user.service && b.service === user.service;
-    const byName    = b.provider && b.provider.toLowerCase().includes(user.name?.toLowerCase());
-    return byService || byName;
+    const byName = b.provider && b.provider.trim().toLowerCase() === user.name?.toLowerCase();
+    const noProviderRequested = !b.provider || b.provider.trim() === "";
+    const byService = noProviderRequested && user.service && b.service && b.service.toLowerCase() === user.service.toLowerCase();
+    return byName || byService;
   });
   const pending    = all.filter(b => b.status === 'Pending').length;
   const accepted   = all.filter(b => b.status === 'Accepted').length;

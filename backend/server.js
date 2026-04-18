@@ -10,18 +10,17 @@ const { body, validationResult } = require("express-validator");
 const db = require("./db");
 
 /* ===================================================
-   TEST DATABASE CONNECTION
+   DATABASE CONNECTION (Non-blocking)
 =================================================== */
 
 db.getConnection((err, connection) => {
-
     if (err) {
-        console.error("❌ Database Connection Error:", err);
-        return;
+        console.error("❌ Database Connection Error:", err.message);
+        console.log("⚠️ Server running without database - API features will fail");
+    } else {
+        console.log("✓ MySQL connected successfully (Pool)");
+        connection.release();
     }
-
-    console.log("✓ MySQL connected successfully (Pool)");
-    connection.release();
 });
 
 
