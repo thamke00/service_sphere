@@ -151,7 +151,12 @@ app.get(["/providers", "/api/providers"], (req, res) => {
     db.query(sql, (err, results) => {
         if (err) {
             console.error("Provider List Error:", err);
-            return res.status(500).json({ success: false, message: "Database query failed", error: err.message });
+            return res.status(500).json({ 
+                success: false, 
+                message: "Database query failed", 
+                error: err.message,
+                code: err.code 
+            });
         }
         res.json({ success: true, providers: results });
     });

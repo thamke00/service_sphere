@@ -6,7 +6,12 @@ let poolConfig;
 
 // Support: Render DATABASE_URL, Railway MYSQL* vars, or individual DB_* vars
 if (process.env.DATABASE_URL) {
-    poolConfig = { uri: process.env.DATABASE_URL, waitForConnections: true, connectionLimit: 10 };
+    poolConfig = { 
+        uri: process.env.DATABASE_URL, 
+        waitForConnections: true, 
+        connectionLimit: 10,
+        ssl: { rejectUnauthorized: false }
+    };
 } else {
     poolConfig = {
         host: process.env.MYSQLHOST || process.env.DB_HOST || "localhost",
@@ -15,7 +20,8 @@ if (process.env.DATABASE_URL) {
         database: process.env.MYSQLDATABASE || process.env.DB_NAME || "servicesphere",
         port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
         waitForConnections: true,
-        connectionLimit: 10
+        connectionLimit: 10,
+        ssl: { rejectUnauthorized: false }
     };
 }
 
