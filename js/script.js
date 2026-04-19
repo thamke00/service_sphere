@@ -7,7 +7,9 @@
 const API_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000'
-    : window.location.origin + '/api'; // Uses the /api prefix for Vercel/Render
+    : window.location.origin + '/api';
+
+console.log('Using API URL:', API_URL); // Uses the /api prefix for Vercel/Render
 
 
 
