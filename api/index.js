@@ -15,6 +15,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.get("/api", (req, res) => res.json({ success: true, message: "ServiceSphere API is live" }));
+
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
@@ -145,9 +147,12 @@ app.get(["/provider-bookings", "/api/provider-bookings"], verifyToken, (req, res
 
 /* ================= GET ALL PROVIDERS ================= */
 app.get(["/providers", "/api/providers"], (req, res) => {
-    const sql = "SELECT name, service, location FROM users WHERE role = 'provider'";
+    const sql = "SELECT name, service, location FROM users WHERE role = 'provider' LIMIT 20";
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: "Failed to fetch" });
+        if (err) {
+            console.error("Provider List Error:", err);
+            return res.status(500).json({ success: false, message: "Database query failed", error: err.message });
+        }
         res.json({ success: true, providers: results });
     });
 });
