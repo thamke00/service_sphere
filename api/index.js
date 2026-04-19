@@ -143,4 +143,13 @@ app.get("/provider-bookings", verifyToken, (req, res) => {
     });
 });
 
+/* ================= GET ALL PROVIDERS ================= */
+app.get("/providers", (req, res) => {
+    const sql = "SELECT name, service, location FROM users WHERE role = 'provider'";
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: "Failed to fetch" });
+        res.json({ success: true, providers: results });
+    });
+});
+
 module.exports = app;
