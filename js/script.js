@@ -415,41 +415,53 @@ function renderBookings(filter = 'all') {
 /* ============================================================
    RENDER PROVIDER BOOKINGS
    ============================================================ */
-function renderProviderBookings(filter = 'all') {
+async function renderProviderBookings(filter = 'all') {
   const user = getUser();
   if (!user) return;
 
   const container = document.getElementById('providerBookingsList');
   if (!container) return;
 
-  let bookings = getBookings()
-    .filter(b => {
-      // 1. Check for exact name match
-      const byName = b.provider && b.provider.trim().toLowerCase() === user.name?.toLowerCase();
+  let bookings = [];
+  
+  // 1. Try fetching from Backend
+  try {
+    const token = getToken();
+    const res = await fetch(API_URL + '/provider-bookings', {
+      headers: { 'Authorization': 'Bearer ' + token },
+      signal: AbortSignal.timeout(4000)
+    });
+    const data = await res.json();
+    if (data.success) {
+      bookings = data.bookings;
+    }
+  } catch (err) {
+    console.warn("Backend fetch failed, using localStorage fallback", err);
+    // 2. Fallback to localStorage
+    bookings = getBookings().filter(b => {
+      // Strict exact name match
+      const byName = b.provider && b.provider.trim().toLowerCase() === (user.name || "").trim().toLowerCase();
       
-      // 2. Check for service match if no specific provider was requested
+      // Service pool match (only if no specific provider was requested)
       const noProviderRequested = !b.provider || b.provider.trim() === "";
       const byService = noProviderRequested && user.service && b.service && b.service.toLowerCase() === user.service.toLowerCase();
       
       return byName || byService;
-    })
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    });
+  }
+
+  // Sort by date
+  bookings.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
   if (filter !== 'all') {
     bookings = bookings.filter(b => (b.status || 'Pending').toLowerCase() === filter);
   }
 
   // Update stats
-  const all        = getBookings().filter(b => {
-    const byName = b.provider && b.provider.trim().toLowerCase() === user.name?.toLowerCase();
-    const noProviderRequested = !b.provider || b.provider.trim() === "";
-    const byService = noProviderRequested && user.service && b.service && b.service.toLowerCase() === user.service.toLowerCase();
-    return byName || byService;
-  });
-  const pending    = all.filter(b => b.status === 'Pending').length;
-  const accepted   = all.filter(b => b.status === 'Accepted').length;
-  const completed  = all.filter(b => b.status === 'Completed').length;
-  const cancelled  = all.filter(b => b.status === 'Cancelled').length;
+  const pending   = bookings.filter(b => b.status === 'Pending').length;
+  const accepted  = bookings.filter(b => b.status === 'Accepted').length;
+  const completed = bookings.filter(b => b.status === 'Completed').length;
+  const cancelled = bookings.filter(b => b.status === 'Cancelled').length;
 
   setEl('pendingCnt', pending);
   setEl('acceptedCnt', accepted);
@@ -508,7 +520,7 @@ async function updateBookingStatus(id, status) {
     saveBookings(bookings);
   }
 
-  // Try backend
+  // Try backend (PUT request for status update)
   try {
     const token = getToken();
     await fetch(API_URL + '/booking/' + id, {

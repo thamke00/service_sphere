@@ -48,8 +48,8 @@ app.post("/register", [
             if (err) return res.status(500).json({ success: false, message: "Database error" });
             if (results.length > 0) return res.status(400).json({ success: false, message: "Email already registered" });
             const hashedPassword = await bcrypt.hash(password, 10);
-            const sql = "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)";
-            db.query(sql, [name, email, hashedPassword, phone, role], (err) => {
+            const sql = "INSERT INTO users (name, email, password, phone, role, service, location) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            db.query(sql, [name, email, hashedPassword, phone, role, req.body.service || "", req.body.location || ""], (err) => {
                 if (err) return res.status(500).json({ success: false, message: "Registration failed" });
                 return res.status(201).json({ success: true, message: "Registered Successfully" });
             });
@@ -62,15 +62,15 @@ app.post("/register", [
 /* ================= LOGIN USER ================= */
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
-    const sql = "SELECT id, name, email, password, role FROM users WHERE email=?";
+    const sql = "SELECT id, name, email, password, role, service, location FROM users WHERE email=?";
     db.query(sql, [email], async (err, results) => {
         if (err) return res.status(500).json({ success: false, message: "Database error" });
         if (results.length === 0) return res.json({ success: false, message: "Invalid email or password" });
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.json({ success: false, message: "Invalid email or password" });
-        const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "24h" });
-        res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role, service: user.service || "" }, JWT_SECRET, { expiresIn: "24h" });
+        res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role, service: user.service || "", location: user.location || "" } });
     });
 });
 
@@ -105,10 +105,34 @@ app.delete("/booking/:id", verifyToken, (req, res) => {
     });
 });
 
-/* ================= GET PROVIDER BOOKINGS ================= */
+/* ================= UPDATE BOOKING STATUS (Provider) ================= */
+app.put("/booking/:id", verifyToken, (req, res) => {
+    const { status } = req.body;
+    const bookingId = req.params.id;
+
+    const sql = "UPDATE bookings SET status = ? WHERE id = ?";
+    db.query(sql, [status, bookingId], (err, result) => {
+        if (err) {
+            console.error("Update Status Error:", err);
+            return res.status(500).json({ success: false, message: "Failed to update status" });
+        }
+        res.json({ success: true, message: "Status updated successfully" });
+    });
+});
+
 app.get("/provider-bookings", verifyToken, (req, res) => {
-    db.query("SELECT * FROM bookings WHERE provider = ? ORDER BY booking_date DESC", [req.user.name], (err, results) => {
-        if (err) return res.json({ success: false });
+    const providerName = req.user.name;
+    const providerService = req.user.service;
+
+    const sql = `
+        SELECT * FROM bookings
+        WHERE (TRIM(provider) = TRIM(?)) 
+           OR ( (provider IS NULL OR TRIM(provider) = '') AND TRIM(service) = TRIM(?) )
+        ORDER BY created_at DESC
+    `;
+
+    db.query(sql, [providerName, providerService], (err, results) => {
+        if (err) return res.json({ success: false, bookings: [] });
         res.json({ success: true, bookings: results });
     });
 });

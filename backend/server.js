@@ -94,8 +94,8 @@ app.post("/register", [
             const hashedPassword = await bcrypt.hash(password, 10);
 
             // Insert user
-            const sql = "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)";
-            db.query(sql, [name, email, hashedPassword, phone, role], (err) => {
+            const sql = "INSERT INTO users (name, email, password, phone, role, service, location) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            db.query(sql, [name, email, hashedPassword, phone, role, req.body.service || "", req.body.location || ""], (err) => {
                 if (err) {
                     console.error("Registration DB Error:", err);
                     return res.status(500).json({ success: false, message: "Registration failed" });
@@ -118,7 +118,7 @@ app.post("/login", async (req, res) => {
 
     const { email, password } = req.body;
 
-    const sql = "SELECT id, name, email, password, role FROM users WHERE email=?";
+    const sql = "SELECT id, name, email, password, role, service, location FROM users WHERE email=?";
 
     db.query(sql, [email], async (err, results) => {
 
@@ -146,9 +146,10 @@ app.post("/login", async (req, res) => {
        const token = jwt.sign(
     {
         id: user.id,
-        name: user.name,   // ⭐ ADD THIS
+        name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        service: user.service || ""  // ⭐ ADD THIS
      },
      JWT_SECRET,
       { expiresIn: "24h" }
@@ -162,7 +163,9 @@ app.post("/login", async (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                service: user.service || "",
+                location: user.location || ""
             }
         });
     });
@@ -260,6 +263,21 @@ app.delete("/booking/:id", verifyToken, (req, res) => {
     }
 });
 
+/* ================= UPDATE BOOKING STATUS (Provider) ================= */
+app.put("/booking/:id", verifyToken, (req, res) => {
+    const { status } = req.body;
+    const bookingId = req.params.id;
+
+    const sql = "UPDATE bookings SET status = ? WHERE id = ?";
+    db.query(sql, [status, bookingId], (err, result) => {
+        if (err) {
+            console.error("Update Status Error:", err);
+            return res.status(500).json({ success: false, message: "Failed to update status" });
+        }
+        res.json({ success: true, message: "Status updated successfully" });
+    });
+});
+
 /* ================= LOGOUT (Optional - mainly client-side) ================= */
 app.post("/logout", verifyToken, (req, res) => {
     // In JWT, logout is mainly handled on the client side by removing the token
@@ -274,22 +292,26 @@ app.listen(PORT, () => {
 app.get("/provider-bookings", verifyToken, (req, res) => {
 
     const providerName = req.user.name;
+    const providerService = req.user.service;
 
+    // Strict exact matching for provider name
+    // Also include bookings where no provider is specified but the service matches the provider's specialty
     const sql = `
         SELECT * FROM bookings
-        WHERE provider = ?
-        ORDER BY booking_date DESC
+        WHERE (TRIM(provider) = TRIM(?)) 
+           OR ( (provider IS NULL OR TRIM(provider) = '') AND TRIM(service) = TRIM(?) )
+        ORDER BY created_at DESC
     `;
 
-    db.query(sql, [providerName], (err, results) => {
+    db.query(sql, [providerName, providerService], (err, results) => {
 
         if (err) {
-            console.log("Provider booking error:", err);
-            return res.json({ success:false });
+            console.error("Provider booking error:", err);
+            return res.json({ success: false, bookings: [] });
         }
 
         res.json({
-            success:true,
+            success: true,
             bookings: results
         });
     });
