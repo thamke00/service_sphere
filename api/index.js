@@ -120,7 +120,7 @@ app.put("/booking/:id", verifyToken, (req, res) => {
     });
 });
 
-app.get("/provider-bookings", verifyToken, (req, res) => {
+app.get(["/provider-bookings", "/api/provider-bookings"], verifyToken, (req, res) => {
     const providerName = req.user.name;
     const providerService = req.user.service;
 
@@ -144,7 +144,7 @@ app.get("/provider-bookings", verifyToken, (req, res) => {
 });
 
 /* ================= GET ALL PROVIDERS ================= */
-app.get("/providers", (req, res) => {
+app.get(["/providers", "/api/providers"], (req, res) => {
     const sql = "SELECT name, service, location FROM users WHERE role = 'provider'";
     db.query(sql, (err, results) => {
         if (err) return res.status(500).json({ success: false, message: "Failed to fetch" });
