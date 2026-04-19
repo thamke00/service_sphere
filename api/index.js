@@ -35,7 +35,7 @@ const verifyToken = (req, res, next) => {
 };
 
 /* ================= REGISTER USER ================= */
-app.post("/register", [
+app.post(["/register", "/api/register"], [
     body("name").trim().notEmpty().withMessage("Name is required"),
     body("email").isEmail().withMessage("Valid email is required"),
     body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
@@ -62,7 +62,7 @@ app.post("/register", [
 });
 
 /* ================= LOGIN USER ================= */
-app.post("/login", async (req, res) => {
+app.post(["/login", "/api/login"], async (req, res) => {
     const { email, password } = req.body;
     const sql = "SELECT id, name, email, password, role, service, location FROM users WHERE email=?";
     db.query(sql, [email], async (err, results) => {
@@ -77,7 +77,7 @@ app.post("/login", async (req, res) => {
 });
 
 /* ================= GET BOOKINGS ================= */
-app.get("/bookings", verifyToken, (req, res) => {
+app.get(["/bookings", "/api/bookings"], verifyToken, (req, res) => {
     const sql = "SELECT * FROM bookings WHERE customer_id = ? ORDER BY booking_date DESC";
     db.query(sql, [req.user.id], (err, results) => {
         if (err) return res.status(500).json({ success: false, message: "Failed to fetch bookings" });
@@ -86,7 +86,7 @@ app.get("/bookings", verifyToken, (req, res) => {
 });
 
 /* ================= CREATE BOOKING ================= */
-app.post("/booking", verifyToken, (req, res) => {
+app.post(["/booking", "/api/booking"], verifyToken, (req, res) => {
     const { customer_name, service, provider, booking_date, booking_time, address, notes } = req.body;
     const sql = "INSERT INTO bookings (customer_id, customer_name, service, provider, booking_date, booking_time, address, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     db.query(sql, [req.user.id, customer_name, service, provider, booking_date, booking_time, address, notes], (err) => {
@@ -96,7 +96,7 @@ app.post("/booking", verifyToken, (req, res) => {
 });
 
 /* ================= CANCEL BOOKING ================= */
-app.delete("/booking/:id", verifyToken, (req, res) => {
+app.delete(["/booking/:id", "/api/booking/:id"], verifyToken, (req, res) => {
     db.query("SELECT customer_id FROM bookings WHERE id = ?", [req.params.id], (err, results) => {
         if (err || results.length === 0) return res.status(404).json({ success: false, message: "Booking not found" });
         if (results[0].customer_id !== req.user.id) return res.status(403).json({ success: false, message: "Unauthorized" });
@@ -108,7 +108,7 @@ app.delete("/booking/:id", verifyToken, (req, res) => {
 });
 
 /* ================= UPDATE BOOKING STATUS (Provider) ================= */
-app.put("/booking/:id", verifyToken, (req, res) => {
+app.put(["/booking/:id", "/api/booking/:id"], verifyToken, (req, res) => {
     const { status } = req.body;
     const bookingId = req.params.id;
 
