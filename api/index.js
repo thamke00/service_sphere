@@ -124,15 +124,21 @@ app.get("/provider-bookings", verifyToken, (req, res) => {
     const providerName = req.user.name;
     const providerService = req.user.service;
 
+    console.log(`Fetching bookings for Provider: "${providerName}" Service: "${providerService}"`);
+
     const sql = `
         SELECT * FROM bookings
-        WHERE (TRIM(provider) = TRIM(?)) 
-           OR ( (provider IS NULL OR TRIM(provider) = '') AND TRIM(service) = TRIM(?) )
-        ORDER BY created_at DESC
+        WHERE (LOWER(TRIM(provider)) = LOWER(TRIM(?))) 
+           OR ( (provider IS NULL OR TRIM(provider) = '') AND LOWER(TRIM(service)) = LOWER(TRIM(?)) )
+        ORDER BY id DESC
     `;
 
     db.query(sql, [providerName, providerService], (err, results) => {
-        if (err) return res.json({ success: false, bookings: [] });
+        if (err) {
+            console.error("DB Error:", err);
+            return res.json({ success: false, bookings: [] });
+        }
+        console.log(`Found ${results.length} bookings for ${providerName}`);
         res.json({ success: true, bookings: results });
     });
 });
