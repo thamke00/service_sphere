@@ -231,11 +231,17 @@ function switchToLogin() {
    ============================================================ */
 
 function getBookings() {
-  return JSON.parse(localStorage.getItem('ss_bookings') || '[]');
+  const user = getUser();
+  if (!user) return [];
+  const key = `ss_bookings_${user.id || user.email}`;
+  return JSON.parse(localStorage.getItem(key) || '[]');
 }
 
 function saveBookings(bookings) {
-  localStorage.setItem('ss_bookings', JSON.stringify(bookings));
+  const user = getUser();
+  if (!user) return;
+  const key = `ss_bookings_${user.id || user.email}`;
+  localStorage.setItem(key, JSON.stringify(bookings));
 }
 
 /* ============================================================
@@ -437,10 +443,14 @@ async function renderProviderBookings(filter = 'all') {
     }
   } catch (err) {
     console.warn("Backend fetch failed, using localStorage fallback", err);
-    // 2. Fallback to localStorage
-    bookings = getBookings().filter(b => {
-      // Strict exact name match
-      const byName = b.provider && b.provider.trim().toLowerCase() === (user.name || "").trim().toLowerCase();
+    // 2. Fallback to localStorage (ONLY if backend fails)
+    const allLocal = JSON.parse(localStorage.getItem('ss_bookings') || '[]'); // Legacy check
+    const userLocal = getBookings();
+    bookings = [...userLocal, ...allLocal].filter(b => {
+      // Strict exact name match (Case-insensitive but length-exact)
+      const providerName = (b.provider || "").trim().toLowerCase();
+      const currentUserName = (user.name || "").trim().toLowerCase();
+      const byName = providerName !== "" && providerName === currentUserName;
       
       // Service pool match (only if no specific provider was requested)
       const noProviderRequested = !b.provider || b.provider.trim() === "";
