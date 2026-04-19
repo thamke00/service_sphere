@@ -579,3 +579,47 @@ function serviceIcon(service) {
   };
   return icons[service] || '🔨';
 }
+
+/* ============================================================
+   LOAD FEATURED PROVIDERS (PALETTE)
+   ============================================================ */
+async function loadFeaturedProviders() {
+  const container = document.getElementById('featuredProvidersList');
+  if (!container) return;
+
+  try {
+    const res = await fetch(API_URL + '/providers');
+    const data = await res.json();
+    
+    if (!data.success || !data.providers || !data.providers.length) {
+      container.innerHTML = '<div class="loader-box">Join us to be our first featured provider!</div>';
+      return;
+    }
+
+    container.innerHTML = data.providers.slice(0, 8).map(p => `
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-avatar">${serviceIcon(p.service)}</div>
+          <div>
+            <div class="provider-name">${p.name}</div>
+            <div class="provider-type">${p.service || 'Professional'}</div>
+          </div>
+        </div>
+        <div class="provider-rating">★ 4.9 <span style="color:var(--text-muted);font-weight:400">(New)</span></div>
+        <div class="provider-detail">📍 ${p.location || 'Mumbai'}</div>
+        <div class="provider-badge">✓ Verified</div>
+        <button class="btn btn-primary btn-block" onclick="bookProvider('${p.service}','${p.name}')">Book Now</button>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    console.warn("Could not load providers showcase", err);
+  }
+}
+
+// Global Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('featuredProvidersList')) loadFeaturedProviders();
+  if (document.getElementById('bookingsList')) renderCustomerBookings();
+  if (document.getElementById('providerBookingsList')) renderProviderBookings();
+});
