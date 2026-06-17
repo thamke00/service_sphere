@@ -6,10 +6,92 @@
   <title>My Dashboard – ServiceSphere</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    .section-title .cnt { background: var(--primary); color: #fff; font-size: 12px; padding: 2px 9px; border-radius: 99px; font-weight: 600; }
-    .bookings-list { display: flex; flex-direction: column; gap: 14px; }
-    .book-now-link { color: var(--primary-light); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; }
+    .bookings-list { display: flex; flex-direction: column; gap: 12px; }
+    .book-now-link { color: var(--primary-light); font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: underline; }
+
+    /* Provider Autocomplete */
+    .provider-search-wrap { position: relative; }
+    .provider-search-wrap input { width: 100%; }
+    .provider-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: var(--radius-md);
+      z-index: 999;
+      max-height: 260px;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      display: none;
+    }
+    .provider-dropdown.open { display: block; }
+    .provider-opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    .provider-opt:last-child { border-bottom: none; }
+    .provider-opt:hover, .provider-opt.highlighted { background: rgba(99,102,241,0.12); }
+    .provider-opt-avatar {
+      width: 36px; height: 36px;
+      background: var(--primary-subtle);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .provider-opt-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .provider-opt-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .provider-opt-badge {
+      margin-left: auto;
+      font-size: 10px;
+      background: rgba(16,185,129,0.15);
+      color: #10b981;
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 20px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+    .provider-empty-opt {
+      padding: 14px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .provider-any-opt {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(99,102,241,0.05);
+      transition: background 0.15s;
+    }
+    .provider-any-opt:hover { background: rgba(99,102,241,0.15); }
+    .provider-selected-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 20px;
+      padding: 4px 12px 4px 8px;
+      font-size: 12px; color: #fff;
+      margin-top: 8px;
+    }
+    .provider-selected-pill .clear-btn {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+    }
+    .provider-selected-pill .clear-btn:hover { color: #ef4444; }
+    #providerValidationMsg {
+      font-size: 12px;
+      margin-top: 6px;
+      display: none;
+    }
+    #providerValidationMsg.error { color: #ef4444; display: block; }
+    #providerValidationMsg.success { color: #10b981; display: block; }
   </style>
 </head>
 <body>
@@ -21,7 +103,10 @@
     <div class="logo-icon">⚡</div>
     ServiceSphere
   </a>
-  <nav>
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="mainNav">
     <a href="#overview" class="active">Dashboard</a>
     <a href="#bookings">My Bookings</a>
     <a href="#book-service">Book Service</a>
@@ -32,6 +117,39 @@
     <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
   </div>
 </header>
+
+<!-- Mobile Navigation Overlay -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-header">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">⚡</div>
+      ServiceSphere
+    </a>
+    <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+  </div>
+  <a href="#overview" class="active" onclick="closeMobileNav()">Dashboard</a>
+  <a href="#bookings" onclick="closeMobileNav()">My Bookings</a>
+  <a href="#book-service" onclick="closeMobileNav()">Book Service</a>
+  <div class="mobile-nav-actions">
+    <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<script>
+  function openMobileNav() {
+    document.getElementById('mobileNav').classList.add('open');
+    document.getElementById('mobileNavOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('mobileNavOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
+  document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
+  document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
+</script>
 
 <!-- MAIN -->
 <main class="dashboard-layout">
@@ -82,43 +200,9 @@
   <!-- ── Featured Providers ── -->
   <div style="margin-bottom:40px;">
     <div class="section-title">🌟 Recommended Providers</div>
-    <div class="providers-grid">
-      <div class="provider-card">
-        <div class="provider-header">
-          <div class="provider-avatar">⚡</div>
-          <div><div class="provider-name">Ramesh Kumar</div><div class="provider-type">Electrician</div></div>
-        </div>
-        <div class="provider-rating">★ 4.8 <span style="color:var(--text-muted);font-weight:400">(132 reviews)</span></div>
-        <div class="provider-badge">✓ Verified</div>
-        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Electrician','Ramesh Kumar')">Book Now</button>
-      </div>
-      <div class="provider-card">
-        <div class="provider-header">
-          <div class="provider-avatar">🔧</div>
-          <div><div class="provider-name">Suresh Plumber</div><div class="provider-type">Plumber</div></div>
-        </div>
-        <div class="provider-rating">★ 4.6 <span style="color:var(--text-muted);font-weight:400">(98 reviews)</span></div>
-        <div class="provider-badge">✓ Verified</div>
-        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Plumber','Suresh Plumber')">Book Now</button>
-      </div>
-      <div class="provider-card">
-        <div class="provider-header">
-          <div class="provider-avatar">👨‍🍳</div>
-          <div><div class="provider-name">Priya Sharma</div><div class="provider-type">Chef / Cook</div></div>
-        </div>
-        <div class="provider-rating">★ 4.9 <span style="color:var(--text-muted);font-weight:400">(214 reviews)</span></div>
-        <div class="provider-badge">✓ Verified</div>
-        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Chef','Priya Sharma')">Book Now</button>
-      </div>
-      <div class="provider-card">
-        <div class="provider-header">
-          <div class="provider-avatar">🚗</div>
-          <div><div class="provider-name">Raj Driver</div><div class="provider-type">Professional Driver</div></div>
-        </div>
-        <div class="provider-rating">★ 4.7 <span style="color:var(--text-muted);font-weight:400">(76 reviews)</span></div>
-        <div class="provider-badge">✓ Verified</div>
-        <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('Driver','Raj Driver')">Book Now</button>
-      </div>
+    <div class="tab-bar" id="dashboardProviderFilterBar" style="margin-bottom:16px;"></div>
+    <div class="providers-grid" id="recommendedProvidersList">
+      <div class="loader-box">Loading verified providers…</div>
     </div>
   </div>
 
@@ -126,7 +210,7 @@
   <div id="bookings" style="margin-bottom:40px;">
     <div class="section-title">
       📋 My Bookings
-      <span class="cnt" id="bookingsBadge">0</span>
+      <span class="cnt" id="bookingsBadge" style="background:var(--primary);color:#fff;">0</span>
     </div>
 
     <!-- Tab Filter -->
@@ -174,7 +258,26 @@
         </div>
         <div class="form-group">
           <label>Preferred Provider</label>
-          <input type="text" id="b_provider" placeholder="Provider name (optional)">
+          <div class="provider-search-wrap" id="providerSearchWrap">
+            <input
+              type="text"
+              id="b_provider"
+              placeholder="Search by name or type 'any'"
+              autocomplete="off"
+              oninput="onProviderSearch(this.value)"
+              onfocus="onProviderSearchFocus()"
+              onkeydown="onProviderSearchKey(event)"
+            >
+            <div class="provider-dropdown" id="providerDropdown"></div>
+          </div>
+          <div id="providerSelectedPill" style="display:none;">
+            <span class="provider-selected-pill">
+              <span id="providerPillIcon">👤</span>
+              <span id="providerPillText"></span>
+              <button class="clear-btn" onclick="clearProviderSelection()" title="Clear">✕</button>
+            </span>
+          </div>
+          <span id="providerValidationMsg"></span>
         </div>
         <div class="form-group">
           <label>Date</label>
@@ -206,10 +309,142 @@
 </main>
 
 <footer>
-  <p>© 2026 ServiceSphere · <a href="index.html">Home</a></p>
+  <div class="footer-inner">
+    <div class="footer-brand"><div class="logo-icon">⚡</div> ServiceSphere</div>
+    <div class="footer-links"><a href="index.html">Home</a></div>
+    <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
+  </div>
 </footer>
 
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModalOverlay">
+  <div class="modal" id="paymentModal">
+    <h3 id="paymentModalTitle">Secure Payment</h3>
+    <div class="sub" id="paymentModalSub">Complete payment for your service booking.</div>
+
+    <!-- Amount Display -->
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: center;">
+      <span style="font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Amount to Pay</span>
+      <span style="font-size: 28px; font-weight: 800; color: #fff;" id="paymentAmount">₹499.00</span>
+    </div>
+
+    <!-- Payment Success Checkmark (hidden by default) -->
+    <div id="paymentSuccessView" class="success-checkmark" style="display: none;">
+      <div class="checkmark-circle">✓</div>
+      <h4>Payment Successful!</h4>
+      <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Your booking has been updated to Paid.</p>
+    </div>
+
+    <!-- Main Payment Form (Credit Card / UPI) -->
+    <div id="paymentFormView">
+      <div class="pay-methods">
+        <button class="pay-method-btn active" id="payMethodCard" onclick="switchPaymentMethod('card')">
+          <span>💳</span> Credit/Debit Card
+        </button>
+        <button class="pay-method-btn" id="payMethodUpi" onclick="switchPaymentMethod('upi')">
+          <span>📱</span> UPI / QR Code
+        </button>
+      </div>
+
+      <!-- Credit Card Fields -->
+      <div id="cardPaymentFields">
+        <!-- Card Preview -->
+        <div class="credit-card-preview">
+          <div class="card-top">
+            <div class="card-chip"></div>
+            <div class="card-logo" id="previewCardLogo">VISA</div>
+          </div>
+          <div class="card-number" id="previewCardNumber">•••• •••• •••• ••••</div>
+          <div class="card-bottom">
+            <div>
+              <div class="card-label">Card Holder</div>
+              <div id="previewCardName" style="font-weight: 600; font-size: 13px;">YOUR NAME</div>
+            </div>
+            <div>
+              <div class="card-label">Expires</div>
+              <div id="previewCardExpiry" style="font-weight: 600; font-size: 13px;">MM/YY</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px; margin-bottom: 4px;">Cardholder Name</label>
+            <input type="text" id="cardNameInput" placeholder="Name on card" oninput="updateCardPreview()">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px; margin-bottom: 4px;">Card Number</label>
+            <input type="text" id="cardNumberInput" placeholder="1234 5678 9012 3456" maxlength="19" oninput="updateCardPreview()">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 12px; margin-bottom: 4px;">Expiry Date</label>
+              <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5" oninput="updateCardPreview()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 12px; margin-bottom: 4px;">CVV</label>
+              <input type="password" id="cardCvvInput" placeholder="•••" maxlength="3">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPI Fields -->
+      <div id="upiPaymentFields" style="display: none; text-align: center;">
+        <div style="margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div style="background: white; padding: 12px; border-radius: var(--radius-md); display: inline-block;">
+            <!-- UPI QR Placeholder -->
+            <div style="width: 140px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; color: #333; font-weight: 700; font-size: 12px; flex-direction: column;">
+              <span>ServiceSphere Pay</span>
+              <span style="font-size: 24px; margin-top: 8px;">📱 QR</span>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary);">Scan this QR code with any UPI app to pay</p>
+        </div>
+        <div style="border-top: 1px solid var(--dark-border); padding-top: 16px; margin-top: 16px;">
+          <span style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Or enter UPI ID</span>
+          <div class="form-group" style="margin-bottom: 0;">
+            <input type="text" id="upiIdInput" placeholder="username@upi" style="text-align: center;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closePaymentModal()">Cancel</button>
+        <button class="btn btn-primary" id="paymentSubmitBtn" onclick="submitPayment()">
+          <span id="paymentSubmitBtnText">Pay Now</span>
+          <span id="paymentSubmitSpinner" class="spinner" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="js/script.js"></script>
+<script src="js/chatbot.js"></script>
+
+<!-- FLOATING CHAT DRAWER -->
+<div class="chat-drawer" id="chatDrawer">
+  <div class="chat-header">
+    <div class="chat-partner-info">
+      <div class="chat-status-dot"></div>
+      <div>
+        <div class="chat-partner-name" id="chatPartnerName">Provider</div>
+        <div class="chat-partner-service" id="chatPartnerService">Service</div>
+      </div>
+    </div>
+    <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Loading messages…</div>
+  </div>
+  <div class="chat-input-area">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
+  </div>
+</div>
+
 <script>
   // ── Init ──
   window.addEventListener('DOMContentLoaded', () => {
@@ -223,16 +458,34 @@
     const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
     document.getElementById('welcomeMsg').textContent = greet + ', ' + name.split(' ')[0] + '! 👋';
 
-    // pre-fill from homepage
-    const ps = sessionStorage.getItem('preselect_service');
-    const pp = sessionStorage.getItem('preselect_provider');
-    if (ps) { document.getElementById('b_service').value = ps; sessionStorage.removeItem('preselect_service'); }
-    if (pp) { document.getElementById('b_provider').value = pp; sessionStorage.removeItem('preselect_provider'); }
+    // pre-fill from homepage (via "Book Now" on a provider card)
+    const ps   = sessionStorage.getItem('preselect_service');
+    const pp   = sessionStorage.getItem('preselect_provider');
+    const ppid = sessionStorage.getItem('preselect_provider_id');
+    if (ps)   { document.getElementById('b_service').value = ps;   sessionStorage.removeItem('preselect_service'); }
+    if (ppid) { window._selectedProviderId = parseInt(ppid);        sessionStorage.removeItem('preselect_provider_id'); }
+    if (pp && ppid) {
+      // Provider was pre-selected from a card — confirm the selection
+      selectProvider({ id: parseInt(ppid), name: pp, service: ps || '', city: '' });
+      sessionStorage.removeItem('preselect_provider');
+    }
     if (user.name) document.getElementById('b_name').value = user.name;
 
     // default date = tomorrow
     const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
     document.getElementById('b_date').value = tomorrow.toISOString().split('T')[0];
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('providerSearchWrap')?.contains(e.target)) {
+        closeProviderDropdown();
+      }
+    });
+
+    // When service changes, clear provider selection and refresh suggestions
+    document.getElementById('b_service')?.addEventListener('change', () => {
+      clearProviderSelection();
+    });
 
     renderBookings('all');
   });
@@ -245,19 +498,208 @@
     renderBookings(status);
   }
 
-  // ── Pre-fill from provider card ──
-  function prefillBooking(service, provider) {
+  // ── Pre-fill from provider card (Recommended Providers section) ──
+  function prefillBooking(service, provider, providerId) {
     document.getElementById('b_service').value = service;
-    document.getElementById('b_provider').value = provider;
+    selectProvider({ id: providerId, name: provider, service: service, city: '' });
     document.getElementById('book-service').scrollIntoView({ behavior: 'smooth' });
   }
 
   // ── Clear form ──
   function clearBookingForm() {
-    ['b_service','b_provider','b_address','b_notes'].forEach(id => {
+    ['b_service','b_address','b_notes'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    clearProviderSelection();
+  }
+
+  /* ══════════════════════════════════════════
+     PROVIDER AUTOCOMPLETE LOGIC
+  ══════════════════════════════════════════ */
+
+  let _providerSearchCache = [];      // providers fetched for current service
+  let _providerSearchTimer  = null;   // debounce timer
+  let _dropdownHighlight    = -1;     // keyboard nav index
+  let _providerConfirmed    = false;  // true only when user explicitly picked from dropdown
+
+  const ICONS = {
+    Electrician:'⚡', Plumber:'🔧', Driver:'🚗', Maid:'🏠', Chef:'👨‍🍳',
+    Tutor:'📚', Carpenter:'🪚', Painter:'🎨', 'AC Repair':'❄️',
+    Gardener:'🌿', 'Pet Care':'🐾', Security:'🛡️'
+  };
+  function getServiceIcon(s) { return ICONS[s] || '👤'; }
+
+  // Called when user types in provider search box
+  function onProviderSearch(value) {
+    _providerConfirmed = false;
+    window._selectedProviderId = null;
+    clearValidationMsg();
+    _dropdownHighlight = -1;
+    clearTimeout(_providerSearchTimer);
+    _providerSearchTimer = setTimeout(() => fetchAndShowProviders(value.trim()), 250);
+  }
+
+  // Called on focus — show dropdown
+  function onProviderSearchFocus() {
+    if (_providerConfirmed) return;
+    const q = document.getElementById('b_provider')?.value?.trim() || '';
+    fetchAndShowProviders(q);
+  }
+
+  // Keyboard navigation
+  function onProviderSearchKey(e) {
+    const dropdown = document.getElementById('providerDropdown');
+    const opts = dropdown?.querySelectorAll('.provider-opt, .provider-any-opt');
+    if (!opts || !opts.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _dropdownHighlight = Math.min(_dropdownHighlight + 1, opts.length - 1);
+      updateHighlight(opts);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _dropdownHighlight = Math.max(_dropdownHighlight - 1, 0);
+      updateHighlight(opts);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (_dropdownHighlight >= 0 && opts[_dropdownHighlight]) opts[_dropdownHighlight].click();
+    } else if (e.key === 'Escape') {
+      closeProviderDropdown();
+    }
+  }
+
+  function updateHighlight(opts) {
+    opts.forEach((o, i) => o.classList.toggle('highlighted', i === _dropdownHighlight));
+    if (_dropdownHighlight >= 0) opts[_dropdownHighlight].scrollIntoView({ block: 'nearest' });
+  }
+
+  async function fetchAndShowProviders(query) {
+    const service = document.getElementById('b_service')?.value || '';
+    let url = API_URL + '/providers';
+    if (service) url += '?service=' + encodeURIComponent(service);
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      const data = await res.json();
+      _providerSearchCache = data.success ? (data.providers || []) : [];
+    } catch (e) {
+      _providerSearchCache = [];
+    }
+    renderProviderDropdown(query);
+  }
+
+  function renderProviderDropdown(query) {
+    const dropdown = document.getElementById('providerDropdown');
+    if (!dropdown) return;
+    const q = (query || '').toLowerCase();
+
+    // Filter by query
+    const filtered = q
+      ? _providerSearchCache.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          (p.city || '').toLowerCase().includes(q) ||
+          (p.service || '').toLowerCase().includes(q)
+        )
+      : _providerSearchCache;
+
+    let html = '';
+
+    // "Any Available Provider" always on top
+    html += `
+      <div class="provider-any-opt" onclick="selectAnyProvider()">
+        <div class="provider-opt-avatar">🎯</div>
+        <div>
+          <div class="provider-opt-name">Any Available Provider</div>
+          <div class="provider-opt-meta">We'll assign the best match for your service</div>
+        </div>
+      </div>`;
+
+    if (!filtered.length && q) {
+      html += `<div class="provider-empty-opt">❌ No verified provider found for "<strong>${escapeHtml(query)}</strong>"<br><span style="font-size:11px;margin-top:4px;display:block;">Try a different name or select Any Available Provider above</span></div>`;
+    } else {
+      filtered.slice(0, 8).forEach(p => {
+        const safeP = JSON.stringify(p).replace(/"/g, '&quot;');
+        html += `
+          <div class="provider-opt" onclick="selectProvider(JSON.parse(this.dataset.p))" data-p="${safeP}">
+            <div class="provider-opt-avatar">${getServiceIcon(p.service)}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="provider-opt-name">${escapeHtml(p.name)}</div>
+              <div class="provider-opt-meta">${escapeHtml(p.service || '')}${p.city ? ' · 📍 ' + escapeHtml(p.city) : ''}</div>
+            </div>
+            <div class="provider-opt-badge">✓ Verified</div>
+          </div>`;
+      });
+    }
+
+    dropdown.innerHTML = html;
+    dropdown.classList.add('open');
+    _dropdownHighlight = -1;
+  }
+
+  function closeProviderDropdown() {
+    document.getElementById('providerDropdown')?.classList.remove('open');
+  }
+
+  // User selected a specific verified provider
+  function selectProvider(p) {
+    _providerConfirmed = true;
+    window._selectedProviderId = p.id || null;
+
+    const input    = document.getElementById('b_provider');
+    const pill     = document.getElementById('providerSelectedPill');
+    const pillIcon = document.getElementById('providerPillIcon');
+    const pillText = document.getElementById('providerPillText');
+
+    if (input)    { input.value = p.name; input.style.display = 'none'; }
+    if (pillIcon) pillIcon.textContent = getServiceIcon(p.service);
+    if (pillText) pillText.textContent = p.name + (p.city ? '  ·  📍 ' + p.city : '') + '  ·  ✓ Verified';
+    if (pill)     pill.style.display = 'block';
+
+    setValidationMsg('success', '✓ Provider confirmed — you\'re good to go!');
+    closeProviderDropdown();
+  }
+
+  // User selected "Any Available Provider"
+  function selectAnyProvider() {
+    _providerConfirmed = true;
+    window._selectedProviderId = null;
+
+    const input    = document.getElementById('b_provider');
+    const pill     = document.getElementById('providerSelectedPill');
+    const pillIcon = document.getElementById('providerPillIcon');
+    const pillText = document.getElementById('providerPillText');
+
+    if (input)    { input.value = ''; input.style.display = 'none'; }
+    if (pillIcon) pillIcon.textContent = '🎯';
+    if (pillText) pillText.textContent = 'Any Available Provider';
+    if (pill)     pill.style.display = 'block';
+
+    setValidationMsg('success', '✓ We\'ll assign the best available provider for your service');
+    closeProviderDropdown();
+  }
+
+  // Clear selection — go back to search
+  function clearProviderSelection() {
+    _providerConfirmed = false;
+    window._selectedProviderId = null;
+
+    const input = document.getElementById('b_provider');
+    const pill  = document.getElementById('providerSelectedPill');
+    if (input) { input.value = ''; input.style.display = ''; }
+    if (pill)  pill.style.display = 'none';
+    clearValidationMsg();
+    closeProviderDropdown();
+  }
+
+  function setValidationMsg(type, msg) {
+    const el = document.getElementById('providerValidationMsg');
+    if (!el) return;
+    el.className = type;
+    el.textContent = msg;
+  }
+
+  function clearValidationMsg() {
+    const el = document.getElementById('providerValidationMsg');
+    if (el) { el.className = ''; el.textContent = ''; }
   }
 </script>
 </body>

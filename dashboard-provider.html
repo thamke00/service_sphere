@@ -6,12 +6,10 @@
   <title>Provider Dashboard – ServiceSphere</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    .section-title .cnt { background: var(--warning); color: #000; font-size: 12px; padding: 2px 9px; border-radius: 99px; font-weight: 700; }
     .bookings-list { display: flex; flex-direction: column; gap: 14px; }
     .provider-profile-card {
-      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08));
-      border: 1px solid var(--glass-border);
+      background: var(--surface-1);
+      border: 1px solid var(--dark-border);
       border-radius: var(--radius-lg);
       padding: 28px;
       display: flex;
@@ -20,15 +18,15 @@
       margin-bottom: 36px;
     }
     .profile-avatar {
-      width: 72px; height: 72px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: var(--primary);
       display: flex; align-items: center; justify-content: center;
-      font-size: 32px; font-weight: 700; flex-shrink: 0;
+      font-size: 24px; font-weight: 700; color: #fff; flex-shrink: 0;
     }
-    .profile-info h3 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-    .profile-info span { font-size: 14px; color: var(--text-secondary); }
-    .profile-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--success); font-size: 12px; font-weight: 600; padding: 3px 12px; border-radius: 99px; margin-top: 8px; }
+    .profile-info h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.02em; }
+    .profile-info span { font-size: 13px; color: var(--text-secondary); }
+    .profile-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.08); color: var(--success); font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -40,7 +38,10 @@
     <div class="logo-icon">⚡</div>
     ServiceSphere
   </a>
-  <nav>
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="mainNav">
     <a href="#" class="active">Dashboard</a>
     <a href="#bookings">Bookings</a>
     <a href="#profile">Profile</a>
@@ -52,8 +53,43 @@
   </div>
 </header>
 
+<!-- Mobile Navigation Overlay -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-header">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">⚡</div>
+      ServiceSphere
+    </a>
+    <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+  </div>
+  <a href="#" class="active" onclick="closeMobileNav()">Dashboard</a>
+  <a href="#bookings" onclick="closeMobileNav()">Bookings</a>
+  <a href="#profile" onclick="closeMobileNav()">Profile</a>
+  <div class="mobile-nav-actions">
+    <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+  </div>
+</nav>
+<script>
+  function openMobileNav() {
+    document.getElementById('mobileNav').classList.add('open');
+    document.getElementById('mobileNavOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('mobileNavOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
+  document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
+  document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
+</script>
+
 <!-- MAIN -->
 <main class="dashboard-layout">
+
+  <div id="verificationBanner" class="verification-banner" style="display:none;"></div>
 
   <!-- Provider Profile Card -->
   <div class="provider-profile-card" id="profile">
@@ -62,7 +98,7 @@
       <h3 id="profileName">Provider Name</h3>
       <span id="profileService">Service Category</span><br>
       <span id="profileLocation" style="font-size:13px; color:var(--text-muted);">📍 Location</span>
-      <div class="profile-badge">✓ Verified Provider</div>
+      <div class="profile-badge" id="profileBadge">✓ Verified Provider</div>
     </div>
   </div>
 
@@ -90,7 +126,7 @@
   <div id="bookings">
     <div class="section-title">
       📋 Booking Requests
-      <span class="cnt" id="pendingBadge">0</span>
+      <span class="cnt" id="pendingBadge" style="background:var(--warning);color:#000;">0</span>
     </div>
 
     <!-- Tab Filter -->
@@ -113,24 +149,65 @@
 </main>
 
 <footer>
-  <p>© 2026 ServiceSphere · <a href="index.html">Home</a></p>
+  <div class="footer-inner">
+    <div class="footer-brand"><div class="logo-icon">⚡</div> ServiceSphere</div>
+    <div class="footer-links"><a href="index.html">Home</a></div>
+    <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
+  </div>
 </footer>
 
+<div class="chat-drawer" id="chatDrawer">
+  <div class="chat-header">
+    <div class="chat-partner-info">
+      <div class="chat-status-dot"></div>
+      <div>
+        <div class="chat-partner-name" id="chatPartnerName">Customer</div>
+        <div class="chat-partner-service" id="chatPartnerService">Service</div>
+      </div>
+    </div>
+    <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-area">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
+  </div>
+</div>
+
 <script src="js/script.js"></script>
+<script src="js/chatbot.js"></script>
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     checkAuth('provider');
 
     const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
     const name = user.name || 'Provider';
+    const vs = user.verification_status;
+    const username = user.username || '';
 
     document.getElementById('userName').textContent = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileName').textContent = name + (username ? ' <span style="color:var(--primary-light);font-size:14px;font-weight:400;">@' + username + '</span>' : '');
     document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-
     document.getElementById('profileService').textContent = user.service || 'Service Provider';
-    document.getElementById('profileLocation').textContent = '📍 ' + (user.location || 'Location not set');
+    document.getElementById('profileLocation').textContent = '📍 ' + (user.location || user.city || 'Location not set');
+
+    const badge = document.getElementById('profileBadge');
+    const banner = document.getElementById('verificationBanner');
+    if (vs === 'approved') {
+      badge.textContent = '✓ Verified Provider';
+      badge.style.background = 'rgba(16,185,129,0.15)';
+      badge.style.color = 'var(--success)';
+    } else if (vs === 'pending') {
+      badge.textContent = '⏳ Pending Verification';
+      badge.style.background = 'rgba(245,158,11,0.15)';
+      badge.style.color = 'var(--warning)';
+      banner.style.display = 'block';
+      banner.className = 'verification-banner pending';
+      banner.innerHTML = '⏳ Your account is under review. Upload was received — admin approval within 24–48 hours. You can view requests but cannot accept until verified.';
+    } else {
+      badge.textContent = '⚠ Not Verified';
+    }
 
     renderProviderBookings('all');
   });

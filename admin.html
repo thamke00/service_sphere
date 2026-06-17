@@ -1,23 +1,239 @@
 <!DOCTYPE html>
-<html lang ="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Admin – ServiceSphere</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<div class="toast-container" id="toastContainer"></div>
+
 <header class="navbar">
-  <h2>Admin Panel</h2>
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">⚡</div>
+    ServiceSphere Admin
+  </a>
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu" style="display:none;">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="btn btn-ghost btn-sm" id="adminLogoutBtn" style="display:none;" onclick="adminLogout()">Logout</button>
 </header>
 
-<section class="dashboard">
-  <h3>Quick Stats</h3>
-  <p>Total Users: 120</p>
-  <p>Total Providers: 45</p>
-  <p>Active Bookings: 18</p>
-</section>
+<!-- Mobile Navigation Overlay -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-header">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">⚡</div>
+      ServiceSphere Admin
+    </a>
+    <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="mobile-nav-actions">
+    <button class="btn btn-ghost btn-block" id="mobileAdminLogoutBtn" style="display:none;" onclick="adminLogout()">Logout</button>
+  </div>
+</nav>
 
+<main class="dashboard-layout" style="max-width:900px;margin:0 auto;">
+
+  <div id="adminLoginSection" class="form-card" style="max-width:420px;margin:40px auto;">
+    <h2 style="margin-bottom:8px;">Admin Login</h2>
+    <p class="subtitle" style="margin-bottom:24px;">Verify provider applications</p>
+    <div class="auth-form-group">
+      <label>Admin Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@servicesphere.com">
+    </div>
+    <div class="auth-form-group">
+      <label>Password</label>
+      <input type="password" id="adminPassword" placeholder="Password">
+    </div>
+    <button class="btn btn-primary btn-block" onclick="adminLogin()">Sign In</button>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:16px;">Set ADMIN_EMAIL and ADMIN_PASSWORD in Vercel env for production.</p>
+  </div>
+
+  <div id="adminPanel" style="display:none;">
+    <div class="dashboard-top">
+      <div>
+        <h2>Provider Verification</h2>
+        <p>Review Aadhaar and address, then approve or reject.</p>
+      </div>
+    </div>
+
+    <div class="stats-row" style="margin-bottom:32px;">
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(99,102,241,0.15);">👤</div>
+        <div><div class="num" id="statCustomers">0</div><div class="lbl">Customers</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(6,182,212,0.15);">🛠️</div>
+        <div><div class="num" id="statProviders">0</div><div class="lbl">Providers</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(245,158,11,0.15);">📅</div>
+        <div><div class="num" id="statBookings">0</div><div class="lbl">Active Bookings</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">⏳ Pending Providers</div>
+    <div id="pendingProvidersList" class="bookings-list">
+      <div class="loader-box">Loading…</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/script.js"></script>
+<script>
+  const ADMIN_TOKEN_KEY = 'ss_admin_token';
+
+  function getAdminToken() { return localStorage.getItem(ADMIN_TOKEN_KEY); }
+  function saveAdminToken(t) { localStorage.setItem(ADMIN_TOKEN_KEY, t); }
+  function clearAdminToken() { localStorage.removeItem(ADMIN_TOKEN_KEY); }
+
+  function adminLogout() {
+    clearAdminToken();
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('adminLoginSection').style.display = 'block';
+    document.getElementById('adminLogoutBtn').style.display = 'none';
+    document.getElementById('mobileAdminLogoutBtn').style.display = 'none';
+    const hb = document.getElementById('hamburgerBtn');
+    if (hb) hb.style.display = 'none';
+  }
+
+  async function adminLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    try {
+      const res = await fetch(API_URL + '/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        saveAdminToken(data.token);
+        showAdminPanel();
+        showToast('Admin signed in', 'success');
+      } else {
+        showToast(data.message || 'Login failed', 'error');
+      }
+    } catch (e) {
+      showToast('Could not reach API', 'error');
+    }
+  }
+
+  function showAdminPanel() {
+    document.getElementById('adminLoginSection').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminLogoutBtn').style.display = 'inline-flex';
+    document.getElementById('mobileAdminLogoutBtn').style.display = 'block';
+    const hb = document.getElementById('hamburgerBtn');
+    if (hb) hb.style.display = '';  // let CSS media query control it
+    loadAdminStats();
+    loadPendingProviders();
+  }
+
+  async function loadAdminStats() {
+    try {
+      const res = await fetch(API_URL + '/admin/stats', {
+        headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('statCustomers').textContent = data.stats.customers;
+        document.getElementById('statProviders').textContent = data.stats.providers;
+        document.getElementById('statBookings').textContent = data.stats.activeBookings;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  async function loadPendingProviders() {
+    const container = document.getElementById('pendingProvidersList');
+    try {
+      const res = await fetch(API_URL + '/admin/pending-providers', {
+        headers: { 'Authorization': 'Bearer ' + getAdminToken() }
+      });
+      const data = await res.json();
+      if (!data.success || !data.providers?.length) {
+        container.innerHTML = '<div class="empty-state"><p>No pending providers 🎉</p></div>';
+        return;
+      }
+      container.innerHTML = data.providers.map(p => `
+        <div class="booking-card admin-provider-card">
+          <h3>${escapeHtml(p.name)} · ${escapeHtml(p.service || 'Provider')}</h3>
+          <div class="meta">📧 ${escapeHtml(p.email)} · 📞 ${escapeHtml(p.phone || '—')}</div>
+          <div class="meta">📍 ${escapeHtml(p.address_line || '')}, ${escapeHtml(p.city || '')} – ${escapeHtml(p.pincode || '')}</div>
+          <div class="meta">📅 Applied: ${new Date(p.created_at).toLocaleDateString('en-IN')}</div>
+          <div class="actions" style="margin-top:12px;">
+            <button class="btn btn-success btn-sm" onclick="verifyProvider(${p.id}, 'approved')">✅ Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="verifyProvider(${p.id}, 'rejected')">❌ Reject</button>
+            <button class="btn btn-ghost btn-sm" onclick="viewAadhaar(${p.id})">🪪 View Aadhaar</button>
+          </div>
+        </div>
+      `).join('');
+      window._pendingProviders = data.providers;
+    } catch (e) {
+      container.innerHTML = '<div class="empty-state"><p>Failed to load. Check admin token.</p></div>';
+    }
+  }
+
+  function viewAadhaar(id) {
+    const p = (window._pendingProviders || []).find(x => x.id === id);
+    if (!p?.aadhaar_proof) {
+      showToast('No Aadhaar on file', 'error');
+      return;
+    }
+    const w = window.open('', '_blank', 'width=500,height=600');
+    w.document.write('<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;"><img src="' + p.aadhaar_proof + '" style="max-width:100%;max-height:100vh;"></body></html>');
+  }
+
+  async function verifyProvider(id, status) {
+    if (!confirm('Set provider status to ' + status + '?')) return;
+    try {
+      const res = await fetch(API_URL + '/admin/provider/' + id + '/verify', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + getAdminToken()
+        },
+        body: JSON.stringify({ status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Provider ' + status, 'success');
+        loadPendingProviders();
+        loadAdminStats();
+      } else {
+        showToast(data.message || 'Failed', 'error');
+      }
+    } catch (e) {
+      showToast('Request failed', 'error');
+    }
+  }
+
+  // Mobile nav
+  function openMobileNav() {
+    document.getElementById('mobileNav').classList.add('open');
+    document.getElementById('mobileNavOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('mobileNavOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  const hb = document.getElementById('hamburgerBtn');
+  if (hb) hb.addEventListener('click', openMobileNav);
+  const nc = document.getElementById('mobileNavClose');
+  if (nc) nc.addEventListener('click', closeMobileNav);
+  const no = document.getElementById('mobileNavOverlay');
+  if (no) no.addEventListener('click', closeMobileNav);
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (getAdminToken()) showAdminPanel();
+  });
+</script>
 </body>
 </html>

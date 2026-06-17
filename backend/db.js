@@ -4,12 +4,16 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 let poolConfig;
 
-// Support: Render DATABASE_URL, Railway MYSQL* vars, or individual DB_* vars
 if (process.env.DATABASE_URL) {
-    poolConfig = { 
-        uri: process.env.DATABASE_URL, 
-        waitForConnections: true, 
-        connectionLimit: 10,
+    poolConfig = {
+        uri: process.env.DATABASE_URL,
+        waitForConnections: true,
+        connectionLimit: 5,
+        maxIdle: 2,
+        idleTimeout: 300000,      // 5 min — recycle idle connections before Aiven drops them
+        connectTimeout: 20000,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 0,
         ssl: { rejectUnauthorized: false }
     };
 } else {
@@ -18,14 +22,226 @@ if (process.env.DATABASE_URL) {
         user: process.env.MYSQLUSER || process.env.DB_USER || "root",
         password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || "",
         database: process.env.MYSQLDATABASE || process.env.DB_NAME || "servicesphere",
-        port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
+        port: Number(process.env.MYSQLPORT || process.env.DB_PORT || 3306),
         waitForConnections: true,
-        connectionLimit: 10,
+        connectionLimit: 5,
+        maxIdle: 2,
+        idleTimeout: 300000,      // 5 min — recycle idle connections before Aiven drops them
+        connectTimeout: 20000,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 0,
         ssl: { rejectUnauthorized: false }
     };
 }
 
 const db = mysql.createPool(poolConfig);
+
+// Handle pool-level errors (e.g. sudden disconnect) without crashing the server
+db.on("error", (err) => {
+    console.error("❌ Database pool error:", err.code, err.message);
+});
+
+// ── Keep-alive: ping every 4 minutes (Aiven cuts idle at ~8 min) ──
+// Gets a fresh connection from the pool each time so stale ones are discarded
+function keepAlive() {
+    db.getConnection((err, conn) => {
+        if (err) {
+            console.warn("⚠️ Keep-alive: could not get connection –", err.message);
+            return;
+        }
+        conn.query("SELECT 1", (pingErr) => {
+            conn.release();
+            if (pingErr) console.warn("⚠️ Keep-alive ping failed –", pingErr.message);
+        });
+    });
+}
+setInterval(keepAlive, 4 * 60 * 1000); // every 4 minutes
+
+const createUsersTable = `
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(30) UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  role ENUM('customer','provider') DEFAULT 'customer',
+  service VARCHAR(100),
+  location VARCHAR(100),
+  address_line VARCHAR(255),
+  city VARCHAR(100),
+  pincode VARCHAR(10),
+  verification_status ENUM('pending','approved','rejected') DEFAULT NULL,
+  aadhaar_proof MEDIUMTEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
+const createBookingsTable = `
+CREATE TABLE IF NOT EXISTS bookings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT,
+  customer_name VARCHAR(100),
+  service VARCHAR(100),
+  provider VARCHAR(100),
+  provider_id INT NULL,
+  booking_date DATE,
+  booking_time TIME,
+  address TEXT,
+  notes TEXT,
+  status ENUM('Pending','Accepted','Completed','Cancelled') DEFAULT 'Pending',
+  payment_status ENUM('Unpaid', 'Paid') DEFAULT 'Unpaid',
+  amount DECIMAL(10,2) DEFAULT 499.00,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE SET NULL
+);
+`;
+
+const createPaymentsTable = `
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id INT NOT NULL,
+  payment_method VARCHAR(50) NOT NULL,
+  transaction_id VARCHAR(100) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  status VARCHAR(20) DEFAULT 'Success',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+`;
+
+const createMessagesTable = `
+CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id INT NOT NULL,
+  sender_id INT NOT NULL,
+  receiver_id INT,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+`;
+
+function addColumnIfMissing(table, column, definition) {
+    db.query(`SHOW COLUMNS FROM ${table} LIKE ?`, [column], (err, results) => {
+        if (!err && results.length === 0) {
+            db.query(`ALTER TABLE ${table} ADD COLUMN ${definition}`, (alterErr) => {
+                if (alterErr) console.error(`❌ Error adding ${table}.${column}:`, alterErr.message);
+                else console.log(`✓ Added ${table}.${column}`);
+            });
+        }
+    });
+}
+
+// ── Generate unique username from name ──
+function generateUsername(name, callback, attempt) {
+    attempt = attempt || 0;
+    // slugify: lowercase, replace spaces/special chars with underscore, trim
+    let base = name.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 20);
+    if (!base) base = 'user';
+    const suffix = attempt > 0 ? '_' + (attempt + 1) : '';
+    const candidate = base + suffix;
+
+    db.query('SELECT id FROM users WHERE username = ?', [candidate], (err, results) => {
+        if (err) return callback(err);
+        if (results.length === 0) return callback(null, candidate);
+        // collision – retry with incremented suffix
+        generateUsername(name, callback, attempt + 1);
+    });
+}
+
+function runMigrations() {
+    console.log("🚀 Running database migrations...");
+    db.query(createUsersTable, (err) => {
+        if (err) return console.error("❌ Users table migration error:", err.message);
+
+        addColumnIfMissing("users", "username", "username VARCHAR(30) UNIQUE");
+        addColumnIfMissing("users", "address_line", "address_line VARCHAR(255)");
+        addColumnIfMissing("users", "city", "city VARCHAR(100)");
+        addColumnIfMissing("users", "pincode", "pincode VARCHAR(10)");
+        addColumnIfMissing("users", "verification_status", "verification_status ENUM('pending','approved','rejected') DEFAULT NULL");
+        addColumnIfMissing("users", "aadhaar_proof", "aadhaar_proof MEDIUMTEXT");
+
+        // Backfill usernames for existing users without one
+        db.query("SELECT id, name FROM users WHERE username IS NULL", (err, users) => {
+            if (err) return console.error("❌ Username backfill error:", err.message);
+            if (users.length > 0) {
+                console.log(`📝 Backfilling usernames for ${users.length} users...`);
+                let done = 0;
+                users.forEach(u => {
+                    generateUsername(u.name, (genErr, uname) => {
+                        if (genErr) { done++; return; }
+                        db.query("UPDATE users SET username = ? WHERE id = ?", [uname, u.id], () => { done++; });
+                    });
+                });
+                // Check completion
+                const checkDone = setInterval(() => {
+                    if (done >= users.length) {
+                        clearInterval(checkDone);
+                        console.log("✓ Usernames backfilled");
+                    }
+                }, 200);
+            }
+        });
+
+        db.query(createBookingsTable, (err) => {
+            if (err) return console.error("❌ Bookings table migration error:", err.message);
+
+            addColumnIfMissing("bookings", "payment_status", "payment_status ENUM('Unpaid', 'Paid') DEFAULT 'Unpaid'");
+            addColumnIfMissing("bookings", "amount", "amount DECIMAL(10,2) DEFAULT 499.00");
+            addColumnIfMissing("bookings", "provider_id", "provider_id INT NULL");
+
+            // Add FK for provider_id if missing
+            db.query(`
+                SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings' AND CONSTRAINT_NAME = 'fk_booking_provider'
+            `, (err, fks) => {
+                if (!err && fks.length === 0) {
+                    db.query(`
+                        ALTER TABLE bookings ADD CONSTRAINT fk_booking_provider
+                        FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE SET NULL
+                    `, (fkErr) => {
+                        if (fkErr) console.error("❌ FK provider_id error:", fkErr.message);
+                        else console.log("✓ bookings.provider_id FK added");
+                    });
+                }
+            });
+
+            // Backfill provider_id from provider name
+            db.query(`
+                UPDATE bookings b
+                JOIN users u ON LOWER(TRIM(b.provider)) = LOWER(TRIM(u.name)) AND u.role = 'provider'
+                SET b.provider_id = u.id
+                WHERE b.provider_id IS NULL AND b.provider IS NOT NULL AND TRIM(b.provider) != ''
+            `, (err, result) => {
+                if (err) console.error("❌ Provider ID backfill error:", err.message);
+                else if (result.affectedRows > 0) console.log(`✓ Backfilled provider_id for ${result.affectedRows} bookings`);
+            });
+
+            db.query(createPaymentsTable, (err) => {
+                if (err) console.error("❌ Payments table migration error:", err.message);
+                else console.log("✓ Payments table ready!");
+            });
+
+            db.query(createMessagesTable, (err) => {
+                if (err) console.error("❌ Messages table migration error:", err.message);
+                else console.log("✓ Messages table ready!");
+            });
+
+            db.query("SHOW COLUMNS FROM messages LIKE 'receiver_id'", (err, cols) => {
+                if (!err && cols.length > 0 && cols[0].Null === "NO") {
+                    db.query("ALTER TABLE messages MODIFY receiver_id INT NULL", (e) => {
+                        if (!e) console.log("✓ messages.receiver_id allows NULL");
+                    });
+                }
+            });
+        });
+    });
+}
 
 db.getConnection((err, connection) => {
     if (err) {
@@ -34,55 +250,8 @@ db.getConnection((err, connection) => {
     }
     console.log("✓ MySQL connected successfully");
     connection.release();
+    runMigrations();
 });
 
 module.exports = db;
-const createUsersTable = `
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  role ENUM('customer','provider') DEFAULT 'customer',
-  service VARCHAR(100),
-  location VARCHAR(100),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-`;
-const createBookingsTable = `
-CREATE TABLE IF NOT EXISTS bookings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  customer_id INT,
-  customer_name VARCHAR(100),
-  service VARCHAR(100),
-  provider VARCHAR(100),
-  booking_date DATE,
-  booking_time TIME,
-  address TEXT,
-  notes TEXT,
-  status ENUM('Pending','Accepted','Completed','Cancelled') DEFAULT 'Pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL
-);
-`;
-if (require.main === module) {
-    console.log("Creating tables...");
-    db.query(createUsersTable, (err) => {
-        if (err) {
-            console.error("❌ Error creating users table:", err.message);
-            process.exit(1);
-        }
-        console.log("✅ Users table ready!");
-
-        db.query(createBookingsTable, (err) => {
-            if (err) {
-                console.error("❌ Error creating bookings table:", err.message);
-                process.exit(1);
-            }
-            console.log("✅ Bookings table ready!");
-            console.log("🚀 Database setup complete!");
-            process.exit(0);
-        });
-    });
-}
+module.exports.generateUsername = generateUsername;
