@@ -64,14 +64,18 @@ async function loadChatMessages(isInitialLoad) {
   const user = getUser();
   if (!box || !user) return;
 
+  // ── Determine current user ID (must match messages.sender_id from MySQL) ──
   let myId = null;
   try {
     const token = getToken();
     if (token && token.includes('.')) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // JWT uses base64url — replace URL-safe chars before decoding
+      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(b64));
       myId = payload.id;
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Chat: JWT decode failed', e); }
+  // Fallback to user object from localStorage
   if (myId == null) myId = user.id;
 
   if (myId == null) {
@@ -79,6 +83,9 @@ async function loadChatMessages(isInitialLoad) {
     box.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;">Authentication error. Please re-login.</div>';
     return;
   }
+
+  // Use Number for reliable comparison with MySQL INT sender_id
+  const myIdNum = Number(myId);
 
   try {
     const res = await apiFetch(API_URL + '/chats/' + activeChatBookingId, {
@@ -96,11 +103,10 @@ async function loadChatMessages(isInitialLoad) {
       return;
     }
 
-    const myIdStr = String(myId);
     if (!isInitialLoad && data.messages.length > _lastMessageCount) {
       const newMessages = data.messages.slice(_lastMessageCount);
       newMessages.forEach(m => {
-        const isFromMe = String(m.sender_id) === myIdStr;
+        const isFromMe = Number(m.sender_id) === myIdNum;
         if (!isFromMe && !_chatNotifiedIds.has(m.id)) {
           _chatNotifiedIds.add(m.id);
           const senderName = m.sender_name || 'Someone';
@@ -113,8 +119,10 @@ async function loadChatMessages(isInitialLoad) {
 
     const myRole = user.role || 'customer';
     box.innerHTML = data.messages.map(m => {
-      const isMine = String(m.sender_id) === myIdStr;
+      const isMine = Number(m.sender_id) === myIdNum;
       const msgClass = isMine ? 'outgoing' : 'incoming';
+
+      // Use sender_role from DB join, with sensible fallback
       const senderRole = m.sender_role || (isMine ? myRole : (myRole === 'customer' ? 'provider' : 'customer'));
 
       const dateTime = formatChatDateTime(m.created_at);
