@@ -585,7 +585,16 @@ function attachRoutes(app, db, generateUsername, options = {}) {
                 return res.status(403).json({ success: false, message: "Unauthorized to update this booking" });
             }
 
-            db.query("UPDATE bookings SET status = ? WHERE id = ?", [status, bookingId], (err) => {
+            // If a pool provider accepts, claim the booking by assigning provider_id + provider name
+            const isAccepting = status === "Accepted" && isServicePool && !booking.provider_id;
+            const updateSql = isAccepting
+                ? "UPDATE bookings SET status = ?, provider_id = ?, provider = ? WHERE id = ?"
+                : "UPDATE bookings SET status = ? WHERE id = ?";
+            const updateParams = isAccepting
+                ? [status, req.user.id, req.user.name, bookingId]
+                : [status, bookingId];
+
+            db.query(updateSql, updateParams, (err) => {
                 if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
                 res.json({ success: true, message: "Status updated successfully" });
             });
@@ -645,7 +654,7 @@ function attachRoutes(app, db, generateUsername, options = {}) {
             SELECT * FROM bookings
             WHERE (provider_id = ?)
                OR (provider_id IS NULL AND LOWER(TRIM(provider)) = LOWER(TRIM(?)))
-               OR ((provider IS NULL OR TRIM(provider) = '') AND LOWER(TRIM(service)) = LOWER(TRIM(?)))
+               OR ((provider IS NULL OR TRIM(provider) = '') AND provider_id IS NULL AND LOWER(TRIM(service)) = LOWER(TRIM(?)) AND status = 'Pending')
             ORDER BY id DESC
         `;
         const params = [providerId, providerName, providerService];
@@ -662,7 +671,7 @@ function attachRoutes(app, db, generateUsername, options = {}) {
                 const countSql = `SELECT COUNT(*) as total FROM bookings
                     WHERE (provider_id = ?)
                        OR (provider_id IS NULL AND LOWER(TRIM(provider)) = LOWER(TRIM(?)))
-                       OR ((provider IS NULL OR TRIM(provider) = '') AND LOWER(TRIM(service)) = LOWER(TRIM(?)))`;
+                       OR ((provider IS NULL OR TRIM(provider) = '') AND provider_id IS NULL AND LOWER(TRIM(service)) = LOWER(TRIM(?)) AND status = 'Pending')`;
                 db.query(countSql, [providerId, providerName, providerService], (cErr, cRes) => {
                     const total = (!cErr && cRes[0]) ? cRes[0].total : results.length;
                     res.json({ success: true, bookings: results, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
