@@ -819,10 +819,10 @@ function attachRoutes(app, db, generateUsername, options = {}) {
                 if (booking.provider_id) {
                     db.query("SELECT id, username, name, service FROM users WHERE id = ?", [booking.provider_id], (pErr, pResults) => {
                         if (!pErr && pResults.length > 0) providerInfo = pResults[0];
-                        res.json({ success: true, messages, provider: providerInfo });
+                        res.json({ success: true, messages, provider: providerInfo, current_user_id: userId });
                     });
                 } else {
-                    res.json({ success: true, messages, provider: providerInfo });
+                    res.json({ success: true, messages, provider: providerInfo, current_user_id: userId });
                 }
             });
         });

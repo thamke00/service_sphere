@@ -64,29 +64,6 @@ async function loadChatMessages(isInitialLoad) {
   const user = getUser();
   if (!box || !user) return;
 
-  // ── Determine current user ID (must match messages.sender_id from MySQL) ──
-  let myId = null;
-  try {
-    const token = getToken();
-    if (token && token.includes('.')) {
-      // JWT uses base64url — replace URL-safe chars before decoding
-      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(b64));
-      myId = payload.id;
-    }
-  } catch(e) { console.warn('Chat: JWT decode failed', e); }
-  // Fallback to user object from localStorage
-  if (myId == null) myId = user.id;
-
-  if (myId == null) {
-    console.error('Chat: Could not determine current user ID');
-    box.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;">Authentication error. Please re-login.</div>';
-    return;
-  }
-
-  // Use Number for reliable comparison with MySQL INT sender_id
-  const myIdNum = Number(myId);
-
   try {
     const res = await apiFetch(API_URL + '/chats/' + activeChatBookingId, {
       headers: { 'Authorization': 'Bearer ' + getToken() },
@@ -102,6 +79,9 @@ async function loadChatMessages(isInitialLoad) {
       _lastMessageCount = 0;
       return;
     }
+
+    // Use the server-provided current_user_id (from verified JWT — most reliable source)
+    const myIdNum = Number(data.current_user_id);
 
     if (!isInitialLoad && data.messages.length > _lastMessageCount) {
       const newMessages = data.messages.slice(_lastMessageCount);
