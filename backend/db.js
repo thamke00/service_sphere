@@ -14,6 +14,8 @@ if (process.env.DATABASE_URL) {
         connectTimeout: 20000,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
+        timezone: 'Z',            // Treat all TIMESTAMP values as UTC
+        dateStrings: false,       // Return Date objects (JSON.stringify will produce ISO with Z)
         ssl: { rejectUnauthorized: false }
     };
 } else {
@@ -30,6 +32,8 @@ if (process.env.DATABASE_URL) {
         connectTimeout: 20000,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
+        timezone: 'Z',            // Treat all TIMESTAMP values as UTC
+        dateStrings: false,       // Return Date objects (JSON.stringify will produce ISO with Z)
         ssl: { rejectUnauthorized: false }
     };
 }
@@ -123,6 +127,45 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 `;
 
+const createReviewsTable = `
+CREATE TABLE IF NOT EXISTS reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id INT NOT NULL UNIQUE,
+  customer_id INT NOT NULL,
+  provider_id INT NOT NULL,
+  rating TINYINT NOT NULL,
+  review_text TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+  FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+const createPasswordResetTable = `
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  token_hash VARCHAR(64) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_user_reset (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+// ── Safe index creation (ignores duplicate index errors) ──
+function addIndexIfMissing(table, indexName, columns) {
+    db.query(`CREATE INDEX ${indexName} ON ${table} (${columns})`, (err) => {
+        if (err && !err.message.includes('Duplicate')) {
+            console.error(`❌ Index ${indexName} error:`, err.message);
+        } else if (!err) {
+            console.log(`✓ Index ${indexName} created on ${table}`);
+        }
+    });
+}
+
 function addColumnIfMissing(table, column, definition) {
     db.query(`SHOW COLUMNS FROM ${table} LIKE ?`, [column], (err, results) => {
         if (!err && results.length === 0) {
@@ -165,6 +208,7 @@ function runMigrations() {
         addColumnIfMissing("users", "pincode", "pincode VARCHAR(10)");
         addColumnIfMissing("users", "verification_status", "verification_status ENUM('pending','approved','rejected') DEFAULT NULL");
         addColumnIfMissing("users", "aadhaar_proof", "aadhaar_proof MEDIUMTEXT");
+        addColumnIfMissing("users", "service_price", "service_price DECIMAL(10,2) DEFAULT NULL");
 
         // Backfill usernames for existing users without one
         db.query("SELECT id, name FROM users WHERE username IS NULL", (err, users) => {
@@ -232,6 +276,16 @@ function runMigrations() {
                 else console.log("✓ Messages table ready!");
             });
 
+            db.query(createReviewsTable, (err) => {
+                if (err) console.error("❌ Reviews table migration error:", err.message);
+                else console.log("✓ Reviews table ready!");
+            });
+
+            db.query(createPasswordResetTable, (err) => {
+                if (err) console.error("❌ Password reset table migration error:", err.message);
+                else console.log("✓ Password reset tokens table ready!");
+            });
+
             db.query("SHOW COLUMNS FROM messages LIKE 'receiver_id'", (err, cols) => {
                 if (!err && cols.length > 0 && cols[0].Null === "NO") {
                     db.query("ALTER TABLE messages MODIFY receiver_id INT NULL", (e) => {
@@ -239,6 +293,20 @@ function runMigrations() {
                     });
                 }
             });
+
+            // ── Performance indexes ──
+            console.log("📇 Checking indexes...");
+            addIndexIfMissing("users", "idx_users_email", "email");
+            addIndexIfMissing("users", "idx_users_username", "username");
+            addIndexIfMissing("users", "idx_users_service", "service");
+            addIndexIfMissing("users", "idx_users_verification", "verification_status");
+            addIndexIfMissing("users", "idx_users_role", "role");
+            addIndexIfMissing("bookings", "idx_bookings_customer", "customer_id");
+            addIndexIfMissing("bookings", "idx_bookings_provider", "provider_id");
+            addIndexIfMissing("bookings", "idx_bookings_status", "status");
+            addIndexIfMissing("messages", "idx_messages_booking", "booking_id");
+            addIndexIfMissing("reviews", "idx_reviews_provider", "provider_id");
+            addIndexIfMissing("reviews", "idx_reviews_customer", "customer_id");
         });
     });
 }

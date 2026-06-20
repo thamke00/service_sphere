@@ -84,7 +84,8 @@
 
 </main>
 
-<script src="js/script.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
 <script>
   const ADMIN_TOKEN_KEY = 'ss_admin_token';
 
@@ -213,23 +214,8 @@
     }
   }
 
-  // Mobile nav
-  function openMobileNav() {
-    document.getElementById('mobileNav').classList.add('open');
-    document.getElementById('mobileNavOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeMobileNav() {
-    document.getElementById('mobileNav').classList.remove('open');
-    document.getElementById('mobileNavOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  const hb = document.getElementById('hamburgerBtn');
-  if (hb) hb.addEventListener('click', openMobileNav);
-  const nc = document.getElementById('mobileNavClose');
-  if (nc) nc.addEventListener('click', closeMobileNav);
-  const no = document.getElementById('mobileNavOverlay');
-  if (no) no.addEventListener('click', closeMobileNav);
+  // Mobile nav is handled by script.js
+
 
   window.addEventListener('DOMContentLoaded', () => {
     if (getAdminToken()) showAdminPanel();

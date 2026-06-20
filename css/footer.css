@@ -1,0 +1,67 @@
+﻿/* Footer */
+
+   FOOTER
+   ============================================================ */
+footer {
+  background: var(--surface-1);
+  border-top: 1px solid var(--dark-border);
+  padding: 40px 24px 24px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.footer-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.footer-brand .logo-icon {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.footer-links a:hover { color: var(--text-primary); }
+
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid var(--dark-border);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+footer a { color: var(--text-secondary); transition: var(--transition); }
+footer a:hover { color: var(--text-primary); }
+

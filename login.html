@@ -68,6 +68,10 @@
 <div class="two-col">
   <!-- LEFT: Branding Panel -->
   <div class="left-panel">
+    <!-- Floating Blobs -->
+    <div class="floating-blob floating-blob--1"></div>
+    <div class="floating-blob floating-blob--2"></div>
+    <div class="floating-blob floating-blob--3"></div>
     <div class="brand">
       <div class="logo-icon">⚡</div>
       ServiceSphere
@@ -103,25 +107,25 @@
       </div>
 
       <!-- Tab: Login / Register -->
-      <div class="auth-tabs">
-        <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Login</div>
-        <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">Register</div>
+      <div class="auth-tabs" role="tablist" aria-label="Authentication method">
+        <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')" role="tab" aria-selected="true" tabindex="0">Login</div>
+        <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')" role="tab" aria-selected="false" tabindex="0">Register</div>
       </div>
 
       <!-- ══════ LOGIN FORM ══════ -->
-      <div id="loginForm">
+      <div id="loginForm" role="tabpanel" aria-labelledby="loginTab">
         <h2>Welcome back 👋</h2>
         <p class="subtitle">Enter your credentials to access your account</p>
 
         <div class="auth-form-group">
           <label for="l_email">Email Address</label>
-          <input type="email" id="l_email" placeholder="you@example.com" autocomplete="email">
+          <input type="email" id="l_email" placeholder="you@example.com" autocomplete="email" aria-required="true">
           <span class="error-msg" id="l_email_err"></span>
         </div>
 
         <div class="auth-form-group">
           <label for="l_password">Password</label>
-          <input type="password" id="l_password" placeholder="••••••••" autocomplete="current-password">
+          <input type="password" id="l_password" placeholder="••••••••" autocomplete="current-password" aria-required="true">
           <span class="error-msg" id="l_pass_err"></span>
         </div>
 
@@ -132,26 +136,74 @@
 
         <div class="auth-divider">or</div>
 
+        <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom: 12px;">
+          <span style="color:var(--primary-light); cursor:pointer; font-weight:500;" onclick="showForgotPasswordForm()">🔑 Forgot your password?</span>
+        </p>
+
         <p style="text-align:center; font-size:14px; color:var(--text-muted);">
           Don't have an account? 
           <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('register')">Register here</span>
         </p>
       </div>
 
+      <!-- ══════ FORGOT PASSWORD FORM ══════ -->
+      <div id="forgotPasswordForm" style="display:none;">
+        <h2>🔑 Reset Password</h2>
+
+        <!-- Step 1: Enter email -->
+        <div id="forgotStep1">
+          <p class="subtitle">Enter the email address linked to your account. We'll generate a reset code.</p>
+
+          <div class="auth-form-group">
+            <label for="forgot_email">Email Address</label>
+            <input type="email" id="forgot_email" placeholder="you@example.com" autocomplete="email">
+          </div>
+
+          <button class="btn btn-primary btn-block btn-lg" id="forgotSendBtn" onclick="requestPasswordReset()" style="margin-top:8px;">🔑 Send Reset Code</button>
+        </div>
+
+        <!-- Step 2: Enter code + new password -->
+        <div id="forgotStep2" style="display:none;">
+          <p class="subtitle">Enter the 6-digit code and choose a new password.</p>
+
+          <div class="auth-form-group">
+            <label for="reset_code">Reset Code</label>
+            <input type="text" id="reset_code" placeholder="6-digit code" maxlength="6" inputmode="numeric" style="font-size:20px; letter-spacing:8px; text-align:center; font-weight:700;">
+          </div>
+
+          <div class="auth-form-group">
+            <label for="reset_password">New Password</label>
+            <input type="password" id="reset_password" placeholder="Min 6 characters">
+          </div>
+
+          <div class="auth-form-group">
+            <label for="reset_confirm">Confirm New Password</label>
+            <input type="password" id="reset_confirm" placeholder="Re-enter password">
+          </div>
+
+          <button class="btn btn-primary btn-block btn-lg" id="resetSubmitBtn" onclick="submitPasswordReset()" style="margin-top:8px;">✅ Reset Password</button>
+        </div>
+
+        <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
+          Remember your password? 
+          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="hideForgotPasswordForm()">Back to Login</span>
+        </p>
+      </div>
+
       <!-- ══════ REGISTER FORM ══════ -->
-      <div id="registerForm" style="display:none;">
+      <div id="registerForm" style="display:none;" role="tabpanel" aria-labelledby="registerTab">
         <h2>Create account ✨</h2>
         <p class="subtitle">Join as a customer or service provider</p>
 
         <!-- Role Selector -->
-        <div class="role-selector">
-          <div class="role-option selected" id="role-customer" onclick="selectRole('customer')">
-            <div class="icon">👤</div>
+        <div class="role-selector" role="radiogroup" aria-label="Account type">
+          <div class="role-option selected" id="role-customer" onclick="selectRole('customer')" role="radio" aria-checked="true" tabindex="0">
+            <div class="icon" aria-hidden="true">👤</div>
             <div class="name">Customer</div>
             <div class="desc">Book services</div>
           </div>
-          <div class="role-option" id="role-provider" onclick="selectRole('provider')">
-            <div class="icon">🛠️</div>
+          <div class="role-option" id="role-provider" onclick="selectRole('provider')" role="radio" aria-checked="false" tabindex="0">
+            <div class="icon" aria-hidden="true">🛠️</div>
             <div class="name">Provider</div>
             <div class="desc">Offer services</div>
           </div>
@@ -160,14 +212,14 @@
         <input type="hidden" id="r_role" value="customer">
 
         <div class="auth-form-group">
-          <label>Full Name</label>
-          <input type="text" id="r_name" placeholder="John Doe">
+          <label for="r_name">Full Name</label>
+          <input type="text" id="r_name" placeholder="John Doe" aria-required="true">
           <span class="error-msg" id="r_name_err"></span>
         </div>
 
         <div class="auth-form-group">
-          <label>Email Address</label>
-          <input type="email" id="r_email" placeholder="you@example.com">
+          <label for="r_email">Email Address</label>
+          <input type="email" id="r_email" placeholder="you@example.com" aria-required="true">
           <span class="error-msg" id="r_email_err"></span>
         </div>
 
@@ -178,7 +230,8 @@
 
         <div class="auth-form-group">
           <label>Password</label>
-          <input type="password" id="r_password" placeholder="Min 6 characters">
+          <input type="password" id="r_password" placeholder="Min 6 characters" oninput="checkPasswordStrength(this.value)">
+          <div class="password-strength"><div class="password-strength-fill" id="passwordStrengthFill"></div></div>
           <span class="error-msg" id="r_pass_err"></span>
         </div>
 
@@ -247,10 +300,15 @@
   </div>
 </div>
 
-<script src="js/script.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/chatbot.js"></script>
 <script>
   function switchAuthTab(tab) {
+    // Always hide forgot password form when switching tabs
+    const forgotForm = document.getElementById('forgotPasswordForm');
+    if (forgotForm) forgotForm.style.display = 'none';
+
     if (tab === 'login') {
       document.getElementById('loginForm').style.display = 'block';
       document.getElementById('registerForm').style.display = 'none';
