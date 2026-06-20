@@ -16,6 +16,15 @@ function providerRatingHtml(p) {
   return '<div class="provider-rating provider-rating--new"><span class="provider-rating-text">✨ New</span></div>';
 }
 
+/* ── Provider price line helper ── */
+function providerPriceHtml(p) {
+  const price = parseFloat(p.service_price);
+  if (price && price > 0) {
+    return `<div class="provider-detail" style="font-weight:700; color:var(--success);">💰 ₹${price.toFixed(0)} <span style="font-weight:400; font-size:12px; color:var(--text-muted);">per service</span></div>`;
+  }
+  return '<div class="provider-detail" style="color:var(--text-muted);">💰 ₹499 <span style="font-size:12px;">(default)</span></div>';
+}
+
 /* ============================================================
    LOAD FEATURED PROVIDERS (index page)
    ============================================================ */

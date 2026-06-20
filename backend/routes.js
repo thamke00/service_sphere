@@ -585,19 +585,25 @@ function attachRoutes(app, db, generateUsername, options = {}) {
                 return res.status(403).json({ success: false, message: "Unauthorized to update this booking" });
             }
 
-            // If a pool provider accepts, claim the booking by assigning provider_id + provider name
+            // If a pool provider accepts, claim the booking by assigning provider_id + provider name + their price
             const isAccepting = status === "Accepted" && isServicePool && !booking.provider_id;
-            const updateSql = isAccepting
-                ? "UPDATE bookings SET status = ?, provider_id = ?, provider = ? WHERE id = ?"
-                : "UPDATE bookings SET status = ? WHERE id = ?";
-            const updateParams = isAccepting
-                ? [status, req.user.id, req.user.name, bookingId]
-                : [status, bookingId];
 
-            db.query(updateSql, updateParams, (err) => {
-                if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
-                res.json({ success: true, message: "Status updated successfully" });
-            });
+            if (isAccepting) {
+                // Look up provider's actual price so the booking amount reflects it
+                db.query("SELECT service_price FROM users WHERE id = ? AND role = 'provider'", [req.user.id], (pErr, pResults) => {
+                    const providerPrice = (!pErr && pResults[0]) ? parseFloat(pResults[0].service_price) || 499.00 : 499.00;
+                    const claimSql = "UPDATE bookings SET status = ?, provider_id = ?, provider = ?, amount = ? WHERE id = ?";
+                    db.query(claimSql, [status, req.user.id, req.user.name, providerPrice, bookingId], (err) => {
+                        if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
+                        res.json({ success: true, message: "Booking accepted and assigned to you", amount: providerPrice });
+                    });
+                });
+            } else {
+                db.query("UPDATE bookings SET status = ? WHERE id = ?", [status, bookingId], (err) => {
+                    if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
+                    res.json({ success: true, message: "Status updated successfully" });
+                });
+            }
         });
     });
 
