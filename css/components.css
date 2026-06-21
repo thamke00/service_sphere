@@ -1610,3 +1610,203 @@
     display: none;
   }
 }
+
+/* ════════════════════════════════════════════════
+   SETTINGS PAGE
+   ════════════════════════════════════════════════ */
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 640px;
+}
+
+.settings-card {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.settings-card:hover { border-color: var(--dark-border-h); }
+
+.settings-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.settings-form-group {
+  margin-bottom: 16px;
+}
+.settings-form-group:last-child { margin-bottom: 0; }
+
+.settings-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.settings-form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
+.settings-form-row {
+  display: flex;
+  gap: 12px;
+}
+.settings-form-row .settings-form-group { flex: 1; }
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.settings-msg {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+  display: none;
+}
+.settings-msg.success {
+  display: block;
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.settings-msg.error {
+  display: block;
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+/* Toggle switch */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dark-border);
+}
+.toggle-switch:last-child { border-bottom: none; }
+
+.toggle-switch-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.toggle-switch-label .title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.toggle-switch-label .desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  background: var(--surface-3);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+}
+.toggle-track.active {
+  background: var(--primary);
+}
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-track.active::after {
+  transform: translateX(20px);
+}
+
+/* Radio options */
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+.radio-option:hover { border-color: var(--dark-border-h); }
+.radio-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-subtle);
+}
+.radio-option .radio-dot {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--text-muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.radio-option.selected .radio-dot {
+  border-color: var(--primary);
+}
+.radio-option.selected .radio-dot::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+.radio-option .radio-text {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.radio-option .radio-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}

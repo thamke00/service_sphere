@@ -279,6 +279,7 @@
     <a href="#" onclick="navigateTo('messages');closeMobileNav();return false;">💬 Messages</a>
     <a href="#" onclick="navigateTo('history');closeMobileNav();return false;">📜 History</a>
     <a href="#" onclick="navigateTo('book-service');closeMobileNav();return false;">📝 Book Service</a>
+    <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;">⚙️ Settings</a>
     <div class="mobile-nav-actions">
       <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
     </div>
@@ -544,6 +545,98 @@
     <div class="dashboard-page" id="page-notifications">
       <div class="section-title">🔔 Notifications</div>
       <div id="inlineNotifListFull"></div>
+    </div>
+
+    <!-- ══════ PAGE: Settings ══════ -->
+    <div class="dashboard-page" id="page-settings">
+      <div class="section-title">⚙️ Settings</div>
+      <div class="settings-grid">
+
+        <!-- Profile Info -->
+        <div class="settings-card">
+          <div class="settings-card-title">👤 Profile Information</div>
+          <div class="settings-card-desc">Update your personal details</div>
+          <div class="settings-form-group">
+            <label>Full Name</label>
+            <input type="text" id="settings_name" placeholder="Your name">
+          </div>
+          <div class="settings-form-group">
+            <label>Email Address</label>
+            <input type="email" id="settings_email" placeholder="your@email.com">
+          </div>
+          <div class="settings-form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="settings_phone" placeholder="10-digit mobile number" maxlength="10">
+          </div>
+          <div class="settings-actions">
+            <button class="btn btn-primary" onclick="saveProfile()">💾 Save Changes</button>
+          </div>
+          <div class="settings-msg" id="profileMsg"></div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="settings-card">
+          <div class="settings-card-title">🔒 Change Password</div>
+          <div class="settings-card-desc">Update your account password</div>
+          <div class="settings-form-group">
+            <label>Current Password</label>
+            <input type="password" id="settings_current_pwd" placeholder="Enter current password">
+          </div>
+          <div class="settings-form-group">
+            <label>New Password</label>
+            <input type="password" id="settings_new_pwd" placeholder="At least 6 characters">
+          </div>
+          <div class="settings-form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="settings_confirm_pwd" placeholder="Re-enter new password">
+          </div>
+          <div class="settings-actions">
+            <button class="btn btn-primary" onclick="changePassword()">🔑 Update Password</button>
+          </div>
+          <div class="settings-msg" id="passwordMsg"></div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="settings-card">
+          <div class="settings-card-title">🎨 Appearance</div>
+          <div class="settings-card-desc">Customize the look and feel</div>
+          <div class="toggle-switch">
+            <div class="toggle-switch-label">
+              <span class="title">☀️ Light Mode</span>
+              <span class="desc">Switch between dark and light theme</span>
+            </div>
+            <div class="toggle-track" id="themeToggle" onclick="toggleTheme()"></div>
+          </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="settings-card">
+          <div class="settings-card-title">🔐 Privacy</div>
+          <div class="settings-card-desc">Control who can message you</div>
+          <div class="radio-option selected" onclick="setMsgPrivacy('everyone')" data-privacy="everyone">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-text">Everyone</div>
+              <div class="radio-desc">Any provider you've booked can message you</div>
+            </div>
+          </div>
+          <div class="radio-option" onclick="setMsgPrivacy('active')" data-privacy="active">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-text">Active bookings only</div>
+              <div class="radio-desc">Only providers with active/pending bookings</div>
+            </div>
+          </div>
+          <div class="radio-option" onclick="setMsgPrivacy('none')" data-privacy="none">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-text">Nobody</div>
+              <div class="radio-desc">Disable incoming messages from all providers</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
   </main>
@@ -1197,6 +1290,7 @@
       if (pageName === 'messages') loadMessageThreadsFull();
       if (pageName === 'history') loadBookingHistoryFull();
       if (pageName === 'notifications') renderInlineNotificationsFull();
+      if (pageName === 'settings') loadSettingsPage();
       if (pageName === 'overview') {
         renderBookings(_bookingsFilter || 'all');
         if (typeof loadDashboardProviders === 'function') loadDashboardProviders();
@@ -1512,6 +1606,157 @@
         </div>
       `).join('');
     }
+
+    /* ═══════════════════════════════════════
+       SETTINGS FUNCTIONS
+    ═══════════════════════════════════════ */
+
+    // Load settings page with current profile data
+    async function loadSettingsPage() {
+      try {
+        const res = await fetch(API_URL + '/profile', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (data.success && data.user) {
+          document.getElementById('settings_name').value = data.user.name || '';
+          document.getElementById('settings_email').value = data.user.email || '';
+          document.getElementById('settings_phone').value = data.user.phone || '';
+        }
+      } catch(e) {
+        // Pre-fill from localStorage as fallback
+        const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+        document.getElementById('settings_name').value = user.name || '';
+        document.getElementById('settings_email').value = user.email || '';
+        document.getElementById('settings_phone').value = user.phone || '';
+      }
+
+      // Theme toggle state
+      const theme = localStorage.getItem('ss_theme') || 'dark';
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) toggle.classList.toggle('active', theme === 'light');
+
+      // Message privacy state
+      const privacy = localStorage.getItem('ss_msg_privacy') || 'everyone';
+      setMsgPrivacy(privacy, true);
+    }
+
+    // Save profile
+    async function saveProfile() {
+      const name = document.getElementById('settings_name').value.trim();
+      const email = document.getElementById('settings_email').value.trim();
+      const phone = document.getElementById('settings_phone').value.trim();
+      const msgEl = document.getElementById('profileMsg');
+
+      if (!name || name.length < 2) return showSettingsMsg(msgEl, 'error', 'Name must be at least 2 characters');
+      if (!email || !email.includes('@')) return showSettingsMsg(msgEl, 'error', 'Please enter a valid email');
+      if (phone && !/^[0-9]{10}$/.test(phone)) return showSettingsMsg(msgEl, 'error', 'Phone must be 10 digits');
+
+      try {
+        const res = await fetch(API_URL + '/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ name, email, phone: phone || undefined })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSettingsMsg(msgEl, 'success', '✅ Profile updated successfully!');
+          // Update localStorage and UI
+          const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+          user.name = name;
+          user.email = email;
+          user.phone = phone;
+          localStorage.setItem('ss_user', JSON.stringify(user));
+          // Update navbar and profile panel
+          document.getElementById('userName').textContent = name;
+          document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+          document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+          document.getElementById('profileName').textContent = name;
+          document.getElementById('profileEmail').textContent = email;
+        } else {
+          showSettingsMsg(msgEl, 'error', data.message || 'Update failed');
+        }
+      } catch(e) {
+        showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
+      }
+    }
+
+    // Change password
+    async function changePassword() {
+      const current = document.getElementById('settings_current_pwd').value;
+      const newPwd = document.getElementById('settings_new_pwd').value;
+      const confirm = document.getElementById('settings_confirm_pwd').value;
+      const msgEl = document.getElementById('passwordMsg');
+
+      if (!current) return showSettingsMsg(msgEl, 'error', 'Enter your current password');
+      if (newPwd.length < 6) return showSettingsMsg(msgEl, 'error', 'New password must be at least 6 characters');
+      if (newPwd !== confirm) return showSettingsMsg(msgEl, 'error', 'Passwords do not match');
+
+      try {
+        const res = await fetch(API_URL + '/change-password', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getToken()
+          },
+          body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSettingsMsg(msgEl, 'success', '✅ Password changed successfully!');
+          document.getElementById('settings_current_pwd').value = '';
+          document.getElementById('settings_new_pwd').value = '';
+          document.getElementById('settings_confirm_pwd').value = '';
+        } else {
+          showSettingsMsg(msgEl, 'error', data.message || 'Password change failed');
+        }
+      } catch(e) {
+        showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('ss_theme', next);
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) toggle.classList.toggle('active', next === 'light');
+    }
+
+    // Apply saved theme on load
+    (function applyTheme() {
+      const saved = localStorage.getItem('ss_theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      // Also set toggle state if settings page is visible
+      const toggle = document.getElementById('themeToggle');
+      if (toggle) toggle.classList.toggle('active', saved === 'light');
+    })();
+
+    // Message privacy
+    function setMsgPrivacy(value, silent) {
+      document.querySelectorAll('.radio-option[data-privacy]').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.privacy === value);
+      });
+      if (!silent) {
+        localStorage.setItem('ss_msg_privacy', value);
+        if (typeof showToast === 'function') showToast('Privacy updated: ' + value, 'success');
+      }
+    }
+
+    // Show settings message
+    function showSettingsMsg(el, type, text) {
+      if (!el) return;
+      el.className = 'settings-msg ' + type;
+      el.textContent = text;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
   </script>
 
   <!-- Notification Center Drawer -->
@@ -1557,6 +1802,9 @@
       </button>
       <button class="profile-nav-link" data-page="book-service" onclick="navigateTo('book-service')">
         <span class="nav-icon">📝</span> Book a Service
+      </button>
+      <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
+        <span class="nav-icon">⚙️</span> Settings
       </button>
     </div>
     <div class="profile-panel-footer">

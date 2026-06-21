@@ -1335,6 +1335,102 @@ function attachRoutes(app, db, generateUsername, options = {}) {
             }
         );
     });
+
+    /* ═══════════════════ GET PROFILE ═══════════════════ */
+    app.get(paths("/profile"), verifyToken, (req, res) => {
+        db.query(
+            "SELECT id, username, name, email, phone, role, service, location, city, created_at FROM users WHERE id = ?",
+            [req.user.id],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Database error" });
+                if (!results.length) return res.status(404).json({ success: false, message: "User not found" });
+                res.json({ success: true, user: results[0] });
+            }
+        );
+    });
+
+    /* ═══════════════════ UPDATE PROFILE ═══════════════════ */
+    app.put(paths("/profile"), verifyToken, [
+        body("name").optional().isLength({ min: 2, max: 100 }).trim(),
+        body("email").optional().isEmail().normalizeEmail(),
+        body("phone").optional().matches(/^[0-9]{10}$/).withMessage("Phone must be 10 digits"),
+    ], (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
+        const { name, email, phone } = req.body;
+        const updates = [];
+        const values = [];
+
+        if (name) { updates.push("name = ?"); values.push(name.trim()); }
+        if (email) { updates.push("email = ?"); values.push(email.trim().toLowerCase()); }
+        if (phone !== undefined) { updates.push("phone = ?"); values.push(phone || null); }
+
+        if (!updates.length) return res.status(400).json({ success: false, message: "Nothing to update" });
+
+        values.push(req.user.id);
+
+        // Check email uniqueness if email is being changed
+        const checkAndUpdate = () => {
+            db.query(
+                `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
+                values,
+                (err) => {
+                    if (err) {
+                        if (err.code === 'ER_DUP_ENTRY') {
+                            return res.status(409).json({ success: false, message: "Email already in use by another account" });
+                        }
+                        return res.status(500).json({ success: false, message: "Database error" });
+                    }
+                    // Re-fetch updated user
+                    db.query(
+                        "SELECT id, username, name, email, phone, role, service, location, city FROM users WHERE id = ?",
+                        [req.user.id],
+                        (err2, results) => {
+                            if (err2) return res.status(500).json({ success: false });
+                            res.json({ success: true, message: "Profile updated", user: results[0] });
+                        }
+                    );
+                }
+            );
+        };
+
+        checkAndUpdate();
+    });
+
+    /* ═══════════════════ CHANGE PASSWORD ═══════════════════ */
+    app.put(paths("/change-password"), verifyToken, [
+        body("currentPassword").notEmpty().withMessage("Current password is required"),
+        body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters"),
+    ], async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
+        const { currentPassword, newPassword } = req.body;
+
+        try {
+            // Get current password hash
+            const [rows] = await db.promise().query(
+                "SELECT password FROM users WHERE id = ?",
+                [req.user.id]
+            );
+            if (!rows.length) return res.status(404).json({ success: false, message: "User not found" });
+
+            const match = await bcrypt.compare(currentPassword, rows[0].password);
+            if (!match) return res.status(401).json({ success: false, message: "Current password is incorrect" });
+
+            const hash = await bcrypt.hash(newPassword, 10);
+            await db.promise().query(
+                "UPDATE users SET password = ? WHERE id = ?",
+                [hash, req.user.id]
+            );
+
+            res.json({ success: true, message: "Password changed successfully" });
+        } catch (err) {
+            console.error("Change password error:", err);
+            res.status(500).json({ success: false, message: "Server error" });
+        }
+    });
 }
 
 module.exports = { attachRoutes };

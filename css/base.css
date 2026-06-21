@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ServiceSphere â€“ Premium Design System v2.0
    ============================================================ */
 
@@ -39,7 +39,39 @@
   --transition-slow:0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ──────────────── Light Mode ──────────────── */
+[data-theme="light"] {
+  --primary:        #4f46e5;
+  --primary-dark:   #4338ca;
+  --primary-light:  #818cf8;
+  --primary-hover:  #6366f1;
+  --primary-subtle: rgba(79, 70, 229, 0.06);
+  --accent:         #0891b2;
+  --accent-dark:    #0e7490;
+  --success:        #16a34a;
+  --warning:        #d97706;
+  --danger:         #dc2626;
+  --dark:           #f8fafc;
+  --dark-card:      #ffffff;
+  --dark-border:    rgba(0, 0, 0, 0.10);
+  --dark-border-h:  rgba(0, 0, 0, 0.16);
+  --surface-1:      #f1f5f9;
+  --surface-2:      #e2e8f0;
+  --surface-3:      #cbd5e1;
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(0, 0, 0, 0.08);
+  --shadow-sm:      0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:      0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:      0 8px 32px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track { background: #f1f5f9; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #4f46e5, #0891b2); }
+
+/* ──────────────── Reset ──────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
