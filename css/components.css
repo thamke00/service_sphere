@@ -38,6 +38,14 @@
   box-shadow: 0 2px 8px rgba(99,102,241,0.3);
 }
 
+.logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .navbar nav {
   display: flex;
   align-items: center;

@@ -1,341 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login – ServiceSphere</title>
-  <meta name="description" content="Login or register to ServiceSphere as a customer or service provider.">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
-    }
-    .left-panel {
-      background: var(--dark-card);
-      border-right: 1px solid var(--dark-border);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 48px;
-      position: relative;
-      overflow: hidden;
-    }
-    .left-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 30% 20%, rgba(99,102,241,0.08) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .left-panel::after {
-      content: '';
-      position: absolute;
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%);
-      bottom: -80px; right: -80px;
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    .left-panel .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; margin-bottom: 48px; letter-spacing: -0.3px; position: relative; }
-    .left-panel .brand .logo-icon { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-    .left-panel h2 { font-size: 30px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.03em; position: relative; }
-    .left-panel p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 36px; position: relative; }
-    .features { display: flex; flex-direction: column; gap: 14px; position: relative; }
-    .feature { display: flex; align-items: center; gap: 12px; }
-    .feature .fi { width: 36px; height: 36px; background: var(--primary-subtle); border: 1px solid var(--dark-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-    .feature h4 { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
-    .feature span { font-size: 12px; color: var(--text-muted); }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Login – ServiceSphere</title>
+ <meta name="description" content="Login or register to ServiceSphere as a customer or service provider.">
+ <link rel="stylesheet" href="css/style.css">
+ <style>
+ .two-col {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ min-height: 100vh;
+ }
+ .left-panel {
+ background: var(--dark-card);
+ border-right: 1px solid var(--dark-border);
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ padding: 48px;
+ position: relative;
+ overflow: hidden;
+ }
+ .left-panel::before {
+ content: '';
+ position: absolute;
+ inset: 0;
+ background:
+ radial-gradient(ellipse 60% 50% at 30% 20%, rgba(99,102,241,0.08) 0%, transparent 60%);
+ pointer-events: none;
+ }
+ .left-panel::after {
+ content: '';
+ position: absolute;
+ width: 300px; height: 300px;
+ background: radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%);
+ bottom: -80px; right: -80px;
+ border-radius: 50%;
+ pointer-events: none;
+ }
+ .left-panel .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; margin-bottom: 48px; letter-spacing: -0.3px; position: relative; }
+ .left-panel .brand .logo-icon { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+ .left-panel h2 { font-size: 30px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.03em; position: relative; }
+ .left-panel p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 36px; position: relative; }
+ .features { display: flex; flex-direction: column; gap: 14px; position: relative; }
+ .feature { display: flex; align-items: center; gap: 12px; }
+ .feature .fi { width: 36px; height: 36px; background: var(--primary-subtle); border: 1px solid var(--dark-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+ .feature h4 { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+ .feature span { font-size: 12px; color: var(--text-muted); }
 
-    .right-panel { display: flex; align-items: center; justify-content: center; padding: 40px 48px; background: var(--dark); }
+ .right-panel { display: flex; align-items: center; justify-content: center; padding: 40px 48px; background: var(--dark); }
 
-    @media (max-width: 768px) {
-      .two-col { grid-template-columns: 1fr; }
-      .left-panel { display: none; }
-      .right-panel { padding: 40px 20px; min-height: 100vh; }
-    }
+ @media (max-width: 768px) {
+ .two-col { grid-template-columns: 1fr; }
+ .left-panel { display: none; }
+ .right-panel { padding: 40px 20px; min-height: 100vh; }
+ }
 
-    .provider-fields { display: none; }
-    .provider-fields.visible { display: block; }
-  </style>
+ .provider-fields { display: none; }
+ .provider-fields.visible { display: block; }
+ </style>
 </head>
 <body class="auth-page" style="padding:0;">
 
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="two-col">
-  <!-- LEFT: Branding Panel -->
-  <div class="left-panel">
-    <!-- Floating Blobs -->
-    <div class="floating-blob floating-blob--1"></div>
-    <div class="floating-blob floating-blob--2"></div>
-    <div class="floating-blob floating-blob--3"></div>
-    <div class="brand">
-      <div class="logo-icon">⚡</div>
-      ServiceSphere
-    </div>
-    <h2>Your trusted service<br>marketplace</h2>
-    <p>Connect with hundreds of verified professionals ready to help you right now.</p>
-    <div class="features">
-      <div class="feature">
-        <div class="fi">✅</div>
-        <div><h4>Verified Providers</h4><span>All professionals are background-checked</span></div>
-      </div>
-      <div class="feature">
-        <div class="fi">📅</div>
-        <div><h4>Easy Booking</h4><span>Book in minutes, track in real-time</span></div>
-      </div>
-      <div class="feature">
-        <div class="fi">⭐</div>
-        <div><h4>Real Reviews</h4><span>Honest ratings from real customers</span></div>
-      </div>
-      <div class="feature">
-        <div class="fi">🔒</div>
-        <div><h4>Secure & Private</h4><span>Your data is always protected</span></div>
-      </div>
-    </div>
-  </div>
+ <!-- LEFT: Branding Panel -->
+ <div class="left-panel">
+ <!-- Floating Blobs -->
+ <div class="floating-blob floating-blob--1"></div>
+ <div class="floating-blob floating-blob--2"></div>
+ <div class="floating-blob floating-blob--3"></div>
+ <div class="brand">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </div>
+ <h2>Your trusted service<br>marketplace</h2>
+ <p>Connect with hundreds of verified professionals ready to help you right now.</p>
+ <div class="features">
+ <div class="feature">
+ <div class="fi">✅</div>
+ <div><h4>Verified Providers</h4><span>All professionals are background-checked</span></div>
+ </div>
+ <div class="feature">
+ <div class="fi">📅</div>
+ <div><h4>Easy Booking</h4><span>Book in minutes, track in real-time</span></div>
+ </div>
+ <div class="feature">
+ <div class="fi">⭐</div>
+ <div><h4>Real Reviews</h4><span>Honest ratings from real customers</span></div>
+ </div>
+ <div class="feature">
+ <div class="fi">🔒</div>
+ <div><h4>Secure & Private</h4><span>Your data is always protected</span></div>
+ </div>
+ </div>
+ </div>
 
-  <!-- RIGHT: Auth Form -->
-  <div class="right-panel">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <div class="logo-icon">⚡</div>
-        ServiceSphere
-      </div>
+ <!-- RIGHT: Auth Form -->
+ <div class="right-panel">
+ <div class="auth-card">
+ <div class="auth-logo">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </div>
 
-      <!-- Tab: Login / Register -->
-      <div class="auth-tabs" role="tablist" aria-label="Authentication method">
-        <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')" role="tab" aria-selected="true" tabindex="0">Login</div>
-        <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')" role="tab" aria-selected="false" tabindex="0">Register</div>
-      </div>
+ <!-- Tab: Login / Register -->
+ <div class="auth-tabs" role="tablist" aria-label="Authentication method">
+ <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')" role="tab" aria-selected="true" tabindex="0">Login</div>
+ <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')" role="tab" aria-selected="false" tabindex="0">Register</div>
+ </div>
 
-      <!-- ══════ LOGIN FORM ══════ -->
-      <div id="loginForm" role="tabpanel" aria-labelledby="loginTab">
-        <h2>Welcome back 👋</h2>
-        <p class="subtitle">Enter your credentials to access your account</p>
+ <!-- ══════ LOGIN FORM ══════ -->
+ <div id="loginForm" role="tabpanel" aria-labelledby="loginTab">
+ <h2>Welcome back 👋</h2>
+ <p class="subtitle">Enter your credentials to access your account</p>
 
-        <div class="auth-form-group">
-          <label for="l_email">Email Address</label>
-          <input type="email" id="l_email" placeholder="you@example.com" autocomplete="email" aria-required="true">
-          <span class="error-msg" id="l_email_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label for="l_email">Email Address</label>
+ <input type="email" id="l_email" placeholder="you@example.com" autocomplete="email" aria-required="true">
+ <span class="error-msg" id="l_email_err"></span>
+ </div>
 
-        <div class="auth-form-group">
-          <label for="l_password">Password</label>
-          <input type="password" id="l_password" placeholder="••••••••" autocomplete="current-password" aria-required="true">
-          <span class="error-msg" id="l_pass_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label for="l_password">Password</label>
+ <input type="password" id="l_password" placeholder="••••••••" autocomplete="current-password" aria-required="true">
+ <span class="error-msg" id="l_pass_err"></span>
+ </div>
 
-        <button class="btn btn-primary btn-block btn-lg" id="loginBtn" onclick="loginUser()" style="margin-top:8px;">
-          <span id="loginBtnText">Sign In</span>
-          <span id="loginSpinner" class="spinner" style="display:none;"></span>
-        </button>
+ <button class="btn btn-primary btn-block btn-lg" id="loginBtn" onclick="loginUser()" style="margin-top:8px;">
+ <span id="loginBtnText">Sign In</span>
+ <span id="loginSpinner" class="spinner" style="display:none;"></span>
+ </button>
 
-        <div class="auth-divider">or</div>
+ <div class="auth-divider">or</div>
 
-        <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom: 12px;">
-          <span style="color:var(--primary-light); cursor:pointer; font-weight:500;" onclick="showForgotPasswordForm()">🔑 Forgot your password?</span>
-        </p>
+ <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom: 12px;">
+ <span style="color:var(--primary-light); cursor:pointer; font-weight:500;" onclick="showForgotPasswordForm()">🔑 Forgot your password?</span>
+ </p>
 
-        <p style="text-align:center; font-size:14px; color:var(--text-muted);">
-          Don't have an account? 
-          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('register')">Register here</span>
-        </p>
-      </div>
+ <p style="text-align:center; font-size:14px; color:var(--text-muted);">
+ Don't have an account? 
+ <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('register')">Register here</span>
+ </p>
+ </div>
 
-      <!-- ══════ FORGOT PASSWORD FORM ══════ -->
-      <div id="forgotPasswordForm" style="display:none;">
-        <h2>🔑 Reset Password</h2>
+ <!-- ══════ FORGOT PASSWORD FORM ══════ -->
+ <div id="forgotPasswordForm" style="display:none;">
+ <h2>🔑 Reset Password</h2>
 
-        <!-- Step 1: Enter email -->
-        <div id="forgotStep1">
-          <p class="subtitle">Enter the email address linked to your account. We'll generate a reset code.</p>
+ <!-- Step 1: Enter email -->
+ <div id="forgotStep1">
+ <p class="subtitle">Enter the email address linked to your account. We'll generate a reset code.</p>
 
-          <div class="auth-form-group">
-            <label for="forgot_email">Email Address</label>
-            <input type="email" id="forgot_email" placeholder="you@example.com" autocomplete="email">
-          </div>
+ <div class="auth-form-group">
+ <label for="forgot_email">Email Address</label>
+ <input type="email" id="forgot_email" placeholder="you@example.com" autocomplete="email">
+ </div>
 
-          <button class="btn btn-primary btn-block btn-lg" id="forgotSendBtn" onclick="requestPasswordReset()" style="margin-top:8px;">🔑 Send Reset Code</button>
-        </div>
+ <button class="btn btn-primary btn-block btn-lg" id="forgotSendBtn" onclick="requestPasswordReset()" style="margin-top:8px;">🔑 Send Reset Code</button>
+ </div>
 
-        <!-- Step 2: Enter code + new password -->
-        <div id="forgotStep2" style="display:none;">
-          <p class="subtitle">Enter the 6-digit code and choose a new password.</p>
+ <!-- Step 2: Enter code + new password -->
+ <div id="forgotStep2" style="display:none;">
+ <p class="subtitle">Enter the 6-digit code and choose a new password.</p>
 
-          <div class="auth-form-group">
-            <label for="reset_code">Reset Code</label>
-            <input type="text" id="reset_code" placeholder="6-digit code" maxlength="6" inputmode="numeric" style="font-size:20px; letter-spacing:8px; text-align:center; font-weight:700;">
-          </div>
+ <div class="auth-form-group">
+ <label for="reset_code">Reset Code</label>
+ <input type="text" id="reset_code" placeholder="6-digit code" maxlength="6" inputmode="numeric" style="font-size:20px; letter-spacing:8px; text-align:center; font-weight:700;">
+ </div>
 
-          <div class="auth-form-group">
-            <label for="reset_password">New Password</label>
-            <input type="password" id="reset_password" placeholder="Min 6 characters">
-          </div>
+ <div class="auth-form-group">
+ <label for="reset_password">New Password</label>
+ <input type="password" id="reset_password" placeholder="Min 6 characters">
+ </div>
 
-          <div class="auth-form-group">
-            <label for="reset_confirm">Confirm New Password</label>
-            <input type="password" id="reset_confirm" placeholder="Re-enter password">
-          </div>
+ <div class="auth-form-group">
+ <label for="reset_confirm">Confirm New Password</label>
+ <input type="password" id="reset_confirm" placeholder="Re-enter password">
+ </div>
 
-          <button class="btn btn-primary btn-block btn-lg" id="resetSubmitBtn" onclick="submitPasswordReset()" style="margin-top:8px;">✅ Reset Password</button>
-        </div>
+ <button class="btn btn-primary btn-block btn-lg" id="resetSubmitBtn" onclick="submitPasswordReset()" style="margin-top:8px;">✅ Reset Password</button>
+ </div>
 
-        <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
-          Remember your password? 
-          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="hideForgotPasswordForm()">Back to Login</span>
-        </p>
-      </div>
+ <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
+ Remember your password? 
+ <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="hideForgotPasswordForm()">Back to Login</span>
+ </p>
+ </div>
 
-      <!-- ══════ REGISTER FORM ══════ -->
-      <div id="registerForm" style="display:none;" role="tabpanel" aria-labelledby="registerTab">
-        <h2>Create account ✨</h2>
-        <p class="subtitle">Join as a customer or service provider</p>
+ <!-- ══════ REGISTER FORM ══════ -->
+ <div id="registerForm" style="display:none;" role="tabpanel" aria-labelledby="registerTab">
+ <h2>Create account ✨</h2>
+ <p class="subtitle">Join as a customer or service provider</p>
 
-        <!-- Role Selector -->
-        <div class="role-selector" role="radiogroup" aria-label="Account type">
-          <div class="role-option selected" id="role-customer" onclick="selectRole('customer')" role="radio" aria-checked="true" tabindex="0">
-            <div class="icon" aria-hidden="true">👤</div>
-            <div class="name">Customer</div>
-            <div class="desc">Book services</div>
-          </div>
-          <div class="role-option" id="role-provider" onclick="selectRole('provider')" role="radio" aria-checked="false" tabindex="0">
-            <div class="icon" aria-hidden="true">🛠️</div>
-            <div class="name">Provider</div>
-            <div class="desc">Offer services</div>
-          </div>
-        </div>
+ <!-- Role Selector -->
+ <div class="role-selector" role="radiogroup" aria-label="Account type">
+ <div class="role-option selected" id="role-customer" onclick="selectRole('customer')" role="radio" aria-checked="true" tabindex="0">
+ <div class="icon" aria-hidden="true">👤</div>
+ <div class="name">Customer</div>
+ <div class="desc">Book services</div>
+ </div>
+ <div class="role-option" id="role-provider" onclick="selectRole('provider')" role="radio" aria-checked="false" tabindex="0">
+ <div class="icon" aria-hidden="true">🛠️</div>
+ <div class="name">Provider</div>
+ <div class="desc">Offer services</div>
+ </div>
+ </div>
 
-        <input type="hidden" id="r_role" value="customer">
+ <input type="hidden" id="r_role" value="customer">
 
-        <div class="auth-form-group">
-          <label for="r_name">Full Name</label>
-          <input type="text" id="r_name" placeholder="John Doe" aria-required="true">
-          <span class="error-msg" id="r_name_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label for="r_name">Full Name</label>
+ <input type="text" id="r_name" placeholder="John Doe" aria-required="true">
+ <span class="error-msg" id="r_name_err"></span>
+ </div>
 
-        <div class="auth-form-group">
-          <label for="r_email">Email Address</label>
-          <input type="email" id="r_email" placeholder="you@example.com" aria-required="true">
-          <span class="error-msg" id="r_email_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label for="r_email">Email Address</label>
+ <input type="email" id="r_email" placeholder="you@example.com" aria-required="true">
+ <span class="error-msg" id="r_email_err"></span>
+ </div>
 
-        <div class="auth-form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="r_phone" placeholder="+91 98765 43210">
-        </div>
+ <div class="auth-form-group">
+ <label>Phone Number</label>
+ <input type="tel" id="r_phone" placeholder="+91 98765 43210">
+ </div>
 
-        <div class="auth-form-group">
-          <label>Password</label>
-          <input type="password" id="r_password" placeholder="Min 6 characters" oninput="checkPasswordStrength(this.value)">
-          <div class="password-strength"><div class="password-strength-fill" id="passwordStrengthFill"></div></div>
-          <span class="error-msg" id="r_pass_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label>Password</label>
+ <input type="password" id="r_password" placeholder="Min 6 characters" oninput="checkPasswordStrength(this.value)">
+ <div class="password-strength"><div class="password-strength-fill" id="passwordStrengthFill"></div></div>
+ <span class="error-msg" id="r_pass_err"></span>
+ </div>
 
-        <div class="auth-form-group">
-          <label>Confirm Password</label>
-          <input type="password" id="r_confirm" placeholder="Re-enter password">
-          <span class="error-msg" id="r_confirm_err"></span>
-        </div>
+ <div class="auth-form-group">
+ <label>Confirm Password</label>
+ <input type="password" id="r_confirm" placeholder="Re-enter password">
+ <span class="error-msg" id="r_confirm_err"></span>
+ </div>
 
-        <!-- Extra fields for providers -->
-        <div class="provider-fields" id="providerFields">
-          <div class="auth-form-group">
-            <label>Service Category</label>
-            <select id="r_service">
-              <option value="">Select your service</option>
-              <option value="Electrician">Electrician</option>
-              <option value="Plumber">Plumber</option>
-              <option value="Driver">Driver</option>
-              <option value="Maid">Maid / Cleaning</option>
-              <option value="Chef">Chef / Cook</option>
-              <option value="Tutor">Tutor</option>
-              <option value="Carpenter">Carpenter</option>
-              <option value="Painter">Painter</option>
-              <option value="AC Repair">AC Repair</option>
-              <option value="Gardener">Gardener</option>
-              <option value="Pet Care">Pet Care</option>
-              <option value="Security">Security Guard</option>
-            </select>
-          </div>
-          <div class="auth-form-group">
-            <label>Street Address</label>
-            <input type="text" id="r_address" placeholder="House no., street, area">
-            <span class="error-msg" id="r_address_err"></span>
-          </div>
-          <div class="auth-form-group">
-            <label>City</label>
-            <input type="text" id="r_city" placeholder="e.g. Mumbai">
-            <span class="error-msg" id="r_city_err"></span>
-          </div>
-          <div class="auth-form-group">
-            <label>Pincode</label>
-            <input type="text" id="r_pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric">
-            <span class="error-msg" id="r_pincode_err"></span>
-          </div>
-          <div class="auth-form-group">
-            <label>Aadhaar Photo (for verification)</label>
-            <input type="file" id="r_aadhaar" accept="image/*" onchange="handleAadhaarUpload(this)">
-            <span id="aadhaarPreview" style="display:none;font-size:13px;color:var(--success);margin-top:6px;"></span>
-            <span class="error-msg" id="r_aadhaar_err"></span>
-          </div>
-          <input type="hidden" id="r_location">
-        </div>
+ <!-- Extra fields for providers -->
+ <div class="provider-fields" id="providerFields">
+ <div class="auth-form-group">
+ <label>Service Category</label>
+ <select id="r_service">
+ <option value="">Select your service</option>
+ <option value="Electrician">Electrician</option>
+ <option value="Plumber">Plumber</option>
+ <option value="Driver">Driver</option>
+ <option value="Maid">Maid / Cleaning</option>
+ <option value="Chef">Chef / Cook</option>
+ <option value="Tutor">Tutor</option>
+ <option value="Carpenter">Carpenter</option>
+ <option value="Painter">Painter</option>
+ <option value="AC Repair">AC Repair</option>
+ <option value="Gardener">Gardener</option>
+ <option value="Pet Care">Pet Care</option>
+ <option value="Security">Security Guard</option>
+ </select>
+ </div>
+ <div class="auth-form-group">
+ <label>Street Address</label>
+ <input type="text" id="r_address" placeholder="House no., street, area">
+ <span class="error-msg" id="r_address_err"></span>
+ </div>
+ <div class="auth-form-group">
+ <label>City</label>
+ <input type="text" id="r_city" placeholder="e.g. Mumbai">
+ <span class="error-msg" id="r_city_err"></span>
+ </div>
+ <div class="auth-form-group">
+ <label>Pincode</label>
+ <input type="text" id="r_pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric">
+ <span class="error-msg" id="r_pincode_err"></span>
+ </div>
+ <div class="auth-form-group">
+ <label>Aadhaar Photo (for verification)</label>
+ <input type="file" id="r_aadhaar" accept="image/*" onchange="handleAadhaarUpload(this)">
+ <span id="aadhaarPreview" style="display:none;font-size:13px;color:var(--success);margin-top:6px;"></span>
+ <span class="error-msg" id="r_aadhaar_err"></span>
+ </div>
+ <input type="hidden" id="r_location">
+ </div>
 
-        <button class="btn btn-primary btn-block btn-lg" id="registerBtn" onclick="registerUser()" style="margin-top:8px;">
-          <span id="registerBtnText">Create Account</span>
-          <span id="registerSpinner" class="spinner" style="display:none;"></span>
-        </button>
+ <button class="btn btn-primary btn-block btn-lg" id="registerBtn" onclick="registerUser()" style="margin-top:8px;">
+ <span id="registerBtnText">Create Account</span>
+ <span id="registerSpinner" class="spinner" style="display:none;"></span>
+ </button>
 
-        <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
-          Already have an account? 
-          <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('login')">Sign in</span>
-        </p>
-      </div>
+ <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:16px;">
+ Already have an account? 
+ <span style="color:var(--primary-light); cursor:pointer; font-weight:600;" onclick="switchAuthTab('login')">Sign in</span>
+ </p>
+ </div>
 
-    </div>
-  </div>
+ </div>
+ </div>
 </div>
 
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/chatbot.js"></script>
 <script>
-  function switchAuthTab(tab) {
-    // Always hide forgot password form when switching tabs
-    const forgotForm = document.getElementById('forgotPasswordForm');
-    if (forgotForm) forgotForm.style.display = 'none';
+ function switchAuthTab(tab) {
+ // Always hide forgot password form when switching tabs
+ const forgotForm = document.getElementById('forgotPasswordForm');
+ if (forgotForm) forgotForm.style.display = 'none';
 
-    if (tab === 'login') {
-      document.getElementById('loginForm').style.display = 'block';
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('loginTab').classList.add('active');
-      document.getElementById('registerTab').classList.remove('active');
-    } else {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('registerForm').style.display = 'block';
-      document.getElementById('loginTab').classList.remove('active');
-      document.getElementById('registerTab').classList.add('active');
-    }
-  }
+ if (tab === 'login') {
+ document.getElementById('loginForm').style.display = 'block';
+ document.getElementById('registerForm').style.display = 'none';
+ document.getElementById('loginTab').classList.add('active');
+ document.getElementById('registerTab').classList.remove('active');
+ } else {
+ document.getElementById('loginForm').style.display = 'none';
+ document.getElementById('registerForm').style.display = 'block';
+ document.getElementById('loginTab').classList.remove('active');
+ document.getElementById('registerTab').classList.add('active');
+ }
+ }
 
-  function selectRole(role) {
-    document.getElementById('r_role').value = role;
-    document.getElementById('role-customer').classList.toggle('selected', role === 'customer');
-    document.getElementById('role-provider').classList.toggle('selected', role === 'provider');
-    const pf = document.getElementById('providerFields');
-    pf.classList.toggle('visible', role === 'provider');
-  }
+ function selectRole(role) {
+ document.getElementById('r_role').value = role;
+ document.getElementById('role-customer').classList.toggle('selected', role === 'customer');
+ document.getElementById('role-provider').classList.toggle('selected', role === 'provider');
+ const pf = document.getElementById('providerFields');
+ pf.classList.toggle('visible', role === 'provider');
+ }
 
-  // Pre-select from homepage
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('role') === 'provider') {
-    switchAuthTab('register');
-    selectRole('provider');
-  }
+ // Pre-select from homepage
+ const urlParams = new URLSearchParams(window.location.search);
+ if (urlParams.get('role') === 'provider') {
+ switchAuthTab('register');
+ selectRole('provider');
+ }
 </script>
 </body>
 </html>

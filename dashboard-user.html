@@ -283,7 +283,7 @@
  <a href="#" onclick="navigateTo('overview');closeMobileNav();return false;" class="active"> Dashboard</a>
  <a href="#" onclick="navigateTo('bookings');closeMobileNav();return false;"> My Bookings</a>
  <a href="#" onclick="navigateTo('messages');closeMobileNav();return false;"> Messages</a>
- <a href="#" onclick="navigateTo('history');closeMobileNav();return false;">📜 History</a>
+ <a href="#" onclick="navigateTo('history');closeMobileNav();return false;"> History</a>
  <a href="#" onclick="navigateTo('book-service');closeMobileNav();return false;"> Book Service</a>
  <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;"> Settings</a>
  <div class="mobile-nav-actions">
@@ -333,27 +333,22 @@
  <!-- Stats -->
  <div class="dashboard-hero-stats">
  <div class="dashboard-hero-stat">
- <div class="dashboard-hero-stat-icon" style="background:rgba(99,102,241,0.2); color:#818cf8;"></div>
  <div class="dashboard-hero-stat-num" id="totalBookings">0</div>
  <div class="dashboard-hero-stat-lbl">Total Bookings</div>
  </div>
  <div class="dashboard-hero-stat">
- <div class="dashboard-hero-stat-icon" style="background:rgba(245,158,11,0.2); color:#fbbf24;"></div>
  <div class="dashboard-hero-stat-num" id="pendingCnt">0</div>
  <div class="dashboard-hero-stat-lbl">Pending</div>
  </div>
  <div class="dashboard-hero-stat">
- <div class="dashboard-hero-stat-icon" style="background:rgba(56,189,248,0.2); color:#38bdf8;"></div>
  <div class="dashboard-hero-stat-num" id="acceptedCnt">0</div>
  <div class="dashboard-hero-stat-lbl">Accepted</div>
  </div>
  <div class="dashboard-hero-stat">
- <div class="dashboard-hero-stat-icon" style="background:rgba(16,185,129,0.2); color:#10b981;"></div>
  <div class="dashboard-hero-stat-num" id="completedCnt">0</div>
  <div class="dashboard-hero-stat-lbl">Completed</div>
  </div>
  <div class="dashboard-hero-stat">
- <div class="dashboard-hero-stat-icon" style="background:rgba(239,68,68,0.2); color:#ef4444;"></div>
  <div class="dashboard-hero-stat-num" id="cancelledCnt">0</div>
  <div class="dashboard-hero-stat-lbl">Cancelled</div>
  </div>
@@ -540,7 +535,7 @@
 
  <!-- ══════ PAGE: History (standalone) ══════ -->
  <div class="dashboard-page" id="page-history">
- <div class="section-title">📜 Booking History</div>
+ <div class="section-title"> Booking History</div>
  <div id="bookingHistoryListFull"></div>
  </div>
 
@@ -1574,7 +1569,7 @@
  if (!bookings.length) {
  container.innerHTML = `
  <div class="empty-state">
- <div class="icon">📜</div>
+ <div class="icon"></div>
  <h4>No past bookings</h4>
  <p>Your completed and cancelled bookings will appear here.</p>
  </div>`;
@@ -1808,26 +1803,26 @@
  </div>
  <div class="profile-panel-nav">
  <button class="profile-nav-link active" data-page="overview" onclick="navigateTo('overview')">
- <span class="nav-icon"></span> Dashboard
+ Dashboard
  </button>
  <button class="profile-nav-link" data-page="bookings" onclick="navigateTo('bookings')">
- <span class="nav-icon"></span> My Bookings
+ My Bookings
  </button>
  <button class="profile-nav-link" data-page="messages" onclick="navigateTo('messages')">
- <span class="nav-icon"></span> Messages
+ Messages
  </button>
  <button class="profile-nav-link" data-page="history" onclick="navigateTo('history')">
- <span class="nav-icon">📜</span> Booking History
+ <span class="nav-icon"></span> Booking History
  </button>
  <button class="profile-nav-link" data-page="notifications" onclick="navigateTo('notifications')">
- <span class="nav-icon"></span> Notifications
+ Notifications
  <span class="nav-badge notif-badge-count" style="display:none;">0</span>
  </button>
  <button class="profile-nav-link" data-page="book-service" onclick="navigateTo('book-service')">
- <span class="nav-icon"></span> Book a Service
+ Book a Service
  </button>
  <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
- <span class="nav-icon"></span> Settings
+ Settings
  </button>
  </div>
  <div class="profile-panel-footer">

@@ -1,4 +1,4 @@
-﻿/* Responsive Media Queries */
+/* Responsive Media Queries */
 
 /* ============================================================
    RESPONSIVE
@@ -34,6 +34,55 @@
   .category-card .icon { font-size: 24px; margin-bottom: 6px; }
   .category-card h3 { font-size: 11px; }
   .category-card span { display: none; }
+
+  /* Dashboard mobile */
+  .navbar { padding: 0 12px; gap: 8px; }
+  .navbar-brand { font-size: 14px; gap: 6px; }
+  .logo-img { width: 26px; height: 26px; }
+  .navbar-actions { display: flex !important; gap: 4px; }
+  .navbar-profile-btn { padding: 4px 6px; gap: 4px; }
+  .notif-bell { font-size: 16px; width: 32px; height: 32px; }
+
+  .dashboard-layout { padding: 16px 12px; }
+  .dashboard-hero { padding: 20px 16px; border-radius: 12px; }
+  .dashboard-hero-title { font-size: 18px; }
+  .dashboard-hero-sub { font-size: 12px; }
+  .dashboard-hero-actions { flex-wrap: wrap; gap: 8px; }
+  .dashboard-hero-actions .btn { font-size: 12px; padding: 8px 14px; }
+  .dashboard-hero-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .dashboard-hero-stat { padding: 10px 8px; }
+  .dashboard-hero-stat-num { font-size: 18px; }
+  .dashboard-hero-stat-lbl { font-size: 10px; }
+
+  .providers-grid { grid-template-columns: 1fr; gap: 12px; }
+  .provider-card { padding: 16px; }
+
+  .section-title { font-size: 16px; margin-bottom: 12px; }
+
+  .profile-panel { width: 85vw; max-width: 300px; }
+  .notif-drawer { width: 90vw; max-width: 360px; }
+  .chat-drawer { width: 90vw; max-width: 360px; }
+
+  .settings-grid { gap: 16px; }
+  .settings-card { padding: 16px; }
+
+  .tab-bar { flex-wrap: wrap; gap: 4px; }
+  .tab-btn { font-size: 11px; padding: 6px 10px; }
+
+  .booking-card { padding: 14px; }
+  .booking-card-actions { flex-wrap: wrap; gap: 6px; }
+
+  .stat-card { padding: 14px; }
+  .stat-card .num { font-size: 20px; }
+
+  .search-box { flex-direction: column; gap: 8px; border-radius: 12px; }
+  .search-box input { max-width: 100% !important; }
+
+  footer { padding: 24px 16px; }
+  .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+  .footer-links { justify-content: center; }
+
+  .pro-gallery-card { min-width: 260px; }
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Section Reveal Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
