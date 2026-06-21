@@ -253,10 +253,10 @@
     </button>
     <div class="navbar-search" id="navbarSearch">
       <span class="navbar-search-icon">🔍</span>
-      <input type="text" id="navSearchInput" placeholder="Search providers, services, cities..." oninput="debounceProviderSearch(this.value)">
-      <select class="navbar-search-location" id="navLocationFilter" onchange="applyProviderFilters()">
-        <option value="">📍 All Locations</option>
-      </select>
+      <input type="text" id="navSearchInput" placeholder="Search providers, services..." oninput="debounceProviderSearch(this.value)">
+      <span class="navbar-search-divider"></span>
+      <span class="navbar-search-icon">📍</span>
+      <input type="text" id="navLocationInput" placeholder="City" oninput="debounceProviderSearch(this.value)" autocomplete="off">
     </div>
     <div class="navbar-actions">
       <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
@@ -360,11 +360,8 @@
       </div>
     </div>
 
-    <!-- ── Search & Filter Bar ── -->
-    <div class="search-filter-bar" id="providerSearchFilter" style="margin-bottom:20px;">
-      <div class="search-input-wrap">
-        <input type="text" id="providerSearchInput" placeholder="Search providers by name, service, or city..." oninput="debounceProviderSearch(this.value)">
-      </div>
+    <!-- Sort selector (compact, no duplicate search) -->
+    <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
       <select class="filter-select" id="sortSelect" onchange="applyProviderFilters()">
         <option value="rating">⭐ Top Rated</option>
         <option value="price_low">💰 Price: Low → High</option>
@@ -1207,10 +1204,9 @@
     }
 
     function applyProviderFilters() {
-      // Read from navbar search bar (primary) OR old inline search (fallback)
-      const q = (document.getElementById('navSearchInput')?.value || document.getElementById('providerSearchInput')?.value || '').trim();
+      const q = (document.getElementById('navSearchInput')?.value || '').trim();
       const sort = document.getElementById('sortSelect')?.value || 'rating';
-      const city = document.getElementById('navLocationFilter')?.value || '';
+      const city = (document.getElementById('navLocationInput')?.value || '').trim();
       const activeFilter = document.querySelector('#dashboardProviderFilterBar .tab-btn.active')?.textContent?.trim();
       const service = (activeFilter && activeFilter !== 'All') ? activeFilter : '';
 
@@ -1230,6 +1226,8 @@
         .then(data => {
           if (!data.success || !data.providers?.length) {
             container.innerHTML = '<div class="loader-box">No providers match your search. Try different filters.</div>';
+            // Still scroll to show the empty message
+            scrollToProviders();
             return;
           }
           container.innerHTML = data.providers.slice(0, 12).map(p => `
@@ -1249,28 +1247,18 @@
               <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
             </div>
           `).join('');
+          // Scroll to providers section so user sees results immediately
+          scrollToProviders();
         })
         .catch(() => {});
     }
 
-    // Populate location dropdown
-    async function populateLocationDropdown() {
-      try {
-        const res = await fetch(API_URL + '/provider-cities');
-        const data = await res.json();
-        if (data.success && data.cities?.length) {
-          const sel = document.getElementById('navLocationFilter');
-          if (!sel) return;
-          data.cities.forEach(city => {
-            const opt = document.createElement('option');
-            opt.value = city;
-            opt.textContent = '📍 ' + city;
-            sel.appendChild(opt);
-          });
-        }
-      } catch(e) { /* silent */ }
+    function scrollToProviders() {
+      const section = document.getElementById('recommendedProvidersSection');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
-    populateLocationDropdown();
 
     /* ═══════════════════════════════════════
        CUSTOMER STATS & LOYALTY POINTS

@@ -824,8 +824,8 @@ function attachRoutes(app, db, generateUsername, options = {}) {
             params.push(like, like, like);
         }
         if (city) {
-            sql += ` AND LOWER(TRIM(u.city)) = LOWER(TRIM(?))`;
-            params.push(city);
+            sql += ` AND LOWER(u.city) LIKE ?`;
+            params.push('%' + city.toLowerCase().trim() + '%');
         }
         if (rating_min) {
             sql += ` AND COALESCE(rv.avg_rating, 0) >= ?`;

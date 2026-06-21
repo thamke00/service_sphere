@@ -1650,21 +1650,15 @@
   color: var(--text-muted);
   font-size: 13px;
 }
-.navbar-search-location {
-  background: var(--surface-2);
-  border: 1px solid var(--dark-border);
-  border-radius: 99px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-family: inherit;
-  padding: 4px 10px;
-  cursor: pointer;
-  outline: none;
+.navbar-search-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--dark-border);
   flex-shrink: 0;
-  max-width: 140px;
 }
-.navbar-search-location:focus {
-  border-color: var(--primary);
+.navbar-search input:last-of-type {
+  max-width: 120px;
+  flex: 0 1 120px;
 }
 
 @media (max-width: 768px) {
