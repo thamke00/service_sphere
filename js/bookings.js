@@ -243,7 +243,7 @@ async function renderBookings(filter = 'all') {
  <div>
  <h3>${serviceIcon(b.service)} ${escapeHtml(b.service)}</h3>
  <div class="meta">👤 ${escapeHtml(b.provider || 'Any Available Provider')}${b.provider_id ? ' <span style="color:var(--primary-light);font-size:11px;">(@' + escapeHtml(b.provider_username || 'provider') + ')</span>' : ''}</div>
- <div class="meta">📅 ${formatDate(b.booking_date)} at ${formatTime(b.booking_time)}</div>
+ <div class="meta"> ${formatDate(b.booking_date)} at ${formatTime(b.booking_time)}</div>
  <div class="meta"> ${escapeHtml(b.address)}</div>
  ${b.notes ? `<div class="meta"> ${escapeHtml(b.notes)}</div>` : ''}
  <div class="meta" style="margin-top: 8px;">
@@ -257,9 +257,9 @@ async function renderBookings(filter = 'all') {
  ${renderBookingTracker(status)}
  <div class="actions">
  ${status !== 'Cancelled' ? `<button class="btn btn-ghost btn-sm" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'})"> Message</button>` : ''}
- ${canCancel ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')">📅 Reschedule</button>` : ''}
+ ${canCancel ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')"> Reschedule</button>` : ''}
  ${canReview ? `<button class="btn btn-review btn-sm" onclick="openReviewModal(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}')"> Leave Review</button>` : ''}
- ${status === 'Completed' ? `<button class="btn btn-ghost btn-sm" onclick="rebookBooking(${b.id})">🔄 Rebook</button>` : ''}
+ ${status === 'Completed' ? `<button class="btn btn-ghost btn-sm" onclick="rebookBooking(${b.id})"> Rebook</button>` : ''}
  ${canPay ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal(${b.id}, ${parseFloat(b.amount) || 499})"> Pay Now</button>` : ''}
  ${isPaid ? `<span class="badge badge-completed" style="padding:6px 12px;"> Paid</span>` : ''}
  ${canCancel ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ''}
@@ -360,7 +360,7 @@ async function renderProviderBookings(filter = 'all') {
  <div>
  <h3>${serviceIcon(b.service)} ${escapeHtml(b.service)}</h3>
  <div class="meta">👤 Customer: <strong>${escapeHtml(b.customer_name)}</strong></div>
- <div class="meta">📅 ${formatDate(b.booking_date)} at ${formatTime(b.booking_time)}</div>
+ <div class="meta"> ${formatDate(b.booking_date)} at ${formatTime(b.booking_time)}</div>
  <div class="meta"> ${escapeHtml(b.address)}</div>
  ${b.notes ? `<div class="meta"> ${escapeHtml(b.notes)}</div>` : ''}
  <div class="meta" style="margin-top: 8px;">
@@ -373,7 +373,7 @@ async function renderProviderBookings(filter = 'all') {
  ${renderBookingTracker(status)}
  <div class="actions">
  ${status !== 'Cancelled' ? `<button class="btn btn-ghost btn-sm" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.customer_name || 'Customer').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}')"> Message</button>` : ''}
- ${(status === 'Pending' || status === 'Accepted') ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')">📅 Reschedule</button>` : ''}
+ ${(status === 'Pending' || status === 'Accepted') ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')"> Reschedule</button>` : ''}
  ${status === 'Pending' ? `
  <button class="btn btn-success btn-sm" onclick="updateBookingStatus(${b.id}, 'Accepted')"> Accept</button>
  <button class="btn btn-danger btn-sm" onclick="updateBookingStatus(${b.id}, 'Cancelled')"> Decline</button>
@@ -470,7 +470,7 @@ async function submitReschedule() {
  showToast(data.message || 'Reschedule failed', 'error');
  return;
  }
- showToast('Booking rescheduled successfully! 📅', 'success');
+ showToast('Booking rescheduled successfully! ', 'success');
  closeRescheduleModal();
  if (typeof renderProviderBookings === 'function' && document.getElementById('providerBookingsList')) {
  await renderProviderBookings(_providerBookingsFilter);
@@ -598,7 +598,7 @@ async function rebookBooking(bookingId) {
  });
  const data = await res.json();
  if (data.success) {
- showToast('Rebooked for tomorrow! 🔄', 'success');
+ showToast('Rebooked for tomorrow! ', 'success');
  await fetchBookingsFromAPI();
  renderBookings('all');
  } else {

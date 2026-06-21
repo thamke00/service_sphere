@@ -83,12 +83,12 @@ function formatTime(timeStr) {
 
 function serviceIcon(service) {
   const icons = {
-    Electrician: '⚡', Plumber: '🔧', Driver: '🚗',
-    Maid: '🏠', Chef: '👨‍🍳', Tutor: '📚',
-    Carpenter: '🪚', Painter: '🎨', 'AC Repair': '❄️',
-    Gardener: '🌿', 'Pet Care': '🐾', Security: '🛡️'
+    Electrician: 'E', Plumber: 'P', Driver: 'D',
+    Maid: 'M', Chef: 'C', Tutor: 'T',
+    Carpenter: 'Cp', Painter: 'Pt', 'AC Repair': 'AC',
+    Gardener: 'G', 'Pet Care': 'PC', Security: 'S'
   };
-  return icons[service] || '🔨';
+  return icons[service] || service?.charAt(0) || '?';
 }
 
 function escapeHtml(str) {

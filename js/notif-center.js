@@ -152,10 +152,10 @@ function updateNotifBadge() {
 /* ── Icon map ── */
 function notifIcon(type) {
  const map = {
- booking: '📅', payment: '', message: '',
- reschedule: '🔄', system: '', status: ''
+ booking: 'B', payment: 'P', message: 'M',
+ reschedule: 'R', system: 'S', status: 'St'
  };
- return map[type] || '';
+ return map[type] || 'N';
 }
 
 /* ── Time ago helper ── */

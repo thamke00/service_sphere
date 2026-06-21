@@ -1225,11 +1225,13 @@
 }
 
 .notif-item-icon {
-  font-size: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
   flex-shrink: 0;
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--surface-2);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   border-radius: 10px;
 }
 .notif-item-body { flex: 1; min-width: 0; }
@@ -1375,10 +1377,13 @@
 .history-card-icon {
   width: 40px; height: 40px;
   border-radius: 10px;
-  background: var(--surface-3);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
   flex-shrink: 0;
+  letter-spacing: -0.5px;
 }
 .history-card-info { flex: 1; }
 .history-card-title {
