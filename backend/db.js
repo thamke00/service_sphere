@@ -43,6 +43,10 @@ const db = mysql.createPool(poolConfig);
 // Handle pool-level errors (e.g. sudden disconnect) without crashing the server
 db.on("error", (err) => {
     console.error("❌ Database pool error:", err.code, err.message);
+    // These are recoverable — pool will create new connections automatically
+    if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET' || err.code === 'EPIPE') {
+        console.log("🔄 Connection lost, pool will auto-reconnect on next query.");
+    }
 });
 
 // ── Keep-alive: ping every 4 minutes (Aiven cuts idle at ~8 min) ──

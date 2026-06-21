@@ -20,7 +20,7 @@
     "mysql2": "^3.17.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": "18.x"
   },
   "keywords": [],
   "author": "",
