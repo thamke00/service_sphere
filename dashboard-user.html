@@ -251,7 +251,13 @@
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
-    <nav id="mainNav" aria-label="Dashboard navigation" style="display:none;"></nav>
+    <div class="navbar-search" id="navbarSearch">
+      <span class="navbar-search-icon">🔍</span>
+      <input type="text" id="navSearchInput" placeholder="Search providers, services, cities..." oninput="debounceProviderSearch(this.value)">
+      <select class="navbar-search-location" id="navLocationFilter" onchange="applyProviderFilters()">
+        <option value="">📍 All Locations</option>
+      </select>
+    </div>
     <div class="navbar-actions">
       <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
         🔔
@@ -1193,21 +1199,31 @@
     let _searchDebounce = null;
     function debounceProviderSearch(q) {
       clearTimeout(_searchDebounce);
-      _searchDebounce = setTimeout(() => applyProviderFilters(), 300);
+      _searchDebounce = setTimeout(() => {
+        // Auto-navigate to overview so results are visible
+        if (_currentPage !== 'overview') navigateTo('overview');
+        applyProviderFilters();
+      }, 300);
     }
 
     function applyProviderFilters() {
-      const q = (document.getElementById('providerSearchInput')?.value || '').trim();
+      // Read from navbar search bar (primary) OR old inline search (fallback)
+      const q = (document.getElementById('navSearchInput')?.value || document.getElementById('providerSearchInput')?.value || '').trim();
       const sort = document.getElementById('sortSelect')?.value || 'rating';
+      const city = document.getElementById('navLocationFilter')?.value || '';
       const activeFilter = document.querySelector('#dashboardProviderFilterBar .tab-btn.active')?.textContent?.trim();
       const service = (activeFilter && activeFilter !== 'All') ? activeFilter : '';
 
       let url = API_URL + '/providers?sort=' + encodeURIComponent(sort);
       if (service) url += '&service=' + encodeURIComponent(service);
       if (q) url += '&q=' + encodeURIComponent(q);
+      if (city) url += '&city=' + encodeURIComponent(city);
 
       const container = document.getElementById('recommendedProvidersList');
       if (!container) return;
+
+      // If not on overview, switch
+      if (_currentPage !== 'overview') navigateTo('overview');
 
       fetch(url)
         .then(r => r.json())
@@ -1236,6 +1252,25 @@
         })
         .catch(() => {});
     }
+
+    // Populate location dropdown
+    async function populateLocationDropdown() {
+      try {
+        const res = await fetch(API_URL + '/provider-cities');
+        const data = await res.json();
+        if (data.success && data.cities?.length) {
+          const sel = document.getElementById('navLocationFilter');
+          if (!sel) return;
+          data.cities.forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            opt.textContent = '📍 ' + city;
+            sel.appendChild(opt);
+          });
+        }
+      } catch(e) { /* silent */ }
+    }
+    populateLocationDropdown();
 
     /* ═══════════════════════════════════════
        CUSTOMER STATS & LOYALTY POINTS

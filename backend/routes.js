@@ -852,6 +852,20 @@ function attachRoutes(app, db, generateUsername, options = {}) {
         });
     });
 
+    /* ═══════════════════ PROVIDER CITIES (for location filter) ═══════════════════ */
+    app.get(paths("/provider-cities"), (req, res) => {
+        db.query(
+            `SELECT DISTINCT TRIM(city) as city FROM users 
+             WHERE role = 'provider' AND verification_status = 'approved' 
+             AND city IS NOT NULL AND TRIM(city) != '' 
+             ORDER BY city ASC`,
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false });
+                res.json({ success: true, cities: results.map(r => r.city) });
+            }
+        );
+    });
+
     /* ═══════════════════ SINGLE PROVIDER ═══════════════════ */
     app.get(paths("/provider/:identifier"), (req, res) => {
         const { identifier } = req.params;
