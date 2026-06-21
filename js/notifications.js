@@ -2,7 +2,8 @@
    ServiceSphere – Notification Polling Module
    Shared polling for booking/payment/message notifications.
    Used by both provider and customer dashboards.
-   Depends on: utils.js, auth.js, chat.js (_playChatNotifSound)
+   Depends on: utils.js, auth.js, chat.js (_playChatNotifSound),
+               notif-center.js (addNotification)
    ============================================================ */
 
 let _notifPollState = {
@@ -25,6 +26,14 @@ function startNotificationPolling(opts) {
   const { role, bookingsEndpoint, onRefresh, interval = 10000 } = opts;
   const isProvider = role === 'provider';
   const st = _notifPollState;
+
+  // Helper to send toast + store in notification center
+  function notify(msg, toastType, notifType, meta) {
+    if (typeof addNotification === 'function') {
+      addNotification(notifType || 'system', msg, '', meta || {});
+    }
+    showToast(msg, toastType);
+  }
 
   async function poll() {
     try {
@@ -49,13 +58,13 @@ function startNotificationPolling(opts) {
         if (isProvider) {
           if (currentCount > st.prevBookingCount) {
             const diff = currentCount - st.prevBookingCount;
-            showToast(`🔔 ${diff} new booking request${diff > 1 ? 's' : ''}!`, 'info');
+            notify(`🔔 ${diff} new booking request${diff > 1 ? 's' : ''}!`, 'info', 'booking');
             _playChatNotifSound();
             if (onRefresh) onRefresh();
           }
           if (currentPaid > st.prevPaidCount) {
             const diff = currentPaid - st.prevPaidCount;
-            showToast(`💰 Payment received for ${diff} booking${diff > 1 ? 's' : ''}!`, 'success');
+            notify(`💰 Payment received for ${diff} booking${diff > 1 ? 's' : ''}!`, 'success', 'payment');
             _playChatNotifSound();
             if (onRefresh) onRefresh();
           }
@@ -63,20 +72,43 @@ function startNotificationPolling(opts) {
           for (const b of bookings) {
             const prev = st.prevBookingStates[b.id];
             if (prev) {
+              // Status change detection
               if (prev.status !== b.status) {
                 if (b.status === 'Accepted') {
-                  showToast(`✅ Your booking #${b.id} (${b.service}) was accepted!`, 'success');
+                  notify(`✅ Your booking #${b.id} (${b.service}) was accepted!`, 'success', 'status', { bookingId: b.id, service: b.service });
+                  _playChatNotifSound();
+                } else if (b.status === 'In Progress') {
+                  notify(`🔧 Your booking #${b.id} (${b.service}) — work has started!`, 'info', 'status', { bookingId: b.id, service: b.service });
                   _playChatNotifSound();
                 } else if (b.status === 'Completed') {
-                  showToast(`🎉 Your booking #${b.id} (${b.service}) is completed! Don't forget to pay.`, 'success');
+                  notify(`🎉 Your booking #${b.id} (${b.service}) is completed! Don't forget to pay.`, 'success', 'status', { bookingId: b.id, service: b.service });
                   _playChatNotifSound();
                 } else if (b.status === 'Cancelled' && prev.status !== 'Cancelled') {
-                  showToast(`❌ Your booking #${b.id} (${b.service}) was cancelled by the provider.`, 'error');
+                  notify(`❌ Your booking #${b.id} (${b.service}) was cancelled by the provider.`, 'error', 'status', { bookingId: b.id, service: b.service });
                 }
                 if (onRefresh) onRefresh();
               }
+
+              // Reschedule detection — date or time changed
+              const bDate = (b.booking_date || '').substring(0, 10);
+              const prevDate = (prev.booking_date || '').substring(0, 10);
+              const bTime = (b.booking_time || '').substring(0, 5);
+              const prevTime = (prev.booking_time || '').substring(0, 5);
+              if (bDate !== prevDate || bTime !== prevTime) {
+                const formattedDate = typeof formatDate === 'function' ? formatDate(b.booking_date) : bDate;
+                const formattedTime = typeof formatTime === 'function' ? formatTime(b.booking_time) : bTime;
+                notify(
+                  `🔄 Booking #${b.id} (${b.service}) was rescheduled to ${formattedDate} at ${formattedTime}`,
+                  'info', 'reschedule',
+                  { bookingId: b.id, service: b.service, newDate: bDate, newTime: bTime }
+                );
+                _playChatNotifSound();
+                if (onRefresh) onRefresh();
+              }
+
+              // Payment status change
               if (prev.payment_status !== b.payment_status && b.payment_status === 'Paid' && prev.payment_status !== 'Paid') {
-                showToast(`💳 Payment confirmed for booking #${b.id}!`, 'success');
+                notify(`💳 Payment confirmed for booking #${b.id}!`, 'success', 'payment', { bookingId: b.id });
                 _playChatNotifSound();
                 if (onRefresh) onRefresh();
               }
@@ -85,9 +117,14 @@ function startNotificationPolling(opts) {
         }
       }
 
-      // Baseline booking states
+      // Baseline booking states — now includes date/time for reschedule detection
       for (const b of bookings) {
-        st.prevBookingStates[b.id] = { status: b.status, payment_status: b.payment_status };
+        st.prevBookingStates[b.id] = {
+          status: b.status,
+          payment_status: b.payment_status,
+          booking_date: b.booking_date || '',
+          booking_time: b.booking_time || ''
+        };
       }
 
       // Check for new messages on each active booking
@@ -114,7 +151,7 @@ function startNotificationPolling(opts) {
                 if (incoming.length > 0) {
                   const senderName = incoming[0].sender_name || (isProvider ? 'Customer' : 'Provider');
                   const label = isProvider ? ` on booking #${b.id}` : '';
-                  showToast(`💬 New message from ${senderName}${label}`, 'info');
+                  notify(`💬 New message from ${senderName}${label}`, 'info', 'message', { bookingId: b.id, senderName });
                   _playChatNotifSound();
                 }
               }

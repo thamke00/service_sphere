@@ -60,6 +60,14 @@ attachRoutes(app, db, generateUsername, {
     routePrefixes: [""]
 });
 
+/* ================= GLOBAL ERROR HANDLERS ================= */
+process.on('uncaughtException', (err) => {
+    console.error('⚠️ Uncaught Exception (server stays alive):', err.message);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('⚠️ Unhandled Rejection (server stays alive):', reason);
+});
+
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

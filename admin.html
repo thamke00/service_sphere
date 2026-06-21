@@ -74,6 +74,14 @@
         <div class="icon-box" style="background:rgba(245,158,11,0.15);">📅</div>
         <div><div class="num" id="statBookings">0</div><div class="lbl">Active Bookings</div></div>
       </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(16,185,129,0.15);">💰</div>
+        <div><div class="num" id="statGMV">₹0</div><div class="lbl">Total GMV</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-box" style="background:rgba(139,92,246,0.15);">📈</div>
+        <div><div class="num" id="statRevenue">₹0</div><div class="lbl">Platform Revenue</div></div>
+      </div>
     </div>
 
     <div class="section-title">⏳ Pending Providers</div>
@@ -146,6 +154,10 @@
         document.getElementById('statCustomers').textContent = data.stats.customers;
         document.getElementById('statProviders').textContent = data.stats.providers;
         document.getElementById('statBookings').textContent = data.stats.activeBookings;
+        const gmvEl = document.getElementById('statGMV');
+        const revEl = document.getElementById('statRevenue');
+        if (gmvEl) gmvEl.textContent = '₹' + (data.stats.totalGMV || 0).toLocaleString('en-IN');
+        if (revEl) revEl.textContent = '₹' + (data.stats.totalRevenue || 0).toLocaleString('en-IN');
       }
     } catch (e) { /* ignore */ }
   }

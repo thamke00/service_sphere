@@ -16,6 +16,14 @@ function providerRatingHtml(p) {
   return '<div class="provider-rating provider-rating--new"><span class="provider-rating-text">✨ New</span></div>';
 }
 
+/* ── Provider stats helper (completed jobs, etc.) ── */
+function providerStatsHtml(p) {
+  let chips = '';
+  const jobs = parseInt(p.completed_jobs) || 0;
+  if (jobs > 0) chips += `<span class="provider-stat-chip">📋 ${jobs} job${jobs !== 1 ? 's' : ''} done</span>`;
+  return chips ? `<div class="provider-stats">${chips}</div>` : '';
+}
+
 /* ── Provider price line helper ── */
 function providerPriceHtml(p) {
   const price = parseFloat(p.service_price);
@@ -67,6 +75,7 @@ async function loadFeaturedProviders(serviceFilter) {
         <div class="provider-detail">📍 ${escapeHtml(p.city || p.location || 'India')}${p.pincode ? ' · ' + escapeHtml(p.pincode) : ''}</div>
         ${providerPriceHtml(p)}
         ${providerRatingHtml(p)}
+        ${providerStatsHtml(p)}
         <div class="provider-badge">✓ Verified</div>
         <button class="btn btn-primary btn-block" onclick="bookProvider('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
       </div>
@@ -150,6 +159,7 @@ async function loadDashboardProviders(serviceFilter) {
         <div class="provider-detail">📍 ${escapeHtml(p.city || p.location || 'India')}${p.pincode ? ' · ' + escapeHtml(p.pincode) : ''}</div>
         ${providerPriceHtml(p)}
         ${providerRatingHtml(p)}
+        ${providerStatsHtml(p)}
         <div class="provider-badge">✓ Verified</div>
         <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
       </div>

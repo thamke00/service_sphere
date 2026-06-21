@@ -9,6 +9,20 @@ let chatPollInterval = null;
 let _lastMessageCount = 0;
 let _chatNotifiedIds = new Set();
 
+/**
+ * Detect which dashboard we're on from the page URL.
+ * This is MORE RELIABLE than reading localStorage (which can be
+ * overwritten by another tab's login).
+ */
+function _getPageRole() {
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('dashboard-provider')) return 'provider';
+  if (path.includes('dashboard-user')) return 'customer';
+  // Fallback to localStorage
+  const u = typeof getUser === 'function' ? getUser() : null;
+  return u?.role || 'customer';
+}
+
 async function openChatDrawer(bookingId, partnerName, service, providerId) {
   activeChatBookingId = bookingId;
   _lastMessageCount = 0;
@@ -16,8 +30,7 @@ async function openChatDrawer(bookingId, partnerName, service, providerId) {
   const drawer = document.getElementById('chatDrawer');
   if (!drawer) return;
 
-  const currentUser = getUser();
-  const myRole = currentUser?.role || 'customer';
+  const myRole = _getPageRole();
   drawer.classList.remove('chat-role-customer', 'chat-role-provider');
   drawer.classList.add(myRole === 'provider' ? 'chat-role-provider' : 'chat-role-customer');
 
@@ -61,8 +74,8 @@ function closeChatDrawer() {
 async function loadChatMessages(isInitialLoad) {
   if (!activeChatBookingId) return;
   const box = document.getElementById('chatMessages');
-  const user = getUser();
-  if (!box || !user) return;
+  const user = typeof getUser === 'function' ? getUser() : null;
+  if (!box) return;
 
   try {
     const res = await apiFetch(API_URL + '/chats/' + activeChatBookingId, {
@@ -80,8 +93,39 @@ async function loadChatMessages(isInitialLoad) {
       return;
     }
 
-    // Use the server-provided current_user_id (from verified JWT — most reliable source)
-    const myIdNum = Number(data.current_user_id);
+    // ── Determine "my" user ID reliably ──
+    // 1. Server's current_user_id (from JWT — most reliable if token is correct)
+    let myIdNum = Number(data.current_user_id);
+
+    // 2. Cross-check: which dashboard page are we on?
+    //    If we're on the customer dashboard, we should be the booking's customer.
+    //    If we're on the provider dashboard, we should be the booking's provider.
+    const pageRole = _getPageRole();
+    if (data.messages.length > 0) {
+      const firstMsg = data.messages[0];
+      // The server JOIN gives us sender_role for each message.
+      // We can also use the booking's customer_id if available.
+      // For extra safety, log mismatch:
+      console.log('[Chat Debug] server current_user_id:', data.current_user_id,
+        '| resolved myIdNum:', myIdNum,
+        '| pageRole:', pageRole,
+        '| localStorage user.id:', user?.id,
+        '| localStorage user.role:', user?.role);
+    }
+
+    // 3. Fallback if server didn't return current_user_id
+    if (!myIdNum || isNaN(myIdNum)) {
+      try {
+        const token = getToken();
+        if (token && token.includes('.')) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          myIdNum = Number(payload.id);
+        }
+      } catch(e) {}
+    }
+    if (!myIdNum || isNaN(myIdNum)) {
+      myIdNum = Number(user?.id);
+    }
 
     if (!isInitialLoad && data.messages.length > _lastMessageCount) {
       const newMessages = data.messages.slice(_lastMessageCount);
@@ -97,7 +141,7 @@ async function loadChatMessages(isInitialLoad) {
     }
     _lastMessageCount = data.messages.length;
 
-    const myRole = user.role || 'customer';
+    const myRole = pageRole;
     box.innerHTML = data.messages.map(m => {
       const isMine = Number(m.sender_id) === myIdNum;
       const msgClass = isMine ? 'outgoing' : 'incoming';

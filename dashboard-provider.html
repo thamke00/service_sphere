@@ -83,10 +83,16 @@
       <a href="#bookings">Bookings</a>
       <a href="#profile">Profile</a>
     </nav>
-    <div class="user-info-nav">
-      <div class="user-avatar" id="userAvatar">P</div>
-      <span><strong id="userName">Provider</strong></span>
-      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    <div class="navbar-actions">
+      <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
+        🔔
+        <span class="notif-badge-count" style="display:none;">0</span>
+      </button>
+      <div class="user-info-nav">
+        <div class="user-avatar" id="userAvatar">P</div>
+        <span><strong id="userName">Provider</strong></span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
     </div>
   </header>
 
@@ -201,6 +207,39 @@
           <div class="num" id="cancelledCnt">0</div>
           <div class="lbl">Cancelled</div>
         </div>
+      </div>
+    </div>
+
+    <!-- ── Earnings Dashboard ── -->
+    <div style="margin-bottom:36px;">
+      <div class="section-title">💰 Earnings Dashboard</div>
+      <div class="earnings-grid" id="earningsGrid">
+        <div class="earnings-card">
+          <span class="earnings-value" id="earnTotal">₹0</span>
+          <span class="earnings-label">Total Earned</span>
+        </div>
+        <div class="earnings-card">
+          <span class="earnings-value" id="earnMonth">₹0</span>
+          <span class="earnings-label">This Month</span>
+        </div>
+        <div class="earnings-card">
+          <span class="earnings-value" id="earnJobs">0</span>
+          <span class="earnings-label">Completed Jobs</span>
+        </div>
+        <div class="earnings-card">
+          <span class="earnings-value" id="earnRate" style="color:var(--primary-light);">0%</span>
+          <span class="earnings-label">Accept Rate</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Availability Schedule ── -->
+    <div style="margin-bottom:36px;">
+      <div class="section-title">🕐 Set Your Availability</div>
+      <div class="availability-grid" id="availabilityGrid"></div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="saveAvailability()" id="saveAvailBtn">💾 Save Schedule</button>
+        <span id="availMsg" style="font-size:12px; color:var(--text-muted); align-self:center;"></span>
       </div>
     </div>
 
@@ -342,6 +381,7 @@
   <script src="js/chat.js"></script>
   <script src="js/payments.js"></script>
   <script src="js/providers.js"></script>
+  <script src="js/notif-center.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/chatbot.js"></script>
   <script>
@@ -381,6 +421,8 @@
       renderProviderCalendar();
       loadMyReviews();
       loadProviderPrice();
+      loadProviderEarnings();
+      loadProviderAvailability();
 
       // ── PROVIDER NOTIFICATION POLLING (uses shared function from script.js) ──
       startNotificationPolling({
@@ -410,6 +452,109 @@
           }
         }
       } catch(e) { console.warn('Could not load pricing', e); }
+    }
+
+    /* ── Earnings Dashboard ── */
+    async function loadProviderEarnings() {
+      try {
+        const res = await apiFetch(API_URL + '/provider/earnings', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (data.success && data.earnings) {
+          const e = data.earnings;
+          const el = id => document.getElementById(id);
+          if (el('earnTotal')) el('earnTotal').textContent = '₹' + (e.total_earned || 0).toLocaleString('en-IN');
+          if (el('earnMonth')) el('earnMonth').textContent = '₹' + (e.earned_this_month || 0).toLocaleString('en-IN');
+          if (el('earnJobs')) el('earnJobs').textContent = e.completed_jobs || 0;
+          if (el('earnRate')) el('earnRate').textContent = (e.acceptance_rate || 0) + '%';
+        }
+      } catch(e) { console.warn('Earnings load failed', e); }
+    }
+
+    /* ── Availability Schedule ── */
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    let _availabilityData = [];
+
+    async function loadProviderAvailability() {
+      const user = getUser();
+      if (!user || !user.id) return;
+      const grid = document.getElementById('availabilityGrid');
+      if (!grid) return;
+
+      try {
+        const res = await fetch(API_URL + '/provider/' + user.id + '/availability');
+        const data = await res.json();
+        _availabilityData = data.success ? (data.availability || []) : [];
+      } catch(e) { _availabilityData = []; }
+
+      renderAvailabilityGrid();
+    }
+
+    function renderAvailabilityGrid() {
+      const grid = document.getElementById('availabilityGrid');
+      if (!grid) return;
+
+      grid.innerHTML = DAY_NAMES.map((day, i) => {
+        const slot = _availabilityData.find(a => a.day_of_week === i);
+        const isOn = slot ? !!slot.is_available : (i >= 1 && i <= 6); // defaults: Mon-Sat on
+        const start = slot?.start_time?.substring(0,5) || '09:00';
+        const end = slot?.end_time?.substring(0,5) || '18:00';
+        return `
+          <div class="avail-row" data-day="${i}">
+            <div class="avail-day">${day.substring(0,3)}</div>
+            <input type="time" class="avail-start" value="${start}" ${!isOn ? 'disabled' : ''}>
+            <input type="time" class="avail-end" value="${end}" ${!isOn ? 'disabled' : ''}>
+            <label class="avail-toggle">
+              <input type="checkbox" class="avail-check" ${isOn ? 'checked' : ''} onchange="toggleAvailDay(this, ${i})">
+              <span class="avail-toggle-slider"></span>
+            </label>
+          </div>`;
+      }).join('');
+    }
+
+    function toggleAvailDay(checkbox, dayIdx) {
+      const row = checkbox.closest('.avail-row');
+      const startInput = row.querySelector('.avail-start');
+      const endInput = row.querySelector('.avail-end');
+      startInput.disabled = !checkbox.checked;
+      endInput.disabled = !checkbox.checked;
+    }
+
+    async function saveAvailability() {
+      const btn = document.getElementById('saveAvailBtn');
+      const msg = document.getElementById('availMsg');
+      const rows = document.querySelectorAll('.avail-row');
+      const schedule = [];
+
+      rows.forEach(row => {
+        const day = parseInt(row.dataset.day);
+        const isOn = row.querySelector('.avail-check').checked;
+        const start = row.querySelector('.avail-start').value || '09:00';
+        const end = row.querySelector('.avail-end').value || '18:00';
+        schedule.push({ day_of_week: day, start_time: start, end_time: end, is_available: isOn });
+      });
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+      try {
+        const res = await apiFetch(API_URL + '/provider/availability', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ schedule })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (msg) { msg.textContent = '✅ Schedule saved!'; msg.style.color = 'var(--success)'; }
+          showToast('Availability updated!', 'success');
+        } else {
+          if (msg) { msg.textContent = data.message || 'Error'; msg.style.color = 'var(--error)'; }
+        }
+      } catch(e) {
+        if (msg) { msg.textContent = 'Server error'; msg.style.color = 'var(--error)'; }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
+        setTimeout(() => { if (msg) msg.textContent = ''; }, 4000);
+      }
     }
 
     async function saveProviderPrice() {
@@ -455,6 +600,18 @@
       renderProviderBookings(status);
     }
   </script>
+
+  <!-- Notification Center Drawer -->
+  <div class="notif-drawer" id="notifCenterDrawer">
+    <div class="notif-drawer-header">
+      <h3>🔔 Notifications</h3>
+      <div class="notif-drawer-actions">
+        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+        <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
+      </div>
+    </div>
+    <div class="notif-drawer-body" id="notifCenterList"></div>
+  </div>
 </body>
 
 </html>

@@ -195,14 +195,19 @@ function attachRoutes(app, db, generateUsername, options = {}) {
     app.get(paths("/admin/stats"), verifyAdmin, (req, res) => {
         db.query("SELECT COUNT(*) as cnt FROM users WHERE role = 'customer'", (e1, customers) => {
             db.query("SELECT COUNT(*) as cnt FROM users WHERE role = 'provider'", (e2, providers) => {
-                db.query("SELECT COUNT(*) as cnt FROM bookings WHERE status IN ('Pending','Accepted')", (e3, bookings) => {
-                    res.json({
-                        success: true,
-                        stats: {
-                            customers: customers?.[0]?.cnt || 0,
-                            providers: providers?.[0]?.cnt || 0,
-                            activeBookings: bookings?.[0]?.cnt || 0
-                        }
+                db.query("SELECT COUNT(*) as cnt FROM bookings WHERE status IN ('Pending','Accepted','In Progress')", (e3, bookings) => {
+                    db.query("SELECT COALESCE(SUM(platform_fee), 0) as total_revenue, COALESCE(SUM(amount), 0) as total_gmv, COUNT(*) as total_bookings FROM bookings WHERE payment_status = 'Paid'", (e4, revenue) => {
+                        res.json({
+                            success: true,
+                            stats: {
+                                customers: customers?.[0]?.cnt || 0,
+                                providers: providers?.[0]?.cnt || 0,
+                                activeBookings: bookings?.[0]?.cnt || 0,
+                                totalRevenue: parseFloat(revenue?.[0]?.total_revenue) || 0,
+                                totalGMV: parseFloat(revenue?.[0]?.total_gmv) || 0,
+                                paidBookings: revenue?.[0]?.total_bookings || 0
+                            }
+                        });
                     });
                 });
             });
@@ -509,17 +514,61 @@ function attachRoutes(app, db, generateUsername, options = {}) {
         let resolvedProviderId = provider_id || null;
         let resolvedProviderName = provider || "";
 
+        // ── Revenue: calculate 10% platform fee ──
+        const PLATFORM_FEE_RATE = 0.10;
+
         function createBookingRow(pid, pname, bookingAmount) {
             const amount = bookingAmount || 499.00;
-            const sql = `INSERT INTO bookings (customer_id, customer_name, service, provider, provider_id, booking_date, booking_time, address, notes, amount)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-            db.query(sql, [customer_id, cleanCustomerName, cleanService, pname, pid, booking_date, booking_time, cleanAddress, cleanNotes, amount], (err, result) => {
-                if (err) {
-                    console.error("BOOKING DB ERROR:", err);
-                    return res.status(500).json({ success: false, message: "Server error" });
-                }
-                res.json({ success: true, message: "Booking created successfully", booking: { id: result.insertId, amount } });
-            });
+            const platformFee = Math.round(amount * PLATFORM_FEE_RATE * 100) / 100;
+            const providerEarning = Math.round((amount - platformFee) * 100) / 100;
+
+            // ── Double-booking prevention: check for conflicts ──
+            function doInsert() {
+                const sql = `INSERT INTO bookings (customer_id, customer_name, service, provider, provider_id, booking_date, booking_time, address, notes, amount, platform_fee, provider_earning)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                db.query(sql, [customer_id, cleanCustomerName, cleanService, pname, pid, booking_date, booking_time, cleanAddress, cleanNotes, amount, platformFee, providerEarning], (err, result) => {
+                    if (err) {
+                        console.error("BOOKING DB ERROR:", err);
+                        return res.status(500).json({ success: false, message: "Server error" });
+                    }
+                    res.json({ success: true, message: "Booking created successfully", booking: { id: result.insertId, amount, platform_fee: platformFee, provider_earning: providerEarning } });
+                });
+            }
+
+            if (pid) {
+                // Check for double-booking: same provider, same date+time, active status
+                db.query(
+                    `SELECT id FROM bookings WHERE provider_id = ? AND booking_date = ? AND booking_time = ? AND status IN ('Pending','Accepted','In Progress') LIMIT 1`,
+                    [pid, booking_date, booking_time],
+                    (err, conflicts) => {
+                        if (err) return res.status(500).json({ success: false, message: "Server error" });
+                        if (conflicts.length > 0) {
+                            return res.status(409).json({ success: false, message: "This provider already has a booking at this date and time. Please choose a different time." });
+                        }
+                        // Check provider availability for the day of week
+                        const bookingDay = new Date(booking_date).getDay(); // 0=Sun
+                        db.query(
+                            `SELECT is_available, start_time, end_time FROM provider_availability WHERE provider_id = ? AND day_of_week = ?`,
+                            [pid, bookingDay],
+                            (err, avail) => {
+                                if (err) return doInsert(); // fail-open if availability table missing
+                                if (avail.length > 0 && !avail[0].is_available) {
+                                    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                                    return res.status(400).json({ success: false, message: `This provider is not available on ${dayNames[bookingDay]}s. Please choose another day.` });
+                                }
+                                if (avail.length > 0 && avail[0].start_time && avail[0].end_time) {
+                                    if (booking_time < avail[0].start_time || booking_time > avail[0].end_time) {
+                                        return res.status(400).json({ success: false, message: `This provider is available from ${avail[0].start_time.substring(0,5)} to ${avail[0].end_time.substring(0,5)} on this day.` });
+                                    }
+                                }
+                                doInsert();
+                            }
+                        );
+                    }
+                );
+            } else {
+                doInsert();
+            }
         }
 
         // Validate provider exists, is verified, and offers the requested service
@@ -572,6 +621,12 @@ function attachRoutes(app, db, generateUsername, options = {}) {
         const { status } = req.body;
         const bookingId = req.params.id;
 
+        // Validate status is in allowed set (including new 'In Progress')
+        const VALID_STATUSES = ['Pending', 'Accepted', 'In Progress', 'Completed', 'Cancelled'];
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid status value." });
+        }
+
         db.query("SELECT customer_id, provider, provider_id, service FROM bookings WHERE id = ?", [bookingId], (err, results) => {
             if (err || results.length === 0) return res.status(404).json({ success: false, message: "Booking not found" });
 
@@ -589,18 +644,53 @@ function attachRoutes(app, db, generateUsername, options = {}) {
             const isAccepting = status === "Accepted" && isServicePool && !booking.provider_id;
 
             if (isAccepting) {
-                // Look up provider's actual price so the booking amount reflects it
-                db.query("SELECT service_price FROM users WHERE id = ? AND role = 'provider'", [req.user.id], (pErr, pResults) => {
-                    const providerPrice = (!pErr && pResults[0]) ? parseFloat(pResults[0].service_price) || 499.00 : 499.00;
-                    const claimSql = "UPDATE bookings SET status = ?, provider_id = ?, provider = ?, amount = ? WHERE id = ?";
-                    db.query(claimSql, [status, req.user.id, req.user.name, providerPrice, bookingId], (err) => {
-                        if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
-                        res.json({ success: true, message: "Booking accepted and assigned to you", amount: providerPrice });
+                // Race-condition guard: check no one else already accepted
+                db.query("SELECT provider_id, status FROM bookings WHERE id = ? AND status = 'Pending' AND provider_id IS NULL", [bookingId], (checkErr, checkResults) => {
+                    if (checkErr) return res.status(500).json({ success: false, message: "Server error" });
+                    if (checkResults.length === 0) {
+                        return res.status(409).json({ success: false, message: "This booking was already accepted by another provider." });
+                    }
+                    // Look up provider's actual price so the booking amount reflects it
+                    db.query("SELECT service_price FROM users WHERE id = ? AND role = 'provider'", [req.user.id], (pErr, pResults) => {
+                        const providerPrice = (!pErr && pResults[0]) ? parseFloat(pResults[0].service_price) || 499.00 : 499.00;
+                        const platformFee = Math.round(providerPrice * 0.10 * 100) / 100;
+                        const providerEarning = Math.round((providerPrice - platformFee) * 100) / 100;
+                        const claimSql = "UPDATE bookings SET status = ?, provider_id = ?, provider = ?, amount = ?, platform_fee = ?, provider_earning = ? WHERE id = ? AND status = 'Pending'";
+                        db.query(claimSql, [status, req.user.id, req.user.name, providerPrice, platformFee, providerEarning, bookingId], (err, result) => {
+                            if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
+                            if (result.affectedRows === 0) return res.status(409).json({ success: false, message: "This booking was already accepted by another provider." });
+                            // Notify customer that a provider accepted
+                            createNotification(
+                                booking.customer_id, 'status',
+                                `✅ Your booking #${bookingId} (${booking.service}) was accepted by ${req.user.name}!`,
+                                '', { bookingId: Number(bookingId), service: booking.service, status: 'Accepted' }
+                            );
+                            res.json({ success: true, message: "Booking accepted and assigned to you", amount: providerPrice });
+                        });
                     });
                 });
             } else {
                 db.query("UPDATE bookings SET status = ? WHERE id = ?", [status, bookingId], (err) => {
                     if (err) return res.status(500).json({ success: false, message: "Failed to update status" });
+
+                    // Notify the other party about the status change
+                    const statusMsgs = {
+                        'Accepted': `✅ Your booking #${bookingId} (${booking.service}) was accepted!`,
+                        'In Progress': `🔧 Your booking #${bookingId} (${booking.service}) — work has started!`,
+                        'Completed': `🎉 Your booking #${bookingId} (${booking.service}) is completed!`,
+                        'Cancelled': `❌ Booking #${bookingId} (${booking.service}) was cancelled.`
+                    };
+                    const notifMsg = statusMsgs[status];
+                    if (notifMsg) {
+                        // If provider changed status, notify customer. If customer cancelled, notify provider.
+                        const notifyId = isCustomer ? booking.provider_id : booking.customer_id;
+                        if (notifyId) {
+                            createNotification(notifyId, 'status', notifMsg, '',
+                                { bookingId: Number(bookingId), service: booking.service, status }
+                            );
+                        }
+                    }
+
                     res.json({ success: true, message: "Status updated successfully" });
                 });
             }
@@ -643,6 +733,20 @@ function attachRoutes(app, db, generateUsername, options = {}) {
 
             db.query("UPDATE bookings SET booking_date = ?, booking_time = ? WHERE id = ?", [booking_date, booking_time, bookingId], (err) => {
                 if (err) return res.status(500).json({ success: false, message: "Failed to reschedule booking" });
+
+                // Notify the OTHER party about the reschedule
+                const notifyUserId = isCustomer ? booking.provider_id : booking.customer_id;
+                const whoRescheduled = isCustomer ? 'Customer' : 'Provider';
+                if (notifyUserId) {
+                    createNotification(
+                        notifyUserId,
+                        'reschedule',
+                        `🔄 Booking #${bookingId} (${booking.service}) was rescheduled by ${whoRescheduled} to ${booking_date} at ${booking_time}`,
+                        '',
+                        { bookingId: Number(bookingId), service: booking.service, newDate: booking_date, newTime: booking_time }
+                    );
+                }
+
                 res.json({ success: true, message: "Booking rescheduled successfully" });
             });
         });
@@ -688,17 +792,25 @@ function attachRoutes(app, db, generateUsername, options = {}) {
         });
     });
 
-    /* ═══════════════════ PROVIDERS LIST ═══════════════════ */
+    /* ═══════════════════ PROVIDERS LIST (with search & filters) ═══════════════════ */
     app.get(paths("/providers"), (req, res) => {
-        const { service } = req.query;
+        const { service, q, city, rating_min, price_max, price_min, sort } = req.query;
         let sql = `SELECT u.id, u.username, u.name, u.service, u.city, u.pincode, u.location, u.verification_status,
                    u.service_price,
-                   COALESCE(rv.avg_rating, 0) as avg_rating, COALESCE(rv.review_count, 0) as review_count
+                   COALESCE(rv.avg_rating, 0) as avg_rating, COALESCE(rv.review_count, 0) as review_count,
+                   COALESCE(bk.completed_jobs, 0) as completed_jobs,
+                   COALESCE(bk.total_jobs, 0) as total_jobs
                    FROM users u
                    LEFT JOIN (
                      SELECT provider_id, ROUND(AVG(rating), 1) as avg_rating, COUNT(*) as review_count
                      FROM reviews GROUP BY provider_id
                    ) rv ON rv.provider_id = u.id
+                   LEFT JOIN (
+                     SELECT provider_id, 
+                       SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed_jobs,
+                       COUNT(*) as total_jobs
+                     FROM bookings WHERE provider_id IS NOT NULL GROUP BY provider_id
+                   ) bk ON bk.provider_id = u.id
                    WHERE u.role = 'provider' AND u.verification_status = 'approved'`;
         const params = [];
 
@@ -706,7 +818,33 @@ function attachRoutes(app, db, generateUsername, options = {}) {
             sql += ` AND LOWER(TRIM(u.service)) = LOWER(TRIM(?))`;
             params.push(service);
         }
-        sql += ` ORDER BY rv.avg_rating DESC, u.created_at DESC`;
+        if (q) {
+            sql += ` AND (LOWER(u.name) LIKE ? OR LOWER(u.service) LIKE ? OR LOWER(u.city) LIKE ?)`;
+            const like = '%' + q.toLowerCase().trim() + '%';
+            params.push(like, like, like);
+        }
+        if (city) {
+            sql += ` AND LOWER(TRIM(u.city)) = LOWER(TRIM(?))`;
+            params.push(city);
+        }
+        if (rating_min) {
+            sql += ` AND COALESCE(rv.avg_rating, 0) >= ?`;
+            params.push(parseFloat(rating_min));
+        }
+        if (price_max) {
+            sql += ` AND (u.service_price IS NULL OR u.service_price <= ?)`;
+            params.push(parseFloat(price_max));
+        }
+        if (price_min) {
+            sql += ` AND (u.service_price IS NULL OR u.service_price >= ?)`;
+            params.push(parseFloat(price_min));
+        }
+
+        // Sort options
+        if (sort === 'price_low') sql += ` ORDER BY COALESCE(u.service_price, 499) ASC, rv.avg_rating DESC`;
+        else if (sort === 'price_high') sql += ` ORDER BY COALESCE(u.service_price, 499) DESC, rv.avg_rating DESC`;
+        else if (sort === 'jobs') sql += ` ORDER BY bk.completed_jobs DESC, rv.avg_rating DESC`;
+        else sql += ` ORDER BY rv.avg_rating DESC, bk.completed_jobs DESC, u.created_at DESC`;
 
         db.query(sql, params, (err, results) => {
             if (err) return res.status(500).json({ success: false, message: "Failed to fetch providers" });
@@ -993,6 +1131,207 @@ function attachRoutes(app, db, generateUsername, options = {}) {
                         });
                     }
                 );
+            }
+        );
+    });
+
+    /* ═══════════════════ PROVIDER AVAILABILITY ═══════════════════ */
+    app.get(paths("/provider/:id/availability"), (req, res) => {
+        db.query(
+            `SELECT day_of_week, start_time, end_time, is_available FROM provider_availability WHERE provider_id = ? ORDER BY day_of_week`,
+            [req.params.id],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Failed to fetch availability" });
+                res.json({ success: true, availability: results });
+            }
+        );
+    });
+
+    app.put(paths("/provider/availability"), verifyToken, (req, res) => {
+        if (req.user.role !== 'provider') {
+            return res.status(403).json({ success: false, message: "Only providers can set availability." });
+        }
+        const { schedule } = req.body; // array of { day_of_week, start_time, end_time, is_available }
+        if (!Array.isArray(schedule) || schedule.length === 0) {
+            return res.status(400).json({ success: false, message: "Schedule array is required." });
+        }
+
+        const providerId = req.user.id;
+        let completed = 0;
+        let errors = 0;
+
+        schedule.forEach(slot => {
+            const { day_of_week, start_time, end_time, is_available } = slot;
+            if (day_of_week < 0 || day_of_week > 6) { completed++; errors++; return; }
+            db.query(
+                `INSERT INTO provider_availability (provider_id, day_of_week, start_time, end_time, is_available)
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE start_time = VALUES(start_time), end_time = VALUES(end_time), is_available = VALUES(is_available)`,
+                [providerId, day_of_week, start_time || '09:00', end_time || '18:00', is_available ? 1 : 0],
+                (err) => {
+                    if (err) errors++;
+                    completed++;
+                    if (completed >= schedule.length) {
+                        if (errors > 0) return res.status(500).json({ success: false, message: `Saved with ${errors} error(s).` });
+                        res.json({ success: true, message: "Availability updated successfully!" });
+                    }
+                }
+            );
+        });
+    });
+
+    /* ═══════════════════ PROVIDER EARNINGS ═══════════════════ */
+    app.get(paths("/provider/earnings"), verifyToken, (req, res) => {
+        if (req.user.role !== 'provider') {
+            return res.status(403).json({ success: false, message: "Provider only." });
+        }
+        const pid = req.user.id;
+        db.query(
+            `SELECT 
+                COALESCE(SUM(provider_earning), 0) as total_earned,
+                COALESCE(SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN provider_earning ELSE 0 END), 0) as earned_this_month,
+                SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed_jobs,
+                COUNT(*) as total_jobs,
+                ROUND(SUM(CASE WHEN status IN ('Accepted','In Progress','Completed') THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 0) as acceptance_rate
+             FROM bookings WHERE provider_id = ?`,
+            [pid],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Database error" });
+                const r = results[0] || {};
+                res.json({
+                    success: true,
+                    earnings: {
+                        total_earned: parseFloat(r.total_earned) || 0,
+                        earned_this_month: parseFloat(r.earned_this_month) || 0,
+                        completed_jobs: r.completed_jobs || 0,
+                        total_jobs: r.total_jobs || 0,
+                        acceptance_rate: r.acceptance_rate || 0
+                    }
+                });
+            }
+        );
+    });
+
+    /* ═══════════════════ RECOMMENDED PROVIDERS ═══════════════════ */
+    app.get(paths("/providers/recommended"), verifyToken, (req, res) => {
+        const customerId = req.user.id;
+        // Simple recommendation: providers previously booked + highest rated in user's booked categories
+        db.query(
+            `SELECT DISTINCT u.id, u.username, u.name, u.service, u.city, u.pincode, u.location,
+                    u.verification_status, u.service_price,
+                    COALESCE(rv.avg_rating, 0) as avg_rating, COALESCE(rv.review_count, 0) as review_count,
+                    COALESCE(bk.completed_jobs, 0) as completed_jobs,
+                    1 as is_recommended
+             FROM bookings b
+             JOIN users u ON b.provider_id = u.id AND u.role = 'provider' AND u.verification_status = 'approved'
+             LEFT JOIN (SELECT provider_id, ROUND(AVG(rating),1) as avg_rating, COUNT(*) as review_count FROM reviews GROUP BY provider_id) rv ON rv.provider_id = u.id
+             LEFT JOIN (SELECT provider_id, SUM(CASE WHEN status='Completed' THEN 1 ELSE 0 END) as completed_jobs FROM bookings WHERE provider_id IS NOT NULL GROUP BY provider_id) bk ON bk.provider_id = u.id
+             WHERE b.customer_id = ? AND b.status = 'Completed'
+             ORDER BY rv.avg_rating DESC, bk.completed_jobs DESC
+             LIMIT 6`,
+            [customerId],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Database error" });
+                res.json({ success: true, providers: results });
+            }
+        );
+    });
+
+    /* ═══════════════════ REBOOK (clone a booking) ═══════════════════ */
+    app.post(paths("/booking/:id/rebook"), verifyToken, (req, res) => {
+        const bookingId = req.params.id;
+        const customerId = req.user.id;
+
+        db.query(
+            "SELECT service, provider, provider_id, address, notes, amount, platform_fee, provider_earning FROM bookings WHERE id = ? AND customer_id = ?",
+            [bookingId, customerId],
+            (err, results) => {
+                if (err || results.length === 0) return res.status(404).json({ success: false, message: "Booking not found" });
+                const orig = results[0];
+                const { booking_date, booking_time } = req.body;
+                if (!booking_date || !booking_time) return res.status(400).json({ success: false, message: "New date and time required." });
+
+                const sql = `INSERT INTO bookings (customer_id, customer_name, service, provider, provider_id, booking_date, booking_time, address, notes, amount, platform_fee, provider_earning)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                db.query(sql, [customerId, req.user.name, orig.service, orig.provider, orig.provider_id, booking_date, booking_time, orig.address, orig.notes || '', orig.amount, orig.platform_fee, orig.provider_earning], (err, result) => {
+                    if (err) return res.status(500).json({ success: false, message: "Could not create rebook." });
+                    res.json({ success: true, message: "Rebooked successfully!", booking: { id: result.insertId, amount: orig.amount } });
+                });
+            }
+        );
+    });
+
+    /* ═══════════════════ CUSTOMER LOYALTY POINTS ═══════════════════ */
+    app.get(paths("/customer/stats"), verifyToken, (req, res) => {
+        const customerId = req.user.id;
+        db.query(
+            `SELECT 
+                COUNT(*) as total_bookings,
+                SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN payment_status = 'Paid' THEN amount ELSE 0 END) as total_spent,
+                SUM(CASE WHEN status = 'Completed' THEN 10 ELSE 0 END) as loyalty_points,
+                COUNT(DISTINCT service) as services_used
+             FROM bookings WHERE customer_id = ?`,
+            [customerId],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Database error" });
+                const r = results[0] || {};
+                res.json({
+                    success: true,
+                    stats: {
+                        total_bookings: r.total_bookings || 0,
+                        completed: r.completed || 0,
+                        total_spent: parseFloat(r.total_spent) || 0,
+                        loyalty_points: r.loyalty_points || 0,
+                        services_used: r.services_used || 0
+                    }
+                });
+            }
+        );
+    });
+
+    /* ═══════════════════ NOTIFICATION HELPER ═══════════════════ */
+    function createNotification(userId, type, title, body, meta) {
+        if (!userId) return;
+        db.query(
+            "INSERT INTO notifications (user_id, type, title, body, meta) VALUES (?, ?, ?, ?, ?)",
+            [userId, type || 'system', title, body || '', JSON.stringify(meta || {})],
+            (err) => { if (err) console.error("Notif insert error:", err.message); }
+        );
+    }
+
+    /* ═══════════════════ GET NOTIFICATIONS ═══════════════════ */
+    app.get(paths("/notifications"), verifyToken, (req, res) => {
+        db.query(
+            "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50",
+            [req.user.id],
+            (err, results) => {
+                if (err) return res.status(500).json({ success: false, message: "Failed to fetch notifications" });
+                res.json({ success: true, notifications: results });
+            }
+        );
+    });
+
+    /* ═══════════════════ MARK ALL READ (must be before :id/read!) ═══════════════════ */
+    app.put(paths("/notifications/read-all"), verifyToken, (req, res) => {
+        db.query(
+            "UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0",
+            [req.user.id],
+            (err) => {
+                if (err) return res.status(500).json({ success: false });
+                res.json({ success: true });
+            }
+        );
+    });
+
+    /* ═══════════════════ MARK NOTIFICATION READ ═══════════════════ */
+    app.put(paths("/notifications/:id/read"), verifyToken, (req, res) => {
+        db.query(
+            "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?",
+            [req.params.id, req.user.id],
+            (err) => {
+                if (err) return res.status(500).json({ success: false });
+                res.json({ success: true });
             }
         );
     });

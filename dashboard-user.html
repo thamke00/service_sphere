@@ -254,12 +254,19 @@
     <nav id="mainNav" aria-label="Dashboard navigation">
       <a href="#overview" class="active" aria-current="page">Dashboard</a>
       <a href="#bookings">My Bookings</a>
+      <a href="#messages-section" onclick="switchDashboardTab('messages')">Messages</a>
       <a href="#book-service">Book Service</a>
     </nav>
-    <div class="user-info-nav">
-      <div class="user-avatar" id="userAvatar">U</div>
-      <span>Welcome, <strong id="userName">User</strong></span>
-      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    <div class="navbar-actions">
+      <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
+        🔔
+        <span class="notif-badge-count" style="display:none;">0</span>
+      </button>
+      <div class="user-info-nav">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span>Welcome, <strong id="userName">User</strong></span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      </div>
     </div>
   </header>
 
@@ -275,6 +282,7 @@
     </div>
     <a href="#overview" class="active" onclick="closeMobileNav()">Dashboard</a>
     <a href="#bookings" onclick="closeMobileNav()">My Bookings</a>
+    <a href="#messages-section" onclick="switchDashboardTab('messages');closeMobileNav()">Messages</a>
     <a href="#book-service" onclick="closeMobileNav()">Book Service</a>
     <div class="mobile-nav-actions">
       <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
@@ -312,6 +320,7 @@
           <div class="dashboard-hero-actions">
             <a href="#book-service" class="btn btn-primary">+ Book a Service</a>
             <a href="#bookings" class="btn btn-ghost dashboard-hero-btn-outline">📋 My Bookings</a>
+            <span class="loyalty-badge" id="loyaltyBadge" style="display:none;">🏆 <span id="loyaltyPoints">0</span> pts</span>
           </div>
         </div>
       </div>
@@ -346,6 +355,19 @@
       </div>
     </div>
 
+    <!-- ── Search & Filter Bar ── -->
+    <div class="search-filter-bar" id="providerSearchFilter" style="margin-bottom:20px;">
+      <div class="search-input-wrap">
+        <input type="text" id="providerSearchInput" placeholder="Search providers by name, service, or city..." oninput="debounceProviderSearch(this.value)">
+      </div>
+      <select class="filter-select" id="sortSelect" onchange="applyProviderFilters()">
+        <option value="rating">⭐ Top Rated</option>
+        <option value="price_low">💰 Price: Low → High</option>
+        <option value="price_high">💰 Price: High → Low</option>
+        <option value="jobs">📋 Most Jobs</option>
+      </select>
+    </div>
+
     <!-- ── Featured Providers ── -->
     <div id="recommendedProvidersSection" style="margin-bottom:40px;">
       <div class="section-title">🌟 Recommended Providers</div>
@@ -362,25 +384,68 @@
         <span class="cnt" id="bookingsBadge" style="background:var(--primary);color:#fff;">0</span>
       </div>
 
-      <!-- Tab Filter -->
-      <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
-        <button class="tab-btn active" id="tab-all" onclick="filterBookings('all')" role="tab"
-          aria-selected="true">All</button>
-        <button class="tab-btn" id="tab-pending" onclick="filterBookings('pending')" role="tab"
-          aria-selected="false">Pending</button>
-        <button class="tab-btn" id="tab-accepted" onclick="filterBookings('accepted')" role="tab"
-          aria-selected="false">Accepted</button>
-        <button class="tab-btn" id="tab-completed" onclick="filterBookings('completed')" role="tab"
-          aria-selected="false">Completed</button>
-        <button class="tab-btn" id="tab-cancelled" onclick="filterBookings('cancelled')" role="tab"
-          aria-selected="false">Cancelled</button>
+      <!-- Section Tabs: Bookings / Messages / History -->
+      <div class="dashboard-section-tabs">
+        <button class="dashboard-section-tab active" onclick="switchDashboardTab('bookings')">📋 Active Bookings</button>
+        <button class="dashboard-section-tab" onclick="switchDashboardTab('messages')">💬 Messages</button>
+        <button class="dashboard-section-tab" onclick="switchDashboardTab('history')">📀 Booking History</button>
+        <button class="dashboard-section-tab" onclick="switchDashboardTab('notifications')">🔔 Notifications <span class="tab-badge notif-badge-count" style="display:none;">0</span></button>
       </div>
 
-      <div class="bookings-list" id="bookingsList" aria-live="polite" aria-label="Your bookings">
-        <div class="empty-state">
-          <div class="icon">📭</div>
-          <h4>No bookings yet</h4>
-          <p>Book a service below to get started.</p>
+      <!-- Panel: Active Bookings -->
+      <div class="dashboard-section-panel active" id="panel-bookings">
+        <!-- Tab Filter -->
+        <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
+          <button class="tab-btn active" id="tab-all" onclick="filterBookings('all')" role="tab"
+            aria-selected="true">All</button>
+          <button class="tab-btn" id="tab-pending" onclick="filterBookings('pending')" role="tab"
+            aria-selected="false">Pending</button>
+          <button class="tab-btn" id="tab-accepted" onclick="filterBookings('accepted')" role="tab"
+            aria-selected="false">Accepted</button>
+          <button class="tab-btn" id="tab-completed" onclick="filterBookings('completed')" role="tab"
+            aria-selected="false">Completed</button>
+          <button class="tab-btn" id="tab-cancelled" onclick="filterBookings('cancelled')" role="tab"
+            aria-selected="false">Cancelled</button>
+        </div>
+        <div class="bookings-list" id="bookingsList" aria-live="polite" aria-label="Your bookings">
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <h4>No bookings yet</h4>
+            <p>Book a service below to get started.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Messages -->
+      <div class="dashboard-section-panel" id="panel-messages">
+        <div class="messages-list" id="messageThreadsList">
+          <div class="empty-state">
+            <div class="icon">💬</div>
+            <h4>No messages yet</h4>
+            <p>Your conversations with providers will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Booking History -->
+      <div class="dashboard-section-panel" id="panel-history">
+        <div id="bookingHistoryList">
+          <div class="empty-state">
+            <div class="icon">📀</div>
+            <h4>No past bookings</h4>
+            <p>Your completed and cancelled bookings will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Notifications -->
+      <div class="dashboard-section-panel" id="panel-notifications">
+        <div id="inlineNotifList">
+          <div class="empty-state">
+            <div class="icon">🔔</div>
+            <h4>No notifications</h4>
+            <p>Booking updates, reschedules, and messages will appear here.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -590,6 +655,7 @@
   <script src="js/chat.js"></script>
   <script src="js/payments.js"></script>
   <script src="js/providers.js"></script>
+  <script src="js/notif-center.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/chatbot.js"></script>
 
@@ -744,6 +810,7 @@
       });
 
       renderBookings('all');
+      loadCustomerStats();
 
       // ── CUSTOMER NOTIFICATION POLLING (uses shared function from script.js) ──
       startNotificationPolling({
@@ -996,7 +1063,254 @@
       const el = document.getElementById('providerValidationMsg');
       if (el) { el.className = ''; el.textContent = ''; }
     }
+
+    /* ═══════════════════════════════════════
+       SEARCH & FILTER PROVIDERS
+    ═══════════════════════════════════════ */
+    let _searchDebounce = null;
+    function debounceProviderSearch(q) {
+      clearTimeout(_searchDebounce);
+      _searchDebounce = setTimeout(() => applyProviderFilters(), 300);
+    }
+
+    function applyProviderFilters() {
+      const q = (document.getElementById('providerSearchInput')?.value || '').trim();
+      const sort = document.getElementById('sortSelect')?.value || 'rating';
+      const activeFilter = document.querySelector('#dashboardProviderFilterBar .tab-btn.active')?.textContent?.trim();
+      const service = (activeFilter && activeFilter !== 'All') ? activeFilter : '';
+
+      let url = API_URL + '/providers?sort=' + encodeURIComponent(sort);
+      if (service) url += '&service=' + encodeURIComponent(service);
+      if (q) url += '&q=' + encodeURIComponent(q);
+
+      const container = document.getElementById('recommendedProvidersList');
+      if (!container) return;
+
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success || !data.providers?.length) {
+            container.innerHTML = '<div class="loader-box">No providers match your search. Try different filters.</div>';
+            return;
+          }
+          container.innerHTML = data.providers.slice(0, 12).map(p => `
+            <div class="provider-card">
+              <div class="provider-header">
+                <div class="provider-avatar">${serviceIcon(p.service)}</div>
+                <div>
+                  <div class="provider-name">${escapeHtml(p.name)}</div>
+                  <div class="provider-type">${escapeHtml(p.service || 'Professional')}${p.username ? ' · <span style="color:var(--primary-light);">@' + escapeHtml(p.username) + '</span>' : ''}</div>
+                </div>
+              </div>
+              <div class="provider-detail">📍 ${escapeHtml(p.city || p.location || 'India')}${p.pincode ? ' · ' + escapeHtml(p.pincode) : ''}</div>
+              ${providerPriceHtml(p)}
+              ${providerRatingHtml(p)}
+              ${providerStatsHtml(p)}
+              <div class="provider-badge">✓ Verified</div>
+              <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
+            </div>
+          `).join('');
+        })
+        .catch(() => {});
+    }
+
+    /* ═══════════════════════════════════════
+       CUSTOMER STATS & LOYALTY POINTS
+    ═══════════════════════════════════════ */
+    async function loadCustomerStats() {
+      try {
+        const res = await apiFetch(API_URL + '/customer/stats', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        const data = await res.json();
+        if (data.success && data.stats) {
+          const pts = data.stats.loyalty_points || 0;
+          const badge = document.getElementById('loyaltyBadge');
+          const ptsEl = document.getElementById('loyaltyPoints');
+          if (pts > 0 && badge && ptsEl) {
+            ptsEl.textContent = pts;
+            badge.style.display = '';
+          }
+        }
+      } catch(e) { /* silent */ }
+    }
+
+    /* ═══════════════════════════════════════
+       DASHBOARD SECTION TABS
+    ═══════════════════════════════════════ */
+    function switchDashboardTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.dashboard-section-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tabName));
+      });
+      // Show/hide panels
+      document.querySelectorAll('.dashboard-section-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      const panel = document.getElementById('panel-' + tabName);
+      if (panel) panel.classList.add('active');
+
+      // Load content for the panel
+      if (tabName === 'messages') loadMessageThreads();
+      if (tabName === 'history') loadBookingHistory();
+      if (tabName === 'notifications') renderInlineNotifications();
+
+      // Scroll to bookings section
+      const section = document.getElementById('bookings');
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ═══════════════════════════════════════
+       MESSAGES TAB
+    ═══════════════════════════════════════ */
+    async function loadMessageThreads() {
+      const container = document.getElementById('messageThreadsList');
+      if (!container) return;
+      container.innerHTML = '<div class="loader-box">Loading conversations…</div>';
+
+      await fetchBookingsFromAPI();
+      const bookings = getBookings().filter(b => b.status !== 'Cancelled');
+
+      if (!bookings.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">💬</div>
+            <h4>No conversations</h4>
+            <p>Book a service to start chatting with providers.</p>
+          </div>`;
+        return;
+      }
+
+      // Load last message for each booking
+      const threads = [];
+      for (const b of bookings) {
+        try {
+          const res = await fetch(API_URL + '/chats/' + b.id, {
+            headers: { 'Authorization': 'Bearer ' + getToken() },
+            signal: AbortSignal.timeout(3000)
+          });
+          const data = await res.json();
+          const msgs = (data.success && data.messages) ? data.messages : [];
+          const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+          threads.push({ booking: b, lastMsg, msgCount: msgs.length });
+        } catch(e) {
+          threads.push({ booking: b, lastMsg: null, msgCount: 0 });
+        }
+      }
+
+      // Sort by most recent message
+      threads.sort((a, b) => {
+        const ta = a.lastMsg ? new Date(a.lastMsg.created_at).getTime() : 0;
+        const tb = b.lastMsg ? new Date(b.lastMsg.created_at).getTime() : 0;
+        return tb - ta;
+      });
+
+      container.innerHTML = threads.map(t => {
+        const b = t.booking;
+        const preview = t.lastMsg
+          ? escapeHtml((t.lastMsg.sender_name || 'You') + ': ' + (t.lastMsg.message || '').substring(0, 50))
+          : 'No messages yet — tap to start chatting';
+        const timeStr = t.lastMsg ? timeAgo(t.lastMsg.created_at) : '';
+        return `
+          <div class="message-thread-card" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'})">
+            <div class="message-thread-avatar">${serviceIcon(b.service)}</div>
+            <div class="message-thread-info">
+              <div class="message-thread-name">${escapeHtml(b.provider || 'Any Provider')} · ${escapeHtml(b.service)}</div>
+              <div class="message-thread-preview">${preview}</div>
+            </div>
+            <div class="message-thread-time">${timeStr}</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ═══════════════════════════════════════
+       BOOKING HISTORY TAB (Completed + Cancelled)
+    ═══════════════════════════════════════ */
+    async function loadBookingHistory() {
+      const container = document.getElementById('bookingHistoryList');
+      if (!container) return;
+      container.innerHTML = '<div class="loader-box">Loading history…</div>';
+
+      await fetchBookingsFromAPI();
+      const history = getBookings()
+        .filter(b => b.status === 'Completed' || b.status === 'Cancelled')
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (!history.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📀</div>
+            <h4>No past bookings</h4>
+            <p>Your completed and cancelled bookings will appear here.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = history.map(b => {
+        const isCompleted = b.status === 'Completed';
+        const statusColor = isCompleted ? 'var(--success)' : 'var(--danger)';
+        const statusIcon = isCompleted ? '✅' : '❌';
+        const dateStr = typeof formatDate === 'function' ? formatDate(b.booking_date) : (b.booking_date || '');
+        return `
+          <div class="history-card">
+            <div class="history-card-icon">${serviceIcon(b.service)}</div>
+            <div class="history-card-info">
+              <div class="history-card-title">${escapeHtml(b.service)} · ${escapeHtml(b.provider || 'Pool Provider')}</div>
+              <div class="history-card-meta">${dateStr} · ₹${b.amount || '499'} · ${b.payment_status === 'Paid' ? '💳 Paid' : '💳 Unpaid'}</div>
+            </div>
+            <div class="history-card-status" style="color:${statusColor}">${statusIcon} ${b.status}</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ═══════════════════════════════════════
+       INLINE NOTIFICATIONS TAB
+    ═══════════════════════════════════════ */
+    function renderInlineNotifications() {
+      const container = document.getElementById('inlineNotifList');
+      if (!container) return;
+
+      const notifs = typeof getNotifications === 'function' ? getNotifications() : [];
+
+      if (!notifs.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🔔</div>
+            <h4>No notifications</h4>
+            <p>Booking updates, reschedules, and messages will appear here.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:13px; color:var(--text-muted);">${notifs.length} notification${notifs.length !== 1 ? 's' : ''}</span>
+          <button class="btn btn-ghost btn-sm" onclick="if(typeof markAllRead==='function'){markAllRead();renderInlineNotifications();}">Mark all read</button>
+        </div>
+      ` + notifs.map(n => `
+        <div class="notif-item ${n.read ? '' : 'notif-item--unread'}" onclick="if(typeof markNotifRead==='function'){markNotifRead('${n.id}');renderInlineNotifications();}">
+          <div class="notif-item-icon">${notifIcon(n.type)}</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">${escapeHtml(n.title)}</div>
+            <div class="notif-item-time">${typeof timeAgo === 'function' ? timeAgo(n.timestamp) : ''}</div>
+          </div>
+          ${!n.read ? '<div class="notif-item-dot"></div>' : ''}
+        </div>
+      `).join('');
+    }
   </script>
+
+  <!-- Notification Center Drawer -->
+  <div class="notif-drawer" id="notifCenterDrawer">
+    <div class="notif-drawer-header">
+      <h3>🔔 Notifications</h3>
+      <div class="notif-drawer-actions">
+        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+        <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
+      </div>
+    </div>
+    <div class="notif-drawer-body" id="notifCenterList"></div>
+  </div>
 </body>
 
 </html>

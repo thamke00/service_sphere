@@ -14,6 +14,29 @@ let _providerBookingsFilter = 'all';
 let _providerServiceFilter = '';
 let _allProvidersCache = [];
 
+/* ============================================================
+   BOOKING STATUS TRACKER (visual progress stepper)
+   ============================================================ */
+function renderBookingTracker(status) {
+  const steps = [
+    { key: 'Pending', label: 'Pending', icon: '⏳' },
+    { key: 'Accepted', label: 'Accepted', icon: '✅' },
+    { key: 'In Progress', label: 'In Progress', icon: '🔧' },
+    { key: 'Completed', label: 'Completed', icon: '🎉' }
+  ];
+  if (status === 'Cancelled') {
+    return `<div class="booking-tracker"><div class="tracker-step tracker-step--cancelled"><span class="tracker-icon">❌</span><span class="tracker-label">Cancelled</span></div></div>`;
+  }
+  const currentIdx = steps.findIndex(s => s.key === status);
+  return `<div class="booking-tracker">${steps.map((s, i) => {
+    let cls = 'tracker-step';
+    if (i < currentIdx) cls += ' tracker-step--done';
+    else if (i === currentIdx) cls += ' tracker-step--active';
+    else cls += ' tracker-step--upcoming';
+    return `<div class="${cls}"><span class="tracker-icon">${s.icon}</span><span class="tracker-label">${s.label}</span></div>${i < steps.length - 1 ? '<div class="tracker-line' + (i < currentIdx ? ' tracker-line--done' : '') + '"></div>' : ''}`;
+  }).join('')}</div>`;
+}
+
 async function fetchBookingsFromAPI() {
   const token = getToken();
   try {
@@ -231,10 +254,12 @@ async function renderBookings(filter = 'all') {
         </div>
         <div style="font-size: 18px; font-weight: 700; color: #fff;">₹${b.amount || '499.00'}</div>
       </div>
+      ${renderBookingTracker(status)}
       <div class="actions">
         ${status !== 'Cancelled' ? `<button class="btn btn-ghost btn-sm" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'})">💬 Message</button>` : ''}
         ${canCancel ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')">📅 Reschedule</button>` : ''}
         ${canReview ? `<button class="btn btn-review btn-sm" onclick="openReviewModal(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}')">⭐ Leave Review</button>` : ''}
+        ${status === 'Completed' ? `<button class="btn btn-ghost btn-sm" onclick="rebookBooking(${b.id})">🔄 Rebook</button>` : ''}
         ${canPay ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal(${b.id}, ${parseFloat(b.amount) || 499})">💳 Pay Now</button>` : ''}
         ${isPaid ? `<span class="badge badge-completed" style="padding:6px 12px;">✅ Paid</span>` : ''}
         ${canCancel ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ''}
@@ -345,6 +370,7 @@ async function renderProviderBookings(filter = 'all') {
         </div>
         <div style="font-size: 18px; font-weight: 700; color: #fff;">₹${b.amount || '499.00'}</div>
       </div>
+      ${renderBookingTracker(status)}
       <div class="actions">
         ${status !== 'Cancelled' ? `<button class="btn btn-ghost btn-sm" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.customer_name || 'Customer').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}')">💬 Message</button>` : ''}
         ${(status === 'Pending' || status === 'Accepted') ? `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal(${b.id}, '${b.booking_date || ''}', '${b.booking_time || ''}')">📅 Reschedule</button>` : ''}
@@ -353,8 +379,11 @@ async function renderProviderBookings(filter = 'all') {
           <button class="btn btn-danger btn-sm" onclick="updateBookingStatus(${b.id}, 'Cancelled')">❌ Decline</button>
         ` : ''}
         ${status === 'Accepted' ? `
-          <button class="btn btn-warning btn-sm" onclick="updateBookingStatus(${b.id}, 'Completed')">✔ Mark Complete</button>
+          <button class="btn btn-warning btn-sm" onclick="updateBookingStatus(${b.id}, 'In Progress')">🔧 Start Work</button>
           <button class="btn btn-danger btn-sm" onclick="updateBookingStatus(${b.id}, 'Cancelled')">❌ Cancel</button>
+        ` : ''}
+        ${status === 'In Progress' ? `
+          <button class="btn btn-success btn-sm" onclick="updateBookingStatus(${b.id}, 'Completed')">✔ Mark Complete</button>
         ` : ''}
       </div>
     </div>`;
@@ -389,7 +418,7 @@ async function updateBookingStatus(id, status) {
     return;
   }
 
-  const msgs = { Accepted: 'Booking accepted! ✅', Completed: 'Marked as completed! ✔', Cancelled: 'Booking declined.' };
+  const msgs = { Accepted: 'Booking accepted! ✅', 'In Progress': 'Work started! 🔧', Completed: 'Marked as completed! ✔', Cancelled: 'Booking declined.' };
   showToast(msgs[status] || 'Status updated.', status === 'Cancelled' ? 'error' : 'success');
   await renderProviderBookings(_providerBookingsFilter);
   if (typeof renderProviderCalendar === 'function') renderProviderCalendar();
@@ -549,4 +578,33 @@ function clearCalendarFilter() {
   const filterEl = document.getElementById('calActiveFilter');
   if (filterEl) filterEl.style.display = 'none';
   renderProviderBookings(_providerBookingsFilter);
+}
+
+/* ============================================================
+   REBOOK BOOKING (Customer)
+   ============================================================ */
+async function rebookBooking(bookingId) {
+  // Create a rebook with tomorrow's date and default time
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  const newDate = tomorrow.toISOString().split('T')[0];
+  const newTime = '10:00';
+
+  try {
+    const res = await apiFetch(API_URL + '/booking/' + bookingId + '/rebook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ booking_date: newDate, booking_time: newTime }),
+      signal: AbortSignal.timeout(8000)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Rebooked for tomorrow! 🔄', 'success');
+      await fetchBookingsFromAPI();
+      renderBookings('all');
+    } else {
+      showToast(data.message || 'Could not rebook.', 'error');
+    }
+  } catch (e) {
+    showToast('Could not reach server.', 'error');
+  }
 }

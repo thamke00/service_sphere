@@ -93,12 +93,27 @@ CREATE TABLE IF NOT EXISTS bookings (
   booking_time TIME,
   address TEXT,
   notes TEXT,
-  status ENUM('Pending','Accepted','Completed','Cancelled') DEFAULT 'Pending',
+  status ENUM('Pending','Accepted','In Progress','Completed','Cancelled') DEFAULT 'Pending',
   payment_status ENUM('Unpaid', 'Paid') DEFAULT 'Unpaid',
   amount DECIMAL(10,2) DEFAULT 499.00,
+  platform_fee DECIMAL(10,2) DEFAULT 0.00,
+  provider_earning DECIMAL(10,2) DEFAULT 0.00,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE SET NULL
+);
+`;
+
+const createAvailabilityTable = `
+CREATE TABLE IF NOT EXISTS provider_availability (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  provider_id INT NOT NULL,
+  day_of_week TINYINT NOT NULL COMMENT '0=Sun, 1=Mon, ... 6=Sat',
+  start_time TIME NOT NULL DEFAULT '09:00:00',
+  end_time TIME NOT NULL DEFAULT '18:00:00',
+  is_available TINYINT(1) DEFAULT 1,
+  UNIQUE KEY unique_provider_day (provider_id, day_of_week),
+  FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `;
 
@@ -151,6 +166,20 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   used TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY unique_user_reset (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+const createNotificationsTable = `
+CREATE TABLE IF NOT EXISTS notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  type VARCHAR(30) NOT NULL DEFAULT 'system',
+  title VARCHAR(255) NOT NULL,
+  body TEXT,
+  meta JSON,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `;
@@ -238,6 +267,14 @@ function runMigrations() {
             addColumnIfMissing("bookings", "payment_status", "payment_status ENUM('Unpaid', 'Paid') DEFAULT 'Unpaid'");
             addColumnIfMissing("bookings", "amount", "amount DECIMAL(10,2) DEFAULT 499.00");
             addColumnIfMissing("bookings", "provider_id", "provider_id INT NULL");
+            addColumnIfMissing("bookings", "platform_fee", "platform_fee DECIMAL(10,2) DEFAULT 0.00");
+            addColumnIfMissing("bookings", "provider_earning", "provider_earning DECIMAL(10,2) DEFAULT 0.00");
+
+            // Expand status ENUM to include 'In Progress' (safe: ALTER ignores if already present)
+            db.query(`ALTER TABLE bookings MODIFY COLUMN status ENUM('Pending','Accepted','In Progress','Completed','Cancelled') DEFAULT 'Pending'`, (err) => {
+                if (err && !err.message.includes('Duplicate')) console.warn("⚠️ Status ENUM expansion:", err.message);
+                else if (!err) console.log("✓ Bookings status ENUM expanded (In Progress)");
+            });
 
             // Add FK for provider_id if missing
             db.query(`
@@ -286,6 +323,16 @@ function runMigrations() {
                 else console.log("✓ Password reset tokens table ready!");
             });
 
+            db.query(createAvailabilityTable, (err) => {
+                if (err) console.error("❌ Availability table migration error:", err.message);
+                else console.log("✓ Provider availability table ready!");
+            });
+
+            db.query(createNotificationsTable, (err) => {
+                if (err) console.error("❌ Notifications table migration error:", err.message);
+                else console.log("✓ Notifications table ready!");
+            });
+
             db.query("SHOW COLUMNS FROM messages LIKE 'receiver_id'", (err, cols) => {
                 if (!err && cols.length > 0 && cols[0].Null === "NO") {
                     db.query("ALTER TABLE messages MODIFY receiver_id INT NULL", (e) => {
@@ -301,12 +348,17 @@ function runMigrations() {
             addIndexIfMissing("users", "idx_users_service", "service");
             addIndexIfMissing("users", "idx_users_verification", "verification_status");
             addIndexIfMissing("users", "idx_users_role", "role");
+            addIndexIfMissing("users", "idx_users_city", "city");
             addIndexIfMissing("bookings", "idx_bookings_customer", "customer_id");
             addIndexIfMissing("bookings", "idx_bookings_provider", "provider_id");
             addIndexIfMissing("bookings", "idx_bookings_status", "status");
+            addIndexIfMissing("bookings", "idx_bookings_date", "booking_date");
             addIndexIfMissing("messages", "idx_messages_booking", "booking_id");
             addIndexIfMissing("reviews", "idx_reviews_provider", "provider_id");
             addIndexIfMissing("reviews", "idx_reviews_customer", "customer_id");
+            addIndexIfMissing("provider_availability", "idx_avail_provider", "provider_id");
+            addIndexIfMissing("notifications", "idx_notif_user", "user_id");
+            addIndexIfMissing("notifications", "idx_notif_read", "is_read");
         });
     });
 }

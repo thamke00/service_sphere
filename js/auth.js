@@ -83,11 +83,27 @@ function checkAuth(requiredRole) {
     return;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
-    if (user.role === 'customer') {
-      window.location.href = 'dashboard-user.html';
-    } else {
-      window.location.href = 'dashboard-provider.html';
+  // Decode the JWT to check the REAL role (localStorage can be stale from another tab)
+  if (requiredRole) {
+    let tokenRole = user.role;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      tokenRole = payload.role;
+      // If localStorage user doesn't match the token, fix it
+      if (user.role !== tokenRole || Number(user.id) !== Number(payload.id)) {
+        // Token belongs to a different user — force re-login
+        clearAuth();
+        window.location.href = 'login.html';
+        return;
+      }
+    } catch(e) {}
+
+    if (tokenRole !== requiredRole) {
+      if (tokenRole === 'customer') {
+        window.location.href = 'dashboard-user.html';
+      } else {
+        window.location.href = 'dashboard-provider.html';
+      }
     }
   }
 }
