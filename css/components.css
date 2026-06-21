@@ -1879,3 +1879,40 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* ════════════════════════════════════════════════
+   GLOBAL SVG ICON ALIGNMENT
+   ════════════════════════════════════════════════ */
+.profile-nav-link svg,
+.dashboard-section-tab svg,
+.btn svg,
+.notif-bell svg,
+.history-card-icon svg,
+.notif-item-icon svg,
+.dashboard-hero-stat-icon svg,
+.booking-card svg {
+  vertical-align: -3px;
+  flex-shrink: 0;
+}
+
+.profile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-section-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dashboard-hero-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
