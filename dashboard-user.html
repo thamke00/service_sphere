@@ -2,1838 +2,1838 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>user Dashboard – ServiceSphere</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .bookings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>user Dashboard – ServiceSphere</title>
+ <link rel="stylesheet" href="css/style.css">
+ <style>
+ .bookings-list {
+ display: flex;
+ flex-direction: column;
+ gap: 12px;
+ }
 
-    .book-now-link {
-      color: var(--primary-light);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: underline;
-    }
+ .book-now-link {
+ color: var(--primary-light);
+ font-size: 13px;
+ font-weight: 500;
+ cursor: pointer;
+ text-decoration: underline;
+ }
 
-    /* Provider Autocomplete */
-    .provider-search-wrap {
-      position: relative;
-    }
+ /* Provider Autocomplete */
+ .provider-search-wrap {
+ position: relative;
+ }
 
-    .provider-search-wrap input {
-      width: 100%;
-      padding-right: 36px;
-    }
+ .provider-search-wrap input {
+ width: 100%;
+ padding-right: 36px;
+ }
 
-    .provider-search-wrap .provider-chevron {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--text-muted);
-      font-size: 12px;
-      transition: transform 0.2s;
-    }
+ .provider-search-wrap .provider-chevron {
+ position: absolute;
+ right: 12px;
+ top: 50%;
+ transform: translateY(-50%);
+ pointer-events: none;
+ color: var(--text-muted);
+ font-size: 12px;
+ transition: transform 0.2s;
+ }
 
-    .provider-search-wrap .provider-chevron.open {
-      transform: translateY(-50%) rotate(180deg);
-    }
+ .provider-search-wrap .provider-chevron.open {
+ transform: translateY(-50%) rotate(180deg);
+ }
 
-    .provider-search-wrap input:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+ .provider-search-wrap input:disabled {
+ opacity: 0.45;
+ cursor: not-allowed;
+ }
 
-    .provider-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      display: none;
-      align-items: center;
-      gap: 4px;
-    }
+ .provider-hint {
+ font-size: 11px;
+ color: var(--text-muted);
+ margin-top: 4px;
+ display: none;
+ align-items: center;
+ gap: 4px;
+ }
 
-    .provider-hint.visible {
-      display: flex;
-    }
+ .provider-hint.visible {
+ display: flex;
+ }
 
-    .provider-hint .hint-dot {
-      width: 6px;
-      height: 6px;
-      background: #10b981;
-      border-radius: 50%;
-      display: inline-block;
-      animation: hintPulse 1.5s ease infinite;
-    }
+ .provider-hint .hint-dot {
+ width: 6px;
+ height: 6px;
+ background: #10b981;
+ border-radius: 50%;
+ display: inline-block;
+ animation: hintPulse 1.5s ease infinite;
+ }
 
-    @keyframes hintPulse {
+ @keyframes hintPulse {
 
-      0%,
-      100% {
-        opacity: 1;
-      }
+ 0%,
+ 100% {
+ opacity: 1;
+ }
 
-      50% {
-        opacity: 0.4;
-      }
-    }
+ 50% {
+ opacity: 0.4;
+ }
+ }
 
-    .provider-dropdown {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      right: 0;
-      background: var(--dark-card);
-      border: 1px solid var(--dark-border);
-      border-radius: var(--radius-md);
-      z-index: 999;
-      max-height: 300px;
-      overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      display: none;
-    }
+ .provider-dropdown {
+ position: absolute;
+ top: calc(100% + 6px);
+ left: 0;
+ right: 0;
+ background: var(--dark-card);
+ border: 1px solid var(--dark-border);
+ border-radius: var(--radius-md);
+ z-index: 999;
+ max-height: 300px;
+ overflow-y: auto;
+ box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+ display: none;
+ }
 
-    .provider-dropdown.open {
-      display: block;
-    }
+ .provider-dropdown.open {
+ display: block;
+ }
 
-    .provider-dropdown-header {
-      padding: 8px 14px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--primary-light);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(99, 102, 241, 0.06);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
+ .provider-dropdown-header {
+ padding: 8px 14px;
+ font-size: 11px;
+ font-weight: 600;
+ color: var(--primary-light);
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+ background: rgba(99, 102, 241, 0.06);
+ position: sticky;
+ top: 0;
+ z-index: 1;
+ }
 
-    .provider-opt {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      transition: background 0.15s;
-    }
+ .provider-opt {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ padding: 10px 14px;
+ cursor: pointer;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+ transition: background 0.15s;
+ }
 
-    .provider-opt:last-child {
-      border-bottom: none;
-    }
+ .provider-opt:last-child {
+ border-bottom: none;
+ }
 
-    .provider-opt:hover,
-    .provider-opt.highlighted {
-      background: rgba(99, 102, 241, 0.12);
-    }
+ .provider-opt:hover,
+ .provider-opt.highlighted {
+ background: rgba(99, 102, 241, 0.12);
+ }
 
-    .provider-opt-avatar {
-      width: 36px;
-      height: 36px;
-      background: var(--primary-subtle);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
+ .provider-opt-avatar {
+ width: 36px;
+ height: 36px;
+ background: var(--primary-subtle);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 16px;
+ flex-shrink: 0;
+ }
 
-    .provider-opt-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #fff;
-    }
+ .provider-opt-name {
+ font-size: 13px;
+ font-weight: 600;
+ color: #fff;
+ }
 
-    .provider-opt-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 1px;
-    }
+ .provider-opt-meta {
+ font-size: 11px;
+ color: var(--text-muted);
+ margin-top: 1px;
+ }
 
-    .provider-opt-badge {
-      margin-left: auto;
-      font-size: 10px;
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 20px;
-      padding: 2px 8px;
-      flex-shrink: 0;
-    }
+ .provider-opt-badge {
+ margin-left: auto;
+ font-size: 10px;
+ background: rgba(16, 185, 129, 0.15);
+ color: #10b981;
+ border: 1px solid rgba(16, 185, 129, 0.3);
+ border-radius: 20px;
+ padding: 2px 8px;
+ flex-shrink: 0;
+ }
 
-    .provider-empty-opt {
-      padding: 14px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
+ .provider-empty-opt {
+ padding: 14px;
+ text-align: center;
+ color: var(--text-muted);
+ font-size: 13px;
+ }
 
-    .provider-any-opt {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(99, 102, 241, 0.05);
-      transition: background 0.15s;
-    }
+ .provider-any-opt {
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ padding: 10px 14px;
+ cursor: pointer;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+ background: rgba(99, 102, 241, 0.05);
+ transition: background 0.15s;
+ }
 
-    .provider-any-opt:hover {
-      background: rgba(99, 102, 241, 0.15);
-    }
+ .provider-any-opt:hover {
+ background: rgba(99, 102, 241, 0.15);
+ }
 
-    .provider-selected-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 20px;
-      padding: 4px 12px 4px 8px;
-      font-size: 12px;
-      color: #fff;
-      margin-top: 8px;
-    }
+ .provider-selected-pill {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ background: rgba(99, 102, 241, 0.15);
+ border: 1px solid rgba(99, 102, 241, 0.3);
+ border-radius: 20px;
+ padding: 4px 12px 4px 8px;
+ font-size: 12px;
+ color: #fff;
+ margin-top: 8px;
+ }
 
-    .provider-selected-pill .clear-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1;
-      padding: 0;
-    }
+ .provider-selected-pill .clear-btn {
+ background: none;
+ border: none;
+ color: var(--text-muted);
+ cursor: pointer;
+ font-size: 14px;
+ line-height: 1;
+ padding: 0;
+ }
 
-    .provider-selected-pill .clear-btn:hover {
-      color: #ef4444;
-    }
+ .provider-selected-pill .clear-btn:hover {
+ color: #ef4444;
+ }
 
-    #providerValidationMsg {
-      font-size: 12px;
-      margin-top: 6px;
-      display: none;
-    }
+ #providerValidationMsg {
+ font-size: 12px;
+ margin-top: 6px;
+ display: none;
+ }
 
-    #providerValidationMsg.error {
-      color: #ef4444;
-      display: block;
-    }
+ #providerValidationMsg.error {
+ color: #ef4444;
+ display: block;
+ }
 
-    #providerValidationMsg.success {
-      color: #10b981;
-      display: block;
-    }
-  </style>
+ #providerValidationMsg.success {
+ color: #10b981;
+ display: block;
+ }
+ </style>
 </head>
 
 <body>
-  <div class="toast-container" id="toastContainer"></div>
-
-  <!-- NAVBAR -->
-  <header class="navbar">
-    <a href="index.html" class="navbar-brand">
-      <div class="logo-icon">⚡</div>
-      ServiceSphere
-    </a>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="navbar-search" id="navbarSearch">
-      <span class="navbar-search-icon">🔍</span>
-      <input type="text" id="navSearchInput" placeholder="Search providers, services..." oninput="debounceProviderSearch(this.value)">
-      <span class="navbar-search-divider"></span>
-      <span class="navbar-search-icon">📍</span>
-      <input type="text" id="navLocationInput" placeholder="City" oninput="debounceProviderSearch(this.value)" autocomplete="off">
-    </div>
-    <div class="navbar-actions">
-      <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
-        🔔
-        <span class="notif-badge-count" style="display:none;">0</span>
-      </button>
-      <button class="navbar-profile-btn" onclick="openProfilePanel()" aria-label="Open profile menu">
-        <div class="user-avatar" id="userAvatar">U</div>
-        <span class="profile-name" id="userName">User</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Navigation Overlay -->
-  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
-  <nav class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-header">
-      <a href="index.html" class="navbar-brand">
-        <div class="logo-icon">⚡</div>
-        ServiceSphere
-      </a>
-      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
-    </div>
-    <a href="#" onclick="navigateTo('overview');closeMobileNav();return false;" class="active">🏠 Dashboard</a>
-    <a href="#" onclick="navigateTo('bookings');closeMobileNav();return false;">📋 My Bookings</a>
-    <a href="#" onclick="navigateTo('messages');closeMobileNav();return false;">💬 Messages</a>
-    <a href="#" onclick="navigateTo('history');closeMobileNav();return false;">📜 History</a>
-    <a href="#" onclick="navigateTo('book-service');closeMobileNav();return false;">📝 Book Service</a>
-    <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;">⚙️ Settings</a>
-    <div class="mobile-nav-actions">
-      <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
-    </div>
-  </nav>
-  <script>
-    function openMobileNav() {
-      document.getElementById('mobileNav').classList.add('open');
-      document.getElementById('mobileNavOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeMobileNav() {
-      document.getElementById('mobileNav').classList.remove('open');
-      document.getElementById('mobileNavOverlay').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-    document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
-    document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
-    document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
-  </script>
-
-  <!-- MAIN -->
-  <main class="dashboard-layout">
-
-    <!-- ══════ PAGE: Overview ══════ -->
-    <div class="dashboard-page active" id="page-overview">
-
-    <!-- ── Dashboard Hero ── -->
-    <div id="overview" class="dashboard-hero">
-      <div class="dashboard-hero-orbs">
-        <div class="dashboard-hero-orb dashboard-hero-orb--1"></div>
-        <div class="dashboard-hero-orb dashboard-hero-orb--2"></div>
-      </div>
-      <div class="dashboard-hero-content">
-        <div class="dashboard-hero-text">
-          <h2 id="welcomeMsg" class="dashboard-hero-title">Good day! 👋</h2>
-          <p class="dashboard-hero-sub">Here's what's happening with your bookings today.</p>
-          <div class="dashboard-hero-actions">
-            <button onclick="navigateTo('book-service')" class="btn btn-primary">+ Book a Service</button>
-            <button onclick="navigateTo('bookings')" class="btn btn-ghost dashboard-hero-btn-outline">📋 My Bookings</button>
-            <span class="loyalty-badge" id="loyaltyBadge" style="display:none;">🏆 <span id="loyaltyPoints">0</span> pts</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="dashboard-hero-stats">
-        <div class="dashboard-hero-stat">
-          <div class="dashboard-hero-stat-icon" style="background:rgba(99,102,241,0.2); color:#818cf8;">📅</div>
-          <div class="dashboard-hero-stat-num" id="totalBookings">0</div>
-          <div class="dashboard-hero-stat-lbl">Total Bookings</div>
-        </div>
-        <div class="dashboard-hero-stat">
-          <div class="dashboard-hero-stat-icon" style="background:rgba(245,158,11,0.2); color:#fbbf24;">⏳</div>
-          <div class="dashboard-hero-stat-num" id="pendingCnt">0</div>
-          <div class="dashboard-hero-stat-lbl">Pending</div>
-        </div>
-        <div class="dashboard-hero-stat">
-          <div class="dashboard-hero-stat-icon" style="background:rgba(56,189,248,0.2); color:#38bdf8;">🔵</div>
-          <div class="dashboard-hero-stat-num" id="acceptedCnt">0</div>
-          <div class="dashboard-hero-stat-lbl">Accepted</div>
-        </div>
-        <div class="dashboard-hero-stat">
-          <div class="dashboard-hero-stat-icon" style="background:rgba(16,185,129,0.2); color:#10b981;">✅</div>
-          <div class="dashboard-hero-stat-num" id="completedCnt">0</div>
-          <div class="dashboard-hero-stat-lbl">Completed</div>
-        </div>
-        <div class="dashboard-hero-stat">
-          <div class="dashboard-hero-stat-icon" style="background:rgba(239,68,68,0.2); color:#ef4444;">❌</div>
-          <div class="dashboard-hero-stat-num" id="cancelledCnt">0</div>
-          <div class="dashboard-hero-stat-lbl">Cancelled</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sort selector (compact, no duplicate search) -->
-    <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-      <select class="filter-select" id="sortSelect" onchange="applyProviderFilters()">
-        <option value="rating">⭐ Top Rated</option>
-        <option value="price_low">💰 Price: Low → High</option>
-        <option value="price_high">💰 Price: High → Low</option>
-        <option value="jobs">📋 Most Jobs</option>
-      </select>
-    </div>
-
-    <!-- ── Featured Providers ── -->
-    <div id="recommendedProvidersSection" style="margin-bottom:40px;">
-      <div class="section-title">🌟 Recommended Providers</div>
-      <div class="tab-bar" id="dashboardProviderFilterBar" style="margin-bottom:16px;"></div>
-      <div class="providers-grid" id="recommendedProvidersList">
-        <div class="loader-box">Loading verified providers…</div>
-      </div>
-    </div>
-    </div><!-- /page-overview -->
-
-    <!-- ══════ PAGE: Bookings ══════ -->
-    <div class="dashboard-page" id="page-bookings">
-    <div id="bookings" style="margin-bottom:40px;">
-      <div class="section-title">
-        📋 My Bookings
-        <span class="cnt" id="bookingsBadge" style="background:var(--primary);color:#fff;">0</span>
-      </div>
-
-      <!-- Section Tabs: Bookings / Messages / History -->
-      <div class="dashboard-section-tabs">
-        <button class="dashboard-section-tab active" onclick="switchDashboardTab('bookings')">📋 Active Bookings</button>
-        <button class="dashboard-section-tab" onclick="switchDashboardTab('messages')">💬 Messages</button>
-        <button class="dashboard-section-tab" onclick="switchDashboardTab('history')">📀 Booking History</button>
-        <button class="dashboard-section-tab" onclick="switchDashboardTab('notifications')">🔔 Notifications <span class="tab-badge notif-badge-count" style="display:none;">0</span></button>
-      </div>
-
-      <!-- Panel: Active Bookings -->
-      <div class="dashboard-section-panel active" id="panel-bookings">
-        <!-- Tab Filter -->
-        <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
-          <button class="tab-btn active" id="tab-all" onclick="filterBookings('all')" role="tab"
-            aria-selected="true">All</button>
-          <button class="tab-btn" id="tab-pending" onclick="filterBookings('pending')" role="tab"
-            aria-selected="false">Pending</button>
-          <button class="tab-btn" id="tab-accepted" onclick="filterBookings('accepted')" role="tab"
-            aria-selected="false">Accepted</button>
-          <button class="tab-btn" id="tab-completed" onclick="filterBookings('completed')" role="tab"
-            aria-selected="false">Completed</button>
-          <button class="tab-btn" id="tab-cancelled" onclick="filterBookings('cancelled')" role="tab"
-            aria-selected="false">Cancelled</button>
-        </div>
-        <div class="bookings-list" id="bookingsList" aria-live="polite" aria-label="Your bookings">
-          <div class="empty-state">
-            <div class="icon">📭</div>
-            <h4>No bookings yet</h4>
-            <p>Book a service below to get started.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel: Messages -->
-      <div class="dashboard-section-panel" id="panel-messages">
-        <div class="messages-list" id="messageThreadsList">
-          <div class="empty-state">
-            <div class="icon">💬</div>
-            <h4>No messages yet</h4>
-            <p>Your conversations with providers will appear here.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel: Booking History -->
-      <div class="dashboard-section-panel" id="panel-history">
-        <div id="bookingHistoryList">
-          <div class="empty-state">
-            <div class="icon">📀</div>
-            <h4>No past bookings</h4>
-            <p>Your completed and cancelled bookings will appear here.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel: Notifications -->
-      <div class="dashboard-section-panel" id="panel-notifications">
-        <div id="inlineNotifList">
-          <div class="empty-state">
-            <div class="icon">🔔</div>
-            <h4>No notifications</h4>
-            <p>Booking updates, reschedules, and messages will appear here.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div><!-- /page-bookings -->
-
-    <!-- ══════ PAGE: Book Service ══════ -->
-    <div class="dashboard-page" id="page-book-service">
-    <div id="book-service">
-      <div class="section-title">📝 Book a Service</div>
-      <div class="form-card">
-        <div class="form-grid">
-          <div class="form-group full">
-            <label for="b_name">Your Name</label>
-            <input type="text" id="b_name" placeholder="Your full name" aria-required="true">
-          </div>
-          <div class="form-group">
-            <label>Service Type</label>
-            <select id="b_service">
-              <option value="">Select a service</option>
-              <option value="Electrician">⚡ Electrician</option>
-              <option value="Plumber">🔧 Plumber</option>
-              <option value="Driver">🚗 Driver</option>
-              <option value="Maid">🏠 Maid / Cleaning</option>
-              <option value="Chef">👨‍🍳 Chef / Cook</option>
-              <option value="Tutor">📚 Tutor</option>
-              <option value="Carpenter">🪚 Carpenter</option>
-              <option value="Painter">🎨 Painter</option>
-              <option value="AC Repair">❄️ AC Repair</option>
-              <option value="Gardener">🌿 Gardener</option>
-              <option value="Pet Care">🐾 Pet Care</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Preferred Provider</label>
-            <div class="provider-search-wrap" id="providerSearchWrap">
-              <input type="text" id="b_provider" placeholder="← First select a service" autocomplete="off" disabled
-                oninput="onProviderSearch(this.value)" onfocus="onProviderSearchFocus()"
-                onkeydown="onProviderSearchKey(event)" onclick="onProviderInputClick()">
-              <span class="provider-chevron" id="providerChevron">▼</span>
-              <div class="provider-dropdown" id="providerDropdown"></div>
-            </div>
-            <div class="provider-hint" id="providerHint">
-              <span class="hint-dot"></span>
-              <span id="providerHintText">Select a service to see available providers</span>
-            </div>
-            <div id="providerSelectedPill" style="display:none;">
-              <span class="provider-selected-pill">
-                <span id="providerPillIcon">👤</span>
-                <span id="providerPillText"></span>
-                <button class="clear-btn" onclick="clearProviderSelection()" title="Clear">✕</button>
-              </span>
-            </div>
-            <span id="providerValidationMsg"></span>
-          </div>
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="b_date">
-          </div>
-          <div class="form-group">
-            <label>Time</label>
-            <input type="time" id="b_time">
-          </div>
-          <div class="form-group full">
-            <label>Service Address</label>
-            <input type="text" id="b_address" placeholder="Enter your full address">
-          </div>
-          <div class="form-group full">
-            <label>Additional Notes</label>
-            <textarea id="b_notes" placeholder="Describe what you need..."></textarea>
-          </div>
-        </div>
-        <div style="margin-top:4px; display:flex; gap:12px;">
-          <button class="btn btn-primary btn-lg" id="bookBtn" onclick="createBooking()">
-            <span id="bookBtnText">Confirm Booking</span>
-            <span id="bookSpinner" class="spinner" style="display:none;"></span>
-          </button>
-          <button class="btn btn-ghost" onclick="clearBookingForm()">Clear</button>
-        </div>
-      </div>
-    </div>
-    </div><!-- /page-book-service -->
-
-    <!-- ══════ PAGE: Messages (standalone) ══════ -->
-    <div class="dashboard-page" id="page-messages">
-      <div class="section-title">💬 Messages</div>
-      <div class="messages-list" id="messageThreadsListFull"></div>
-    </div>
-
-    <!-- ══════ PAGE: History (standalone) ══════ -->
-    <div class="dashboard-page" id="page-history">
-      <div class="section-title">📜 Booking History</div>
-      <div id="bookingHistoryListFull"></div>
-    </div>
-
-    <!-- ══════ PAGE: Notifications (standalone) ══════ -->
-    <div class="dashboard-page" id="page-notifications">
-      <div class="section-title">🔔 Notifications</div>
-      <div id="inlineNotifListFull"></div>
-    </div>
-
-    <!-- ══════ PAGE: Settings ══════ -->
-    <div class="dashboard-page" id="page-settings">
-      <div class="section-title">⚙️ Settings</div>
-      <div class="settings-grid">
-
-        <!-- Profile Info -->
-        <div class="settings-card">
-          <div class="settings-card-title">👤 Profile Information</div>
-          <div class="settings-card-desc">Update your personal details</div>
-          <div class="settings-form-group">
-            <label>Full Name</label>
-            <input type="text" id="settings_name" placeholder="Your name">
-          </div>
-          <div class="settings-form-group">
-            <label>Email Address</label>
-            <input type="email" id="settings_email" placeholder="your@email.com">
-          </div>
-          <div class="settings-form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="settings_phone" placeholder="10-digit mobile number" maxlength="10">
-          </div>
-          <div class="settings-actions">
-            <button class="btn btn-primary" onclick="saveProfile()">💾 Save Changes</button>
-          </div>
-          <div class="settings-msg" id="profileMsg"></div>
-        </div>
-
-        <!-- Change Password -->
-        <div class="settings-card">
-          <div class="settings-card-title">🔒 Change Password</div>
-          <div class="settings-card-desc">Update your account password</div>
-          <div class="settings-form-group">
-            <label>Current Password</label>
-            <input type="password" id="settings_current_pwd" placeholder="Enter current password">
-          </div>
-          <div class="settings-form-group">
-            <label>New Password</label>
-            <input type="password" id="settings_new_pwd" placeholder="At least 6 characters">
-          </div>
-          <div class="settings-form-group">
-            <label>Confirm New Password</label>
-            <input type="password" id="settings_confirm_pwd" placeholder="Re-enter new password">
-          </div>
-          <div class="settings-actions">
-            <button class="btn btn-primary" onclick="changePassword()">🔑 Update Password</button>
-          </div>
-          <div class="settings-msg" id="passwordMsg"></div>
-        </div>
-
-        <!-- Appearance -->
-        <div class="settings-card">
-          <div class="settings-card-title">🎨 Appearance</div>
-          <div class="settings-card-desc">Customize the look and feel</div>
-          <div class="toggle-switch">
-            <div class="toggle-switch-label">
-              <span class="title">☀️ Light Mode</span>
-              <span class="desc">Switch between dark and light theme</span>
-            </div>
-            <div class="toggle-track" id="themeToggle" onclick="toggleTheme()"></div>
-          </div>
-        </div>
-
-        <!-- Privacy -->
-        <div class="settings-card">
-          <div class="settings-card-title">🔐 Privacy</div>
-          <div class="settings-card-desc">Control who can message you</div>
-          <div class="radio-option selected" onclick="setMsgPrivacy('everyone')" data-privacy="everyone">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-text">Everyone</div>
-              <div class="radio-desc">Any provider you've booked can message you</div>
-            </div>
-          </div>
-          <div class="radio-option" onclick="setMsgPrivacy('active')" data-privacy="active">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-text">Active bookings only</div>
-              <div class="radio-desc">Only providers with active/pending bookings</div>
-            </div>
-          </div>
-          <div class="radio-option" onclick="setMsgPrivacy('none')" data-privacy="none">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-text">Nobody</div>
-              <div class="radio-desc">Disable incoming messages from all providers</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </main>
-
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <div class="logo-icon">⚡</div> ServiceSphere
-      </div>
-      <div class="footer-links"><a href="index.html">Home</a></div>
-      <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
-    </div>
-  </footer>
-
-  <!-- PAYMENT MODAL -->
-  <div class="modal-overlay" id="paymentModalOverlay">
-    <div class="modal" id="paymentModal">
-      <h3 id="paymentModalTitle">Secure Payment</h3>
-      <div class="sub" id="paymentModalSub">Complete payment for your service booking.</div>
-
-      <!-- Amount Display -->
-      <div
-        style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: center;">
-        <span style="font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Amount to
-          Pay</span>
-        <span style="font-size: 28px; font-weight: 800; color: #fff;" id="paymentAmount">₹499.00</span>
-      </div>
-
-      <!-- Payment Success Checkmark (hidden by default) -->
-      <div id="paymentSuccessView" class="success-checkmark" style="display: none;">
-        <div class="checkmark-circle">✓</div>
-        <h4>Payment Successful!</h4>
-        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Your booking has been updated to
-          Paid.</p>
-      </div>
-
-      <!-- Main Payment Form (Credit Card / UPI) -->
-      <div id="paymentFormView">
-        <div class="pay-methods">
-          <button class="pay-method-btn active" id="payMethodCard" onclick="switchPaymentMethod('card')">
-            <span>💳</span> Credit/Debit Card
-          </button>
-          <button class="pay-method-btn" id="payMethodUpi" onclick="switchPaymentMethod('upi')">
-            <span>📱</span> UPI / QR Code
-          </button>
-        </div>
-
-        <!-- Credit Card Fields -->
-        <div id="cardPaymentFields">
-          <!-- Card Preview -->
-          <div class="credit-card-preview">
-            <div class="card-top">
-              <div class="card-chip"></div>
-              <div class="card-logo" id="previewCardLogo">VISA</div>
-            </div>
-            <div class="card-number" id="previewCardNumber">•••• •••• •••• ••••</div>
-            <div class="card-bottom">
-              <div>
-                <div class="card-label">Card Holder</div>
-                <div id="previewCardName" style="font-weight: 600; font-size: 13px;">YOUR NAME</div>
-              </div>
-              <div>
-                <div class="card-label">Expires</div>
-                <div id="previewCardExpiry" style="font-weight: 600; font-size: 13px;">MM/YY</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Form fields -->
-          <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-size: 12px; margin-bottom: 4px;">Cardholder Name</label>
-              <input type="text" id="cardNameInput" placeholder="Name on card" oninput="updateCardPreview()">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label style="font-size: 12px; margin-bottom: 4px;">Card Number</label>
-              <input type="text" id="cardNumberInput" placeholder="1234 5678 9012 3456" maxlength="19"
-                oninput="updateCardPreview()">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-size: 12px; margin-bottom: 4px;">Expiry Date</label>
-                <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5" oninput="updateCardPreview()">
-              </div>
-              <div class="form-group" style="margin-bottom: 0;">
-                <label style="font-size: 12px; margin-bottom: 4px;">CVV</label>
-                <input type="password" id="cardCvvInput" placeholder="•••" maxlength="3">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- UPI Fields -->
-        <div id="upiPaymentFields" style="display: none; text-align: center;">
-          <div style="margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-            <div style="background: white; padding: 12px; border-radius: var(--radius-md); display: inline-block;">
-              <!-- UPI QR Placeholder -->
-              <div
-                style="width: 140px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; color: #333; font-weight: 700; font-size: 12px; flex-direction: column;">
-                <span>ServiceSphere Pay</span>
-                <span style="font-size: 24px; margin-top: 8px;">📱 QR</span>
-              </div>
-            </div>
-            <p style="font-size: 12px; color: var(--text-secondary);">Scan this QR code with any UPI app to pay</p>
-          </div>
-          <div style="border-top: 1px solid var(--dark-border); padding-top: 16px; margin-top: 16px;">
-            <span style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Or enter
-              UPI ID</span>
-            <div class="form-group" style="margin-bottom: 0;">
-              <input type="text" id="upiIdInput" placeholder="username@upi" style="text-align: center;">
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closePaymentModal()">Cancel</button>
-          <button class="btn btn-primary" id="paymentSubmitBtn" onclick="submitPayment()">
-            <span id="paymentSubmitBtnText">Pay Now</span>
-            <span id="paymentSubmitSpinner" class="spinner" style="display: none;"></span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/reviews.js"></script>
-  <script src="js/bookings.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/payments.js"></script>
-  <script src="js/providers.js"></script>
-  <script src="js/notif-center.js"></script>
-  <script src="js/notifications.js"></script>
-  <script src="js/chatbot.js"></script>
-
-  <!-- Review Modal -->
-  <div class="modal-overlay" id="reviewModal">
-    <div class="modal">
-      <div class="review-modal-header">
-        <h3>⭐ Rate Your Experience</h3>
-        <div class="sub">How was your service with <strong id="reviewProviderName"></strong>? <span id="reviewServiceName" style="color:var(--text-muted);"></span></div>
-      </div>
-      <div id="reviewStarPicker" class="star-picker"></div>
-      <div id="reviewRatingLabel" class="review-rating-label"></div>
-      <textarea id="reviewText" class="review-textarea" placeholder="Tell us about your experience (optional)…" maxlength="1000" oninput="updateReviewCharCount()"></textarea>
-      <div id="reviewCharCount" class="review-char-count">0 / 1000</div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeReviewModal()">Cancel</button>
-        <button class="btn btn-primary" id="reviewSubmitBtn" onclick="submitReview()">⭐ Submit Review</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reviews Drawer -->
-  <div class="reviews-drawer" id="reviewsDrawer">
-    <div class="reviews-drawer-header">
-      <h3>Reviews for <span id="reviewsDrawerProviderName"></span></h3>
-      <button class="reviews-drawer-close" onclick="closeReviewsDrawer()">&times;</button>
-    </div>
-    <div class="reviews-drawer-body" id="reviewsDrawerBody"></div>
-  </div>
-
-  <!-- Reschedule Modal -->
-  <div class="modal-overlay" id="rescheduleModal">
-    <div class="modal" style="max-width:400px;">
-      <h3>📅 Reschedule Booking</h3>
-      <div class="sub">Pick a new date and time for this booking.</div>
-      <input type="hidden" id="rescheduleBookingId">
-      <div class="form-group">
-        <label for="rescheduleDate">New Date</label>
-        <input type="date" id="rescheduleDate" class="form-input" required>
-      </div>
-      <div class="form-group">
-        <label for="rescheduleTime">New Time</label>
-        <input type="time" id="rescheduleTime" class="form-input" required>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeRescheduleModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitReschedule()" id="rescheduleSubmitBtn">✓ Confirm
-          Reschedule</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOATING CHAT DRAWER -->
-  <div class="chat-drawer" id="chatDrawer">
-    <div class="chat-header">
-      <div class="chat-partner-info">
-        <div class="chat-status-dot"></div>
-        <div>
-          <div class="chat-partner-name" id="chatPartnerName">Provider</div>
-          <div class="chat-partner-service" id="chatPartnerService">Service</div>
-        </div>
-      </div>
-      <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Loading messages…</div>
-    </div>
-    <div class="chat-input-area">
-      <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…"
-        onkeydown="if(event.key==='Enter') sendChatMessage()">
-      <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
-    </div>
-  </div>
-
-  <script>
-    // ── Init ──
-    window.addEventListener('DOMContentLoaded', () => {
-      checkAuth('customer');
-
-      const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-      const name = user.name || 'User';
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-
-      // Profile panel
-      const pAvatar = document.getElementById('profileAvatar');
-      const pName = document.getElementById('profileName');
-      const pEmail = document.getElementById('profileEmail');
-      if (pAvatar) pAvatar.textContent = name.charAt(0).toUpperCase();
-      if (pName) pName.textContent = name;
-      if (pEmail) pEmail.textContent = user.email || '';
-
-      const hour = new Date().getHours();
-      const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-      document.getElementById('welcomeMsg').textContent = greet + ', ' + name.split(' ')[0] + '! 👋';
-
-      // pre-fill from homepage (via "Book Now" on a provider card)
-      const ps = sessionStorage.getItem('preselect_service');
-      const pp = sessionStorage.getItem('preselect_provider');
-      const ppid = sessionStorage.getItem('preselect_provider_id');
-      if (ps) { document.getElementById('b_service').value = ps; sessionStorage.removeItem('preselect_service'); }
-      if (ppid) { window._selectedProviderId = parseInt(ppid); sessionStorage.removeItem('preselect_provider_id'); }
-      if (pp && ppid) {
-        // Provider was pre-selected from a card — confirm the selection
-        selectProvider({ id: parseInt(ppid), name: pp, service: ps || '', city: '' });
-        sessionStorage.removeItem('preselect_provider');
-      }
-      if (user.name) document.getElementById('b_name').value = user.name;
-
-      // default date = tomorrow
-      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-      document.getElementById('b_date').value = tomorrow.toISOString().split('T')[0];
-
-      // Close dropdown on outside click
-      document.addEventListener('click', (e) => {
-        if (!document.getElementById('providerSearchWrap')?.contains(e.target)) {
-          closeProviderDropdown();
-        }
-      });
-
-      // When service changes, clear provider selection and auto-show providers for that category
-      document.getElementById('b_service')?.addEventListener('change', (e) => {
-        clearProviderSelection();
-        const service = e.target.value;
-        const providerInput = document.getElementById('b_provider');
-        const providerHint = document.getElementById('providerHint');
-        if (service) {
-          // Enable the provider input and update placeholder
-          if (providerInput) {
-            providerInput.disabled = false;
-            providerInput.placeholder = 'Click to select a ' + service + ' provider';
-          }
-          // Auto-fetch and show available providers for the selected service
-          setTimeout(() => {
-            fetchAndShowProviders('').then(() => {
-              // Update the hint with the count
-              const count = _providerSearchCache.length;
-              if (providerHint) {
-                const hintText = document.getElementById('providerHintText');
-                if (hintText) {
-                  hintText.textContent = count > 0
-                    ? count + ' ' + service + ' provider' + (count > 1 ? 's' : '') + ' available — click to choose'
-                    : 'No ' + service + ' providers registered yet — choose "Any Available"';
-                }
-                providerHint.classList.add('visible');
-              }
-              // Auto-open the dropdown so user sees providers immediately
-              if (count > 0) {
-                renderProviderDropdown('');
-              }
-            });
-          }, 150);
-        } else {
-          // No service selected — disable provider input
-          if (providerInput) {
-            providerInput.disabled = true;
-            providerInput.placeholder = '← First select a service';
-          }
-          if (providerHint) providerHint.classList.remove('visible');
-        }
-      });
-
-      renderBookings('all');
-      loadCustomerStats();
-
-      // ── CUSTOMER NOTIFICATION POLLING (uses shared function from script.js) ──
-      startNotificationPolling({
-        role: 'customer',
-        bookingsEndpoint: '/bookings',
-        onRefresh: () => renderBookings(_bookingsFilter || 'all')
-      });
-    });
-
-    // ── Filter bookings ──
-    function filterBookings(status) {
-      ['all', 'pending', 'accepted', 'completed', 'cancelled'].forEach(t => {
-        document.getElementById('tab-' + t)?.classList.toggle('active', t === status);
-      });
-      renderBookings(status);
-    }
-
-    // ── Pre-fill from provider card (Recommended Providers section) ──
-    function prefillBooking(service, provider, providerId) {
-      document.getElementById('b_service').value = service;
-      selectProvider({ id: providerId, name: provider, service: service, city: '' });
-      navigateTo('book-service');
-    }
-
-    // ── Clear form ──
-    function clearBookingForm() {
-      ['b_service', 'b_address', 'b_notes'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      clearProviderSelection();
-    }
-
-    /* ══════════════════════════════════════════
-       PROVIDER AUTOCOMPLETE LOGIC
-    ══════════════════════════════════════════ */
-
-    let _providerSearchCache = [];      // providers fetched for current service
-    let _providerSearchTimer = null;   // debounce timer
-    let _dropdownHighlight = -1;     // keyboard nav index
-    let _providerConfirmed = false;  // true only when user explicitly picked from dropdown
-
-    const ICONS = {
-      Electrician: '⚡', Plumber: '🔧', Driver: '🚗', Maid: '🏠', Chef: '👨‍🍳',
-      Tutor: '📚', Carpenter: '🪚', Painter: '🎨', 'AC Repair': '❄️',
-      Gardener: '🌿', 'Pet Care': '🐾', Security: '🛡️'
-    };
-    function getServiceIcon(s) { return ICONS[s] || '👤'; }
-
-    // Called when user types in provider search box
-    function onProviderSearch(value) {
-      _providerConfirmed = false;
-      window._selectedProviderId = null;
-      clearValidationMsg();
-      _dropdownHighlight = -1;
-      clearTimeout(_providerSearchTimer);
-      _providerSearchTimer = setTimeout(() => fetchAndShowProviders(value.trim()), 250);
-    }
-
-    // Called on focus — show dropdown
-    function onProviderSearchFocus() {
-      if (_providerConfirmed) return;
-      const q = document.getElementById('b_provider')?.value?.trim() || '';
-      fetchAndShowProviders(q);
-    }
-
-    // Keyboard navigation
-    function onProviderSearchKey(e) {
-      const dropdown = document.getElementById('providerDropdown');
-      const opts = dropdown?.querySelectorAll('.provider-opt, .provider-any-opt');
-      if (!opts || !opts.length) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        _dropdownHighlight = Math.min(_dropdownHighlight + 1, opts.length - 1);
-        updateHighlight(opts);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        _dropdownHighlight = Math.max(_dropdownHighlight - 1, 0);
-        updateHighlight(opts);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (_dropdownHighlight >= 0 && opts[_dropdownHighlight]) opts[_dropdownHighlight].click();
-      } else if (e.key === 'Escape') {
-        closeProviderDropdown();
-      }
-    }
-
-    function updateHighlight(opts) {
-      opts.forEach((o, i) => o.classList.toggle('highlighted', i === _dropdownHighlight));
-      if (_dropdownHighlight >= 0) opts[_dropdownHighlight].scrollIntoView({ block: 'nearest' });
-    }
-
-    async function fetchAndShowProviders(query) {
-      const service = document.getElementById('b_service')?.value || '';
-      let url = API_URL + '/providers';
-      if (service) url += '?service=' + encodeURIComponent(service);
-      try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-        const data = await res.json();
-        _providerSearchCache = data.success ? (data.providers || []) : [];
-      } catch (e) {
-        _providerSearchCache = [];
-      }
-      renderProviderDropdown(query);
-    }
-
-    function renderProviderDropdown(query) {
-      const dropdown = document.getElementById('providerDropdown');
-      if (!dropdown) return;
-      const q = (query || '').toLowerCase();
-      const service = document.getElementById('b_service')?.value || '';
-
-      // Filter by query
-      const filtered = q
-        ? _providerSearchCache.filter(p =>
-          p.name.toLowerCase().includes(q) ||
-          (p.city || '').toLowerCase().includes(q) ||
-          (p.service || '').toLowerCase().includes(q)
-        )
-        : _providerSearchCache;
-
-      let html = '';
-
-      // Count header
-      const totalCount = _providerSearchCache.length;
-      const shownCount = filtered.length;
-      const serviceLabel = service || 'All Services';
-      if (service) {
-        html += `<div class="provider-dropdown-header">${getServiceIcon(service)} ${shownCount} ${escapeHtml(serviceLabel)} provider${shownCount !== 1 ? 's' : ''} available</div>`;
-      }
-
-      // "Any Available Provider" always on top
-      html += `
-      <div class="provider-any-opt" onclick="selectAnyProvider()">
-        <div class="provider-opt-avatar">🎯</div>
-        <div>
-          <div class="provider-opt-name">Any Available Provider</div>
-          <div class="provider-opt-meta">We'll assign the best match for your service</div>
-        </div>
-      </div>`;
-
-      if (!filtered.length && q) {
-        html += `<div class="provider-empty-opt">❌ No verified provider found for "<strong>${escapeHtml(query)}</strong>"<br><span style="font-size:11px;margin-top:4px;display:block;">Try a different name or select Any Available Provider above</span></div>`;
-      } else {
-        filtered.slice(0, 12).forEach(p => {
-          const safeP = JSON.stringify(p).replace(/"/g, '&quot;');
-          html += `
-          <div class="provider-opt" onclick="selectProvider(JSON.parse(this.dataset.p))" data-p="${safeP}">
-            <div class="provider-opt-avatar">${getServiceIcon(p.service)}</div>
-            <div style="flex:1;min-width:0;">
-              <div class="provider-opt-name">${escapeHtml(p.name)}</div>
-              <div class="provider-opt-meta">${escapeHtml(p.service || '')}${p.city ? ' · 📍 ' + escapeHtml(p.city) : ''}</div>
-            </div>
-            <div class="provider-opt-badge">✓ Verified</div>
-          </div>`;
-        });
-      }
-
-      dropdown.innerHTML = html;
-      dropdown.classList.add('open');
-      document.getElementById('providerChevron')?.classList.add('open');
-      _dropdownHighlight = -1;
-    }
-
-    function closeProviderDropdown() {
-      document.getElementById('providerDropdown')?.classList.remove('open');
-      document.getElementById('providerChevron')?.classList.remove('open');
-    }
-
-    // Clicking the input toggles the dropdown (like a select)
-    function onProviderInputClick() {
-      if (_providerConfirmed) return;
-      const dropdown = document.getElementById('providerDropdown');
-      if (dropdown?.classList.contains('open')) {
-        closeProviderDropdown();
-      } else {
-        const q = document.getElementById('b_provider')?.value?.trim() || '';
-        fetchAndShowProviders(q);
-      }
-    }
-
-    // User selected a specific verified provider
-    function selectProvider(p) {
-      _providerConfirmed = true;
-      window._selectedProviderId = p.id || null;
-
-      const input = document.getElementById('b_provider');
-      const pill = document.getElementById('providerSelectedPill');
-      const pillIcon = document.getElementById('providerPillIcon');
-      const pillText = document.getElementById('providerPillText');
-
-      if (input) { input.value = p.name; input.style.display = 'none'; }
-      if (pillIcon) pillIcon.textContent = getServiceIcon(p.service);
-      if (pillText) pillText.textContent = p.name + (p.city ? '  ·  📍 ' + p.city : '') + '  ·  ✓ Verified';
-      if (pill) pill.style.display = 'block';
-
-      setValidationMsg('success', '✓ Provider confirmed — you\'re good to go!');
-      closeProviderDropdown();
-    }
-
-    // User selected "Any Available Provider"
-    function selectAnyProvider() {
-      _providerConfirmed = true;
-      window._selectedProviderId = null;
-
-      const input = document.getElementById('b_provider');
-      const pill = document.getElementById('providerSelectedPill');
-      const pillIcon = document.getElementById('providerPillIcon');
-      const pillText = document.getElementById('providerPillText');
-
-      if (input) { input.value = ''; input.style.display = 'none'; }
-      if (pillIcon) pillIcon.textContent = '🎯';
-      if (pillText) pillText.textContent = 'Any Available Provider';
-      if (pill) pill.style.display = 'block';
-
-      setValidationMsg('success', '✓ We\'ll assign the best available provider for your service');
-      closeProviderDropdown();
-    }
-
-    // Clear selection — go back to search
-    function clearProviderSelection() {
-      _providerConfirmed = false;
-      window._selectedProviderId = null;
-
-      const input = document.getElementById('b_provider');
-      const pill = document.getElementById('providerSelectedPill');
-      const service = document.getElementById('b_service')?.value || '';
-      if (input) {
-        input.value = '';
-        input.style.display = '';
-        // Keep disabled state in sync with service selection
-        if (!service) {
-          input.disabled = true;
-          input.placeholder = '← First select a service';
-        }
-      }
-      if (pill) pill.style.display = 'none';
-      clearValidationMsg();
-      closeProviderDropdown();
-    }
-
-    function setValidationMsg(type, msg) {
-      const el = document.getElementById('providerValidationMsg');
-      if (!el) return;
-      el.className = type;
-      el.textContent = msg;
-    }
-
-    function clearValidationMsg() {
-      const el = document.getElementById('providerValidationMsg');
-      if (el) { el.className = ''; el.textContent = ''; }
-    }
-
-    /* ═══════════════════════════════════════
-       SEARCH & FILTER PROVIDERS
-    ═══════════════════════════════════════ */
-    let _searchDebounce = null;
-    function debounceProviderSearch(q) {
-      clearTimeout(_searchDebounce);
-      _searchDebounce = setTimeout(() => {
-        // Auto-navigate to overview so results are visible
-        if (_currentPage !== 'overview') navigateTo('overview');
-        applyProviderFilters();
-      }, 300);
-    }
-
-    function applyProviderFilters() {
-      const q = (document.getElementById('navSearchInput')?.value || '').trim();
-      const sort = document.getElementById('sortSelect')?.value || 'rating';
-      const city = (document.getElementById('navLocationInput')?.value || '').trim();
-      const activeFilter = document.querySelector('#dashboardProviderFilterBar .tab-btn.active')?.textContent?.trim();
-      const service = (activeFilter && activeFilter !== 'All') ? activeFilter : '';
-
-      let url = API_URL + '/providers?sort=' + encodeURIComponent(sort);
-      if (service) url += '&service=' + encodeURIComponent(service);
-      if (q) url += '&q=' + encodeURIComponent(q);
-      if (city) url += '&city=' + encodeURIComponent(city);
-
-      const container = document.getElementById('recommendedProvidersList');
-      if (!container) return;
-
-      // If not on overview, switch
-      if (_currentPage !== 'overview') navigateTo('overview');
-
-      fetch(url)
-        .then(r => r.json())
-        .then(data => {
-          if (!data.success || !data.providers?.length) {
-            container.innerHTML = '<div class="loader-box">No providers match your search. Try different filters.</div>';
-            // Still scroll to show the empty message
-            scrollToProviders();
-            return;
-          }
-          container.innerHTML = data.providers.slice(0, 12).map(p => `
-            <div class="provider-card">
-              <div class="provider-header">
-                <div class="provider-avatar">${serviceIcon(p.service)}</div>
-                <div>
-                  <div class="provider-name">${escapeHtml(p.name)}</div>
-                  <div class="provider-type">${escapeHtml(p.service || 'Professional')}${p.username ? ' · <span style="color:var(--primary-light);">@' + escapeHtml(p.username) + '</span>' : ''}</div>
-                </div>
-              </div>
-              <div class="provider-detail">📍 ${escapeHtml(p.city || p.location || 'India')}${p.pincode ? ' · ' + escapeHtml(p.pincode) : ''}</div>
-              ${providerPriceHtml(p)}
-              ${providerRatingHtml(p)}
-              ${providerStatsHtml(p)}
-              <div class="provider-badge">✓ Verified</div>
-              <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
-            </div>
-          `).join('');
-          // Scroll to providers section so user sees results immediately
-          scrollToProviders();
-        })
-        .catch(() => {});
-    }
-
-    function scrollToProviders() {
-      const section = document.getElementById('recommendedProvidersSection');
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    /* ═══════════════════════════════════════
-       CUSTOMER STATS & LOYALTY POINTS
-    ═══════════════════════════════════════ */
-    async function loadCustomerStats() {
-      try {
-        const res = await apiFetch(API_URL + '/customer/stats', {
-          headers: { 'Authorization': 'Bearer ' + getToken() }
-        });
-        const data = await res.json();
-        if (data.success && data.stats) {
-          const pts = data.stats.loyalty_points || 0;
-          const badge = document.getElementById('loyaltyBadge');
-          const ptsEl = document.getElementById('loyaltyPoints');
-          if (pts > 0 && badge && ptsEl) {
-            ptsEl.textContent = pts;
-            badge.style.display = '';
-          }
-        }
-      } catch(e) { /* silent */ }
-    }
-
-    /* ═══════════════════════════════════════
-       SPA NAVIGATION — switch dashboard pages
-    ═══════════════════════════════════════ */
-    let _currentPage = 'overview';
-
-    function navigateTo(pageName) {
-      _currentPage = pageName;
-
-      // Hide all pages, show target
-      document.querySelectorAll('.dashboard-page').forEach(p => p.classList.remove('active'));
-      const target = document.getElementById('page-' + pageName);
-      if (target) target.classList.add('active');
-
-      // Update profile panel nav links
-      document.querySelectorAll('.profile-nav-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.page === pageName);
-      });
-
-      // Load content for the page
-      if (pageName === 'bookings') {
-        renderBookings(_bookingsFilter || 'all');
-        // Also activate the "bookings" sub-tab
-        document.querySelectorAll('.dashboard-section-tab').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.dashboard-section-panel').forEach(p => p.classList.remove('active'));
-        const bTab = document.querySelector('.dashboard-section-tab');
-        const bPanel = document.getElementById('panel-bookings');
-        if (bTab) bTab.classList.add('active');
-        if (bPanel) bPanel.classList.add('active');
-      }
-      if (pageName === 'messages') loadMessageThreadsFull();
-      if (pageName === 'history') loadBookingHistoryFull();
-      if (pageName === 'notifications') renderInlineNotificationsFull();
-      if (pageName === 'settings') loadSettingsPage();
-      if (pageName === 'overview') {
-        renderBookings(_bookingsFilter || 'all');
-        if (typeof loadDashboardProviders === 'function') loadDashboardProviders();
-      }
-
-      // Close profile panel if open
-      closeProfilePanel();
-
-      // Scroll to top of main content
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Keep old switchDashboardTab for in-page sub-tabs (Active/Messages/History/Notifications within bookings page)
-    function switchDashboardTab(tabName) {
-      // Update tab buttons
-      document.querySelectorAll('.dashboard-section-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tabName));
-      });
-      // Show/hide panels
-      document.querySelectorAll('.dashboard-section-panel').forEach(panel => {
-        panel.classList.remove('active');
-      });
-      const panel = document.getElementById('panel-' + tabName);
-      if (panel) panel.classList.add('active');
-
-      // Load content for the panel
-      if (tabName === 'messages') loadMessageThreads();
-      if (tabName === 'history') loadBookingHistory();
-      if (tabName === 'notifications') renderInlineNotifications();
-    }
-
-    /* ═══════════════════════════════════════
-       PROFILE PANEL
-    ═══════════════════════════════════════ */
-    function openProfilePanel() {
-      document.getElementById('profilePanel')?.classList.add('open');
-      document.getElementById('profilePanelOverlay')?.classList.add('open');
-    }
-    function closeProfilePanel() {
-      document.getElementById('profilePanel')?.classList.remove('open');
-      document.getElementById('profilePanelOverlay')?.classList.remove('open');
-    }
-
-    /* ═══════════════════════════════════════
-       MESSAGES TAB
-    ═══════════════════════════════════════ */
-    async function loadMessageThreads() {
-      const container = document.getElementById('messageThreadsList');
-      if (!container) return;
-      container.innerHTML = '<div class="loader-box">Loading conversations…</div>';
-
-      await fetchBookingsFromAPI();
-      const bookings = getBookings().filter(b => b.status !== 'Cancelled');
-
-      if (!bookings.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">💬</div>
-            <h4>No conversations</h4>
-            <p>Book a service to start chatting with providers.</p>
-          </div>`;
-        return;
-      }
-
-      // Load last message for each booking
-      const threads = [];
-      for (const b of bookings) {
-        try {
-          const res = await fetch(API_URL + '/chats/' + b.id, {
-            headers: { 'Authorization': 'Bearer ' + getToken() },
-            signal: AbortSignal.timeout(3000)
-          });
-          const data = await res.json();
-          const msgs = (data.success && data.messages) ? data.messages : [];
-          const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-          threads.push({ booking: b, lastMsg, msgCount: msgs.length });
-        } catch(e) {
-          threads.push({ booking: b, lastMsg: null, msgCount: 0 });
-        }
-      }
-
-      // Sort by most recent message
-      threads.sort((a, b) => {
-        const ta = a.lastMsg ? new Date(a.lastMsg.created_at).getTime() : 0;
-        const tb = b.lastMsg ? new Date(b.lastMsg.created_at).getTime() : 0;
-        return tb - ta;
-      });
-
-      container.innerHTML = threads.map(t => {
-        const b = t.booking;
-        const preview = t.lastMsg
-          ? escapeHtml((t.lastMsg.sender_name || 'You') + ': ' + (t.lastMsg.message || '').substring(0, 50))
-          : 'No messages yet — tap to start chatting';
-        const timeStr = t.lastMsg ? timeAgo(t.lastMsg.created_at) : '';
-        return `
-          <div class="message-thread-card" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'})">
-            <div class="message-thread-avatar">${serviceIcon(b.service)}</div>
-            <div class="message-thread-info">
-              <div class="message-thread-name">${escapeHtml(b.provider || 'Any Provider')} · ${escapeHtml(b.service)}</div>
-              <div class="message-thread-preview">${preview}</div>
-            </div>
-            <div class="message-thread-time">${timeStr}</div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ═══════════════════════════════════════
-       BOOKING HISTORY TAB (Completed + Cancelled)
-    ═══════════════════════════════════════ */
-    async function loadBookingHistory() {
-      const container = document.getElementById('bookingHistoryList');
-      if (!container) return;
-      container.innerHTML = '<div class="loader-box">Loading history…</div>';
-
-      await fetchBookingsFromAPI();
-      const history = getBookings()
-        .filter(b => b.status === 'Completed' || b.status === 'Cancelled')
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      if (!history.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">📀</div>
-            <h4>No past bookings</h4>
-            <p>Your completed and cancelled bookings will appear here.</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = history.map(b => {
-        const isCompleted = b.status === 'Completed';
-        const statusColor = isCompleted ? 'var(--success)' : 'var(--danger)';
-        const statusIcon = isCompleted ? '✅' : '❌';
-        const dateStr = typeof formatDate === 'function' ? formatDate(b.booking_date) : (b.booking_date || '');
-        return `
-          <div class="history-card">
-            <div class="history-card-icon">${serviceIcon(b.service)}</div>
-            <div class="history-card-info">
-              <div class="history-card-title">${escapeHtml(b.service)} · ${escapeHtml(b.provider || 'Pool Provider')}</div>
-              <div class="history-card-meta">${dateStr} · ₹${b.amount || '499'} · ${b.payment_status === 'Paid' ? '💳 Paid' : '💳 Unpaid'}</div>
-            </div>
-            <div class="history-card-status" style="color:${statusColor}">${statusIcon} ${b.status}</div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ═══════════════════════════════════════
-       INLINE NOTIFICATIONS TAB
-    ═══════════════════════════════════════ */
-    function renderInlineNotifications() {
-      const container = document.getElementById('inlineNotifList');
-      if (!container) return;
-
-      const notifs = typeof getNotifications === 'function' ? getNotifications() : [];
-
-      if (!notifs.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">🔔</div>
-            <h4>No notifications</h4>
-            <p>Booking updates, reschedules, and messages will appear here.</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <span style="font-size:13px; color:var(--text-muted);">${notifs.length} notification${notifs.length !== 1 ? 's' : ''}</span>
-          <button class="btn btn-ghost btn-sm" onclick="if(typeof markAllRead==='function'){markAllRead();renderInlineNotifications();}">Mark all read</button>
-        </div>
-      ` + notifs.map(n => `
-        <div class="notif-item ${n.read ? '' : 'notif-item--unread'}" onclick="if(typeof markNotifRead==='function'){markNotifRead('${n.id}');renderInlineNotifications();}">
-          <div class="notif-item-icon">${notifIcon(n.type)}</div>
-          <div class="notif-item-body">
-            <div class="notif-item-title">${escapeHtml(n.title)}</div>
-            <div class="notif-item-time">${typeof timeAgo === 'function' ? timeAgo(n.timestamp) : ''}</div>
-          </div>
-          ${!n.read ? '<div class="notif-item-dot"></div>' : ''}
-        </div>
-      `).join('');
-    }
-
-    /* ═══════════════════════════════════════
-       FULL-PAGE LOADERS (for SPA pages)
-    ═══════════════════════════════════════ */
-
-    // Full-page messages (page-messages)
-    async function loadMessageThreadsFull() {
-      const container = document.getElementById('messageThreadsListFull');
-      if (!container) return;
-      container.innerHTML = '<div class="loader-box">Loading conversations…</div>';
-
-      await fetchBookingsFromAPI();
-      const bookings = getBookings().filter(b => b.status !== 'Cancelled');
-
-      if (!bookings.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">💬</div>
-            <h4>No conversations</h4>
-            <p>Book a service to start chatting with providers.</p>
-          </div>`;
-        return;
-      }
-
-      const threads = [];
-      for (const b of bookings) {
-        try {
-          const res = await fetch(API_URL + '/chats/' + b.id, {
-            headers: { 'Authorization': 'Bearer ' + getToken() },
-            signal: AbortSignal.timeout(3000)
-          });
-          const data = await res.json();
-          const msgs = (data.success && data.messages) ? data.messages : [];
-          const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-          threads.push({ booking: b, lastMsg, msgCount: msgs.length });
-        } catch(e) {
-          threads.push({ booking: b, lastMsg: null, msgCount: 0 });
-        }
-      }
-
-      threads.sort((a, b) => {
-        if (a.lastMsg && b.lastMsg) return new Date(b.lastMsg.created_at) - new Date(a.lastMsg.created_at);
-        if (a.lastMsg) return -1;
-        if (b.lastMsg) return 1;
-        return b.booking.id - a.booking.id;
-      });
-
-      container.innerHTML = threads.map(t => {
-        const b = t.booking;
-        const preview = t.lastMsg ? (t.lastMsg.message || '').substring(0, 60) + (t.lastMsg.message?.length > 60 ? '…' : '') : 'No messages yet';
-        const timeStr = t.lastMsg ? (typeof formatChatDateTime === 'function' ? formatChatDateTime(t.lastMsg.created_at) : '') : '';
-        const icon = serviceIcon(b.service);
-        return `
-          <div class="history-card" style="cursor:pointer;" onclick="navigateTo('bookings');setTimeout(()=>openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'}), 200)">
-            <div class="history-card-icon">${icon}</div>
-            <div class="history-card-info">
-              <div class="history-card-title">${escapeHtml(b.provider || 'Pool Provider')} · ${escapeHtml(b.service)}</div>
-              <div class="history-card-meta">${escapeHtml(preview)}</div>
-            </div>
-            <div style="text-align:right;font-size:11px;color:var(--text-muted);flex-shrink:0;">
-              ${t.msgCount > 0 ? '<span style="color:#818cf8;font-weight:600;">' + t.msgCount + ' msgs</span>' : ''}
-              ${timeStr ? '<br>' + timeStr : ''}
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // Full-page booking history (page-history)
-    async function loadBookingHistoryFull() {
-      const container = document.getElementById('bookingHistoryListFull');
-      if (!container) return;
-      container.innerHTML = '<div class="loader-box">Loading history…</div>';
-
-      await fetchBookingsFromAPI();
-      const bookings = getBookings().filter(b => b.status === 'Completed' || b.status === 'Cancelled');
-
-      if (!bookings.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">📜</div>
-            <h4>No past bookings</h4>
-            <p>Your completed and cancelled bookings will appear here.</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = bookings.map(b => {
-        const dateStr = b.booking_date ? new Date(b.booking_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
-        const statusColor = b.status === 'Completed' ? '#10b981' : '#ef4444';
-        const statusIcon = b.status === 'Completed' ? '✅' : '❌';
-        return `
-          <div class="history-card">
-            <div class="history-card-icon">${serviceIcon(b.service)}</div>
-            <div class="history-card-info">
-              <div class="history-card-title">${escapeHtml(b.service)} · ${escapeHtml(b.provider || 'Pool Provider')}</div>
-              <div class="history-card-meta">${dateStr} · ₹${b.amount || '499'} · ${b.payment_status === 'Paid' ? '💳 Paid' : '💳 Unpaid'}</div>
-            </div>
-            <div class="history-card-status" style="color:${statusColor}">${statusIcon} ${b.status}</div>
-          </div>`;
-      }).join('');
-    }
-
-    // Full-page notifications (page-notifications)
-    function renderInlineNotificationsFull() {
-      const container = document.getElementById('inlineNotifListFull');
-      if (!container) return;
-
-      const notifs = typeof getNotifications === 'function' ? getNotifications() : [];
-
-      if (!notifs.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">🔔</div>
-            <h4>No notifications</h4>
-            <p>Booking updates, reschedules, and messages will appear here.</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = `
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-          <button class="btn btn-ghost btn-sm" onclick="markAllRead();renderInlineNotificationsFull();">Mark all read</button>
-        </div>
-      ` + notifs.map(n => `
-        <div class="notif-item ${n.read ? '' : 'notif-item--unread'}" onclick="if(typeof markNotifRead==='function'){markNotifRead('${n.id}');renderInlineNotificationsFull();}">
-          <div class="notif-item-icon">${notifIcon(n.type)}</div>
-          <div class="notif-item-body">
-            <div class="notif-item-title">${escapeHtml(n.title)}</div>
-            <div class="notif-item-time">${typeof timeAgo === 'function' ? timeAgo(n.timestamp) : ''}</div>
-          </div>
-          ${!n.read ? '<div class="notif-item-dot"></div>' : ''}
-        </div>
-      `).join('');
-    }
-
-    /* ═══════════════════════════════════════
-       SETTINGS FUNCTIONS
-    ═══════════════════════════════════════ */
-
-    // Load settings page with current profile data
-    async function loadSettingsPage() {
-      try {
-        const res = await fetch(API_URL + '/profile', {
-          headers: { 'Authorization': 'Bearer ' + getToken() }
-        });
-        const data = await res.json();
-        if (data.success && data.user) {
-          document.getElementById('settings_name').value = data.user.name || '';
-          document.getElementById('settings_email').value = data.user.email || '';
-          document.getElementById('settings_phone').value = data.user.phone || '';
-        }
-      } catch(e) {
-        // Pre-fill from localStorage as fallback
-        const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-        document.getElementById('settings_name').value = user.name || '';
-        document.getElementById('settings_email').value = user.email || '';
-        document.getElementById('settings_phone').value = user.phone || '';
-      }
-
-      // Theme toggle state
-      const theme = localStorage.getItem('ss_theme') || 'dark';
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', theme === 'light');
-
-      // Message privacy state
-      const privacy = localStorage.getItem('ss_msg_privacy') || 'everyone';
-      setMsgPrivacy(privacy, true);
-    }
-
-    // Save profile
-    async function saveProfile() {
-      const name = document.getElementById('settings_name').value.trim();
-      const email = document.getElementById('settings_email').value.trim();
-      const phone = document.getElementById('settings_phone').value.trim();
-      const msgEl = document.getElementById('profileMsg');
-
-      if (!name || name.length < 2) return showSettingsMsg(msgEl, 'error', 'Name must be at least 2 characters');
-      if (!email || !email.includes('@')) return showSettingsMsg(msgEl, 'error', 'Please enter a valid email');
-      if (phone && !/^[0-9]{10}$/.test(phone)) return showSettingsMsg(msgEl, 'error', 'Phone must be 10 digits');
-
-      try {
-        const res = await fetch(API_URL + '/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getToken()
-          },
-          body: JSON.stringify({ name, email, phone: phone || undefined })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showSettingsMsg(msgEl, 'success', '✅ Profile updated successfully!');
-          // Update localStorage and UI
-          const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-          user.name = name;
-          user.email = email;
-          user.phone = phone;
-          localStorage.setItem('ss_user', JSON.stringify(user));
-          // Update navbar and profile panel
-          document.getElementById('userName').textContent = name;
-          document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-          document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-          document.getElementById('profileName').textContent = name;
-          document.getElementById('profileEmail').textContent = email;
-        } else {
-          showSettingsMsg(msgEl, 'error', data.message || 'Update failed');
-        }
-      } catch(e) {
-        showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
-      }
-    }
-
-    // Change password
-    async function changePassword() {
-      const current = document.getElementById('settings_current_pwd').value;
-      const newPwd = document.getElementById('settings_new_pwd').value;
-      const confirm = document.getElementById('settings_confirm_pwd').value;
-      const msgEl = document.getElementById('passwordMsg');
-
-      if (!current) return showSettingsMsg(msgEl, 'error', 'Enter your current password');
-      if (newPwd.length < 6) return showSettingsMsg(msgEl, 'error', 'New password must be at least 6 characters');
-      if (newPwd !== confirm) return showSettingsMsg(msgEl, 'error', 'Passwords do not match');
-
-      try {
-        const res = await fetch(API_URL + '/change-password', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + getToken()
-          },
-          body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showSettingsMsg(msgEl, 'success', '✅ Password changed successfully!');
-          document.getElementById('settings_current_pwd').value = '';
-          document.getElementById('settings_new_pwd').value = '';
-          document.getElementById('settings_confirm_pwd').value = '';
-        } else {
-          showSettingsMsg(msgEl, 'error', data.message || 'Password change failed');
-        }
-      } catch(e) {
-        showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
-      }
-    }
-
-    // Theme toggle
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('ss_theme', next);
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', next === 'light');
-    }
-
-    // Apply saved theme on load
-    (function applyTheme() {
-      const saved = localStorage.getItem('ss_theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      // Also set toggle state if settings page is visible
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', saved === 'light');
-    })();
-
-    // Message privacy
-    function setMsgPrivacy(value, silent) {
-      document.querySelectorAll('.radio-option[data-privacy]').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.privacy === value);
-      });
-      if (!silent) {
-        localStorage.setItem('ss_msg_privacy', value);
-        if (typeof showToast === 'function') showToast('Privacy updated: ' + value, 'success');
-      }
-    }
-
-    // Show settings message
-    function showSettingsMsg(el, type, text) {
-      if (!el) return;
-      el.className = 'settings-msg ' + type;
-      el.textContent = text;
-      el.style.display = 'block';
-      setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
-  </script>
-
-  <!-- Notification Center Drawer -->
-  <div class="notif-drawer" id="notifCenterDrawer">
-    <div class="notif-drawer-header">
-      <h3>🔔 Notifications</h3>
-      <div class="notif-drawer-actions">
-        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
-        <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
-      </div>
-    </div>
-    <div class="notif-drawer-body" id="notifCenterList"></div>
-  </div>
-
-  <!-- Profile Panel Overlay -->
-  <div class="profile-panel-overlay" id="profilePanelOverlay" onclick="closeProfilePanel()"></div>
-
-  <!-- Profile Side Panel -->
-  <div class="profile-panel" id="profilePanel">
-    <div class="profile-panel-header">
-      <button class="profile-panel-close" onclick="closeProfilePanel()">&times;</button>
-      <div class="profile-panel-avatar" id="profileAvatar">U</div>
-      <div class="profile-panel-name" id="profileName">User</div>
-      <div class="profile-panel-email" id="profileEmail">user@email.com</div>
-      <div class="profile-panel-role">👤 Customer</div>
-    </div>
-    <div class="profile-panel-nav">
-      <button class="profile-nav-link active" data-page="overview" onclick="navigateTo('overview')">
-        <span class="nav-icon">🏠</span> Dashboard
-      </button>
-      <button class="profile-nav-link" data-page="bookings" onclick="navigateTo('bookings')">
-        <span class="nav-icon">📋</span> My Bookings
-      </button>
-      <button class="profile-nav-link" data-page="messages" onclick="navigateTo('messages')">
-        <span class="nav-icon">💬</span> Messages
-      </button>
-      <button class="profile-nav-link" data-page="history" onclick="navigateTo('history')">
-        <span class="nav-icon">📜</span> Booking History
-      </button>
-      <button class="profile-nav-link" data-page="notifications" onclick="navigateTo('notifications')">
-        <span class="nav-icon">🔔</span> Notifications
-        <span class="nav-badge notif-badge-count" style="display:none;">0</span>
-      </button>
-      <button class="profile-nav-link" data-page="book-service" onclick="navigateTo('book-service')">
-        <span class="nav-icon">📝</span> Book a Service
-      </button>
-      <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
-        <span class="nav-icon">⚙️</span> Settings
-      </button>
-    </div>
-    <div class="profile-panel-footer">
-      <button class="btn btn-ghost" onclick="logout()">🚪 Logout</button>
-    </div>
-  </div>
+ <div class="toast-container" id="toastContainer"></div>
+
+ <!-- NAVBAR -->
+ <header class="navbar">
+ <a href="index.html" class="navbar-brand">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </a>
+ <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+ <span></span><span></span><span></span>
+ </button>
+ <div class="navbar-search" id="navbarSearch">
+ <span class="navbar-search-icon"></span>
+ <input type="text" id="navSearchInput" placeholder="Search providers, services..." oninput="debounceProviderSearch(this.value)">
+ <span class="navbar-search-divider"></span>
+ <span class="navbar-search-icon"></span>
+ <input type="text" id="navLocationInput" placeholder="City" oninput="debounceProviderSearch(this.value)" autocomplete="off">
+ </div>
+ <div class="navbar-actions">
+ <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
+ 
+ <span class="notif-badge-count" style="display:none;">0</span>
+ </button>
+ <button class="navbar-profile-btn" onclick="openProfilePanel()" aria-label="Open profile menu">
+ <div class="user-avatar" id="userAvatar">U</div>
+ <span class="profile-name" id="userName">User</span>
+ </button>
+ </div>
+ </header>
+
+ <!-- Mobile Navigation Overlay -->
+ <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+ <nav class="mobile-nav" id="mobileNav">
+ <div class="mobile-nav-header">
+ <a href="index.html" class="navbar-brand">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </a>
+ <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+ </div>
+ <a href="#" onclick="navigateTo('overview');closeMobileNav();return false;" class="active"> Dashboard</a>
+ <a href="#" onclick="navigateTo('bookings');closeMobileNav();return false;"> My Bookings</a>
+ <a href="#" onclick="navigateTo('messages');closeMobileNav();return false;"> Messages</a>
+ <a href="#" onclick="navigateTo('history');closeMobileNav();return false;">📜 History</a>
+ <a href="#" onclick="navigateTo('book-service');closeMobileNav();return false;"> Book Service</a>
+ <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;"> Settings</a>
+ <div class="mobile-nav-actions">
+ <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+ </div>
+ </nav>
+ <script>
+ function openMobileNav() {
+ document.getElementById('mobileNav').classList.add('open');
+ document.getElementById('mobileNavOverlay').classList.add('open');
+ document.body.style.overflow = 'hidden';
+ }
+ function closeMobileNav() {
+ document.getElementById('mobileNav').classList.remove('open');
+ document.getElementById('mobileNavOverlay').classList.remove('open');
+ document.body.style.overflow = '';
+ }
+ document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
+ document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
+ document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
+ </script>
+
+ <!-- MAIN -->
+ <main class="dashboard-layout">
+
+ <!-- ══════ PAGE: Overview ══════ -->
+ <div class="dashboard-page active" id="page-overview">
+
+ <!-- ── Dashboard Hero ── -->
+ <div id="overview" class="dashboard-hero">
+ <div class="dashboard-hero-orbs">
+ <div class="dashboard-hero-orb dashboard-hero-orb--1"></div>
+ <div class="dashboard-hero-orb dashboard-hero-orb--2"></div>
+ </div>
+ <div class="dashboard-hero-content">
+ <div class="dashboard-hero-text">
+ <h2 id="welcomeMsg" class="dashboard-hero-title">Good day! </h2>
+ <p class="dashboard-hero-sub">Here's what's happening with your bookings today.</p>
+ <div class="dashboard-hero-actions">
+ <button onclick="navigateTo('book-service')" class="btn btn-primary">+ Book a Service</button>
+ <button onclick="navigateTo('bookings')" class="btn btn-ghost dashboard-hero-btn-outline"> My Bookings</button>
+ <span class="loyalty-badge" id="loyaltyBadge" style="display:none;"> <span id="loyaltyPoints">0</span> pts</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Stats -->
+ <div class="dashboard-hero-stats">
+ <div class="dashboard-hero-stat">
+ <div class="dashboard-hero-stat-icon" style="background:rgba(99,102,241,0.2); color:#818cf8;"></div>
+ <div class="dashboard-hero-stat-num" id="totalBookings">0</div>
+ <div class="dashboard-hero-stat-lbl">Total Bookings</div>
+ </div>
+ <div class="dashboard-hero-stat">
+ <div class="dashboard-hero-stat-icon" style="background:rgba(245,158,11,0.2); color:#fbbf24;"></div>
+ <div class="dashboard-hero-stat-num" id="pendingCnt">0</div>
+ <div class="dashboard-hero-stat-lbl">Pending</div>
+ </div>
+ <div class="dashboard-hero-stat">
+ <div class="dashboard-hero-stat-icon" style="background:rgba(56,189,248,0.2); color:#38bdf8;"></div>
+ <div class="dashboard-hero-stat-num" id="acceptedCnt">0</div>
+ <div class="dashboard-hero-stat-lbl">Accepted</div>
+ </div>
+ <div class="dashboard-hero-stat">
+ <div class="dashboard-hero-stat-icon" style="background:rgba(16,185,129,0.2); color:#10b981;"></div>
+ <div class="dashboard-hero-stat-num" id="completedCnt">0</div>
+ <div class="dashboard-hero-stat-lbl">Completed</div>
+ </div>
+ <div class="dashboard-hero-stat">
+ <div class="dashboard-hero-stat-icon" style="background:rgba(239,68,68,0.2); color:#ef4444;"></div>
+ <div class="dashboard-hero-stat-num" id="cancelledCnt">0</div>
+ <div class="dashboard-hero-stat-lbl">Cancelled</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Sort selector (compact, no duplicate search) -->
+ <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+ <select class="filter-select" id="sortSelect" onchange="applyProviderFilters()">
+ <option value="rating"> Top Rated</option>
+ <option value="price_low"> Price: Low → High</option>
+ <option value="price_high"> Price: High → Low</option>
+ <option value="jobs"> Most Jobs</option>
+ </select>
+ </div>
+
+ <!-- ── Featured Providers ── -->
+ <div id="recommendedProvidersSection" style="margin-bottom:40px;">
+ <div class="section-title"> Recommended Providers</div>
+ <div class="tab-bar" id="dashboardProviderFilterBar" style="margin-bottom:16px;"></div>
+ <div class="providers-grid" id="recommendedProvidersList">
+ <div class="loader-box">Loading verified providers…</div>
+ </div>
+ </div>
+ </div><!-- /page-overview -->
+
+ <!-- ══════ PAGE: Bookings ══════ -->
+ <div class="dashboard-page" id="page-bookings">
+ <div id="bookings" style="margin-bottom:40px;">
+ <div class="section-title">
+ My Bookings
+ <span class="cnt" id="bookingsBadge" style="background:var(--primary);color:#fff;">0</span>
+ </div>
+
+ <!-- Section Tabs: Bookings / Messages / History -->
+ <div class="dashboard-section-tabs">
+ <button class="dashboard-section-tab active" onclick="switchDashboardTab('bookings')"> Active Bookings</button>
+ <button class="dashboard-section-tab" onclick="switchDashboardTab('messages')"> Messages</button>
+ <button class="dashboard-section-tab" onclick="switchDashboardTab('history')">📀 Booking History</button>
+ <button class="dashboard-section-tab" onclick="switchDashboardTab('notifications')"> Notifications <span class="tab-badge notif-badge-count" style="display:none;">0</span></button>
+ </div>
+
+ <!-- Panel: Active Bookings -->
+ <div class="dashboard-section-panel active" id="panel-bookings">
+ <!-- Tab Filter -->
+ <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
+ <button class="tab-btn active" id="tab-all" onclick="filterBookings('all')" role="tab"
+ aria-selected="true">All</button>
+ <button class="tab-btn" id="tab-pending" onclick="filterBookings('pending')" role="tab"
+ aria-selected="false">Pending</button>
+ <button class="tab-btn" id="tab-accepted" onclick="filterBookings('accepted')" role="tab"
+ aria-selected="false">Accepted</button>
+ <button class="tab-btn" id="tab-completed" onclick="filterBookings('completed')" role="tab"
+ aria-selected="false">Completed</button>
+ <button class="tab-btn" id="tab-cancelled" onclick="filterBookings('cancelled')" role="tab"
+ aria-selected="false">Cancelled</button>
+ </div>
+ <div class="bookings-list" id="bookingsList" aria-live="polite" aria-label="Your bookings">
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No bookings yet</h4>
+ <p>Book a service below to get started.</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Panel: Messages -->
+ <div class="dashboard-section-panel" id="panel-messages">
+ <div class="messages-list" id="messageThreadsList">
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No messages yet</h4>
+ <p>Your conversations with providers will appear here.</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Panel: Booking History -->
+ <div class="dashboard-section-panel" id="panel-history">
+ <div id="bookingHistoryList">
+ <div class="empty-state">
+ <div class="icon">📀</div>
+ <h4>No past bookings</h4>
+ <p>Your completed and cancelled bookings will appear here.</p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Panel: Notifications -->
+ <div class="dashboard-section-panel" id="panel-notifications">
+ <div id="inlineNotifList">
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No notifications</h4>
+ <p>Booking updates, reschedules, and messages will appear here.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div><!-- /page-bookings -->
+
+ <!-- ══════ PAGE: Book Service ══════ -->
+ <div class="dashboard-page" id="page-book-service">
+ <div id="book-service">
+ <div class="section-title"> Book a Service</div>
+ <div class="form-card">
+ <div class="form-grid">
+ <div class="form-group full">
+ <label for="b_name">Your Name</label>
+ <input type="text" id="b_name" placeholder="Your full name" aria-required="true">
+ </div>
+ <div class="form-group">
+ <label>Service Type</label>
+ <select id="b_service">
+ <option value="">Select a service</option>
+ <option value="Electrician">⚡ Electrician</option>
+ <option value="Plumber"> Plumber</option>
+ <option value="Driver"> Driver</option>
+ <option value="Maid"> Maid / Cleaning</option>
+ <option value="Chef"> Chef / Cook</option>
+ <option value="Tutor"> Tutor</option>
+ <option value="Carpenter"> Carpenter</option>
+ <option value="Painter"> Painter</option>
+ <option value="AC Repair"> AC Repair</option>
+ <option value="Gardener"> Gardener</option>
+ <option value="Pet Care"> Pet Care</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label>Preferred Provider</label>
+ <div class="provider-search-wrap" id="providerSearchWrap">
+ <input type="text" id="b_provider" placeholder="← First select a service" autocomplete="off" disabled
+ oninput="onProviderSearch(this.value)" onfocus="onProviderSearchFocus()"
+ onkeydown="onProviderSearchKey(event)" onclick="onProviderInputClick()">
+ <span class="provider-chevron" id="providerChevron">▼</span>
+ <div class="provider-dropdown" id="providerDropdown"></div>
+ </div>
+ <div class="provider-hint" id="providerHint">
+ <span class="hint-dot"></span>
+ <span id="providerHintText">Select a service to see available providers</span>
+ </div>
+ <div id="providerSelectedPill" style="display:none;">
+ <span class="provider-selected-pill">
+ <span id="providerPillIcon"></span>
+ <span id="providerPillText"></span>
+ <button class="clear-btn" onclick="clearProviderSelection()" title="Clear">✕</button>
+ </span>
+ </div>
+ <span id="providerValidationMsg"></span>
+ </div>
+ <div class="form-group">
+ <label>Date</label>
+ <input type="date" id="b_date">
+ </div>
+ <div class="form-group">
+ <label>Time</label>
+ <input type="time" id="b_time">
+ </div>
+ <div class="form-group full">
+ <label>Service Address</label>
+ <input type="text" id="b_address" placeholder="Enter your full address">
+ </div>
+ <div class="form-group full">
+ <label>Additional Notes</label>
+ <textarea id="b_notes" placeholder="Describe what you need..."></textarea>
+ </div>
+ </div>
+ <div style="margin-top:4px; display:flex; gap:12px;">
+ <button class="btn btn-primary btn-lg" id="bookBtn" onclick="createBooking()">
+ <span id="bookBtnText">Confirm Booking</span>
+ <span id="bookSpinner" class="spinner" style="display:none;"></span>
+ </button>
+ <button class="btn btn-ghost" onclick="clearBookingForm()">Clear</button>
+ </div>
+ </div>
+ </div>
+ </div><!-- /page-book-service -->
+
+ <!-- ══════ PAGE: Messages (standalone) ══════ -->
+ <div class="dashboard-page" id="page-messages">
+ <div class="section-title"> Messages</div>
+ <div class="messages-list" id="messageThreadsListFull"></div>
+ </div>
+
+ <!-- ══════ PAGE: History (standalone) ══════ -->
+ <div class="dashboard-page" id="page-history">
+ <div class="section-title">📜 Booking History</div>
+ <div id="bookingHistoryListFull"></div>
+ </div>
+
+ <!-- ══════ PAGE: Notifications (standalone) ══════ -->
+ <div class="dashboard-page" id="page-notifications">
+ <div class="section-title"> Notifications</div>
+ <div id="inlineNotifListFull"></div>
+ </div>
+
+ <!-- ══════ PAGE: Settings ══════ -->
+ <div class="dashboard-page" id="page-settings">
+ <div class="section-title"> Settings</div>
+ <div class="settings-grid">
+
+ <!-- Profile Info -->
+ <div class="settings-card">
+ <div class="settings-card-title"> Profile Information</div>
+ <div class="settings-card-desc">Update your personal details</div>
+ <div class="settings-form-group">
+ <label>Full Name</label>
+ <input type="text" id="settings_name" placeholder="Your name">
+ </div>
+ <div class="settings-form-group">
+ <label>Email Address</label>
+ <input type="email" id="settings_email" placeholder="your@email.com">
+ </div>
+ <div class="settings-form-group">
+ <label>Phone Number</label>
+ <input type="tel" id="settings_phone" placeholder="10-digit mobile number" maxlength="10">
+ </div>
+ <div class="settings-actions">
+ <button class="btn btn-primary" onclick="saveProfile()"> Save Changes</button>
+ </div>
+ <div class="settings-msg" id="profileMsg"></div>
+ </div>
+
+ <!-- Change Password -->
+ <div class="settings-card">
+ <div class="settings-card-title"> Change Password</div>
+ <div class="settings-card-desc">Update your account password</div>
+ <div class="settings-form-group">
+ <label>Current Password</label>
+ <input type="password" id="settings_current_pwd" placeholder="Enter current password">
+ </div>
+ <div class="settings-form-group">
+ <label>New Password</label>
+ <input type="password" id="settings_new_pwd" placeholder="At least 6 characters">
+ </div>
+ <div class="settings-form-group">
+ <label>Confirm New Password</label>
+ <input type="password" id="settings_confirm_pwd" placeholder="Re-enter new password">
+ </div>
+ <div class="settings-actions">
+ <button class="btn btn-primary" onclick="changePassword()"> Update Password</button>
+ </div>
+ <div class="settings-msg" id="passwordMsg"></div>
+ </div>
+
+ <!-- Appearance -->
+ <div class="settings-card">
+ <div class="settings-card-title"> Appearance</div>
+ <div class="settings-card-desc">Customize the look and feel</div>
+ <div class="toggle-switch">
+ <div class="toggle-switch-label">
+ <span class="title"> Light Mode</span>
+ <span class="desc">Switch between dark and light theme</span>
+ </div>
+ <div class="toggle-track" id="themeToggle" onclick="toggleTheme()"></div>
+ </div>
+ </div>
+
+ <!-- Privacy -->
+ <div class="settings-card">
+ <div class="settings-card-title"> Privacy</div>
+ <div class="settings-card-desc">Control who can message you</div>
+ <div class="radio-option selected" onclick="setMsgPrivacy('everyone')" data-privacy="everyone">
+ <div class="radio-dot"></div>
+ <div>
+ <div class="radio-text">Everyone</div>
+ <div class="radio-desc">Any provider you've booked can message you</div>
+ </div>
+ </div>
+ <div class="radio-option" onclick="setMsgPrivacy('active')" data-privacy="active">
+ <div class="radio-dot"></div>
+ <div>
+ <div class="radio-text">Active bookings only</div>
+ <div class="radio-desc">Only providers with active/pending bookings</div>
+ </div>
+ </div>
+ <div class="radio-option" onclick="setMsgPrivacy('none')" data-privacy="none">
+ <div class="radio-dot"></div>
+ <div>
+ <div class="radio-text">Nobody</div>
+ <div class="radio-desc">Disable incoming messages from all providers</div>
+ </div>
+ </div>
+ </div>
+
+ </div>
+ </div>
+
+ </main>
+
+ <footer>
+ <div class="footer-inner">
+ <div class="footer-brand">
+ <div class="logo-icon">⚡</div> ServiceSphere
+ </div>
+ <div class="footer-links"><a href="index.html">Home</a></div>
+ <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
+ </div>
+ </footer>
+
+ <!-- PAYMENT MODAL -->
+ <div class="modal-overlay" id="paymentModalOverlay">
+ <div class="modal" id="paymentModal">
+ <h3 id="paymentModalTitle">Secure Payment</h3>
+ <div class="sub" id="paymentModalSub">Complete payment for your service booking.</div>
+
+ <!-- Amount Display -->
+ <div
+ style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: center;">
+ <span style="font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Amount to
+ Pay</span>
+ <span style="font-size: 28px; font-weight: 800; color: #fff;" id="paymentAmount">₹499.00</span>
+ </div>
+
+ <!-- Payment Success Checkmark (hidden by default) -->
+ <div id="paymentSuccessView" class="success-checkmark" style="display: none;">
+ <div class="checkmark-circle">✓</div>
+ <h4>Payment Successful!</h4>
+ <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Your booking has been updated to
+ Paid.</p>
+ </div>
+
+ <!-- Main Payment Form (Credit Card / UPI) -->
+ <div id="paymentFormView">
+ <div class="pay-methods">
+ <button class="pay-method-btn active" id="payMethodCard" onclick="switchPaymentMethod('card')">
+ <span></span> Credit/Debit Card
+ </button>
+ <button class="pay-method-btn" id="payMethodUpi" onclick="switchPaymentMethod('upi')">
+ <span></span> UPI / QR Code
+ </button>
+ </div>
+
+ <!-- Credit Card Fields -->
+ <div id="cardPaymentFields">
+ <!-- Card Preview -->
+ <div class="credit-card-preview">
+ <div class="card-top">
+ <div class="card-chip"></div>
+ <div class="card-logo" id="previewCardLogo">VISA</div>
+ </div>
+ <div class="card-number" id="previewCardNumber">•••• •••• •••• ••••</div>
+ <div class="card-bottom">
+ <div>
+ <div class="card-label">Card Holder</div>
+ <div id="previewCardName" style="font-weight: 600; font-size: 13px;">YOUR NAME</div>
+ </div>
+ <div>
+ <div class="card-label">Expires</div>
+ <div id="previewCardExpiry" style="font-weight: 600; font-size: 13px;">MM/YY</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Form fields -->
+ <div style="display: flex; flex-direction: column; gap: 14px;">
+ <div class="form-group" style="margin-bottom: 0;">
+ <label style="font-size: 12px; margin-bottom: 4px;">Cardholder Name</label>
+ <input type="text" id="cardNameInput" placeholder="Name on card" oninput="updateCardPreview()">
+ </div>
+ <div class="form-group" style="margin-bottom: 0;">
+ <label style="font-size: 12px; margin-bottom: 4px;">Card Number</label>
+ <input type="text" id="cardNumberInput" placeholder="1234 5678 9012 3456" maxlength="19"
+ oninput="updateCardPreview()">
+ </div>
+ <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+ <div class="form-group" style="margin-bottom: 0;">
+ <label style="font-size: 12px; margin-bottom: 4px;">Expiry Date</label>
+ <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5" oninput="updateCardPreview()">
+ </div>
+ <div class="form-group" style="margin-bottom: 0;">
+ <label style="font-size: 12px; margin-bottom: 4px;">CVV</label>
+ <input type="password" id="cardCvvInput" placeholder="•••" maxlength="3">
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- UPI Fields -->
+ <div id="upiPaymentFields" style="display: none; text-align: center;">
+ <div style="margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+ <div style="background: white; padding: 12px; border-radius: var(--radius-md); display: inline-block;">
+ <!-- UPI QR Placeholder -->
+ <div
+ style="width: 140px; height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; color: #333; font-weight: 700; font-size: 12px; flex-direction: column;">
+ <span>ServiceSphere Pay</span>
+ <span style="font-size: 24px; margin-top: 8px;"> QR</span>
+ </div>
+ </div>
+ <p style="font-size: 12px; color: var(--text-secondary);">Scan this QR code with any UPI app to pay</p>
+ </div>
+ <div style="border-top: 1px solid var(--dark-border); padding-top: 16px; margin-top: 16px;">
+ <span style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Or enter
+ UPI ID</span>
+ <div class="form-group" style="margin-bottom: 0;">
+ <input type="text" id="upiIdInput" placeholder="username@upi" style="text-align: center;">
+ </div>
+ </div>
+ </div>
+
+ <div class="modal-actions">
+ <button class="btn btn-ghost" onclick="closePaymentModal()">Cancel</button>
+ <button class="btn btn-primary" id="paymentSubmitBtn" onclick="submitPayment()">
+ <span id="paymentSubmitBtnText">Pay Now</span>
+ <span id="paymentSubmitSpinner" class="spinner" style="display: none;"></span>
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <script src="js/utils.js"></script>
+ <script src="js/auth.js"></script>
+ <script src="js/reviews.js"></script>
+ <script src="js/bookings.js"></script>
+ <script src="js/chat.js"></script>
+ <script src="js/payments.js"></script>
+ <script src="js/providers.js"></script>
+ <script src="js/notif-center.js"></script>
+ <script src="js/notifications.js"></script>
+ <script src="js/chatbot.js"></script>
+
+ <!-- Review Modal -->
+ <div class="modal-overlay" id="reviewModal">
+ <div class="modal">
+ <div class="review-modal-header">
+ <h3> Rate Your Experience</h3>
+ <div class="sub">How was your service with <strong id="reviewProviderName"></strong>? <span id="reviewServiceName" style="color:var(--text-muted);"></span></div>
+ </div>
+ <div id="reviewStarPicker" class="star-picker"></div>
+ <div id="reviewRatingLabel" class="review-rating-label"></div>
+ <textarea id="reviewText" class="review-textarea" placeholder="Tell us about your experience (optional)…" maxlength="1000" oninput="updateReviewCharCount()"></textarea>
+ <div id="reviewCharCount" class="review-char-count">0 / 1000</div>
+ <div class="modal-actions">
+ <button class="btn btn-ghost" onclick="closeReviewModal()">Cancel</button>
+ <button class="btn btn-primary" id="reviewSubmitBtn" onclick="submitReview()"> Submit Review</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Reviews Drawer -->
+ <div class="reviews-drawer" id="reviewsDrawer">
+ <div class="reviews-drawer-header">
+ <h3>Reviews for <span id="reviewsDrawerProviderName"></span></h3>
+ <button class="reviews-drawer-close" onclick="closeReviewsDrawer()">&times;</button>
+ </div>
+ <div class="reviews-drawer-body" id="reviewsDrawerBody"></div>
+ </div>
+
+ <!-- Reschedule Modal -->
+ <div class="modal-overlay" id="rescheduleModal">
+ <div class="modal" style="max-width:400px;">
+ <h3> Reschedule Booking</h3>
+ <div class="sub">Pick a new date and time for this booking.</div>
+ <input type="hidden" id="rescheduleBookingId">
+ <div class="form-group">
+ <label for="rescheduleDate">New Date</label>
+ <input type="date" id="rescheduleDate" class="form-input" required>
+ </div>
+ <div class="form-group">
+ <label for="rescheduleTime">New Time</label>
+ <input type="time" id="rescheduleTime" class="form-input" required>
+ </div>
+ <div class="modal-actions">
+ <button class="btn btn-ghost" onclick="closeRescheduleModal()">Cancel</button>
+ <button class="btn btn-primary" onclick="submitReschedule()" id="rescheduleSubmitBtn">✓ Confirm
+ Reschedule</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- FLOATING CHAT DRAWER -->
+ <div class="chat-drawer" id="chatDrawer">
+ <div class="chat-header">
+ <div class="chat-partner-info">
+ <div class="chat-status-dot"></div>
+ <div>
+ <div class="chat-partner-name" id="chatPartnerName">Provider</div>
+ <div class="chat-partner-service" id="chatPartnerService">Service</div>
+ </div>
+ </div>
+ <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
+ </div>
+ <div class="chat-messages" id="chatMessages">
+ <div style="text-align:center; color:var(--text-muted); font-size:13px; margin:auto;">Loading messages…</div>
+ </div>
+ <div class="chat-input-area">
+ <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…"
+ onkeydown="if(event.key==='Enter') sendChatMessage()">
+ <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
+ </div>
+ </div>
+
+ <script>
+ // ── Init ──
+ window.addEventListener('DOMContentLoaded', () => {
+ checkAuth('customer');
+
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ const name = user.name || 'User';
+ document.getElementById('userName').textContent = name;
+ document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+ // Profile panel
+ const pAvatar = document.getElementById('profileAvatar');
+ const pName = document.getElementById('profileName');
+ const pEmail = document.getElementById('profileEmail');
+ if (pAvatar) pAvatar.textContent = name.charAt(0).toUpperCase();
+ if (pName) pName.textContent = name;
+ if (pEmail) pEmail.textContent = user.email || '';
+
+ const hour = new Date().getHours();
+ const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+ document.getElementById('welcomeMsg').textContent = greet + ', ' + name.split(' ')[0] + '! ';
+
+ // pre-fill from homepage (via "Book Now" on a provider card)
+ const ps = sessionStorage.getItem('preselect_service');
+ const pp = sessionStorage.getItem('preselect_provider');
+ const ppid = sessionStorage.getItem('preselect_provider_id');
+ if (ps) { document.getElementById('b_service').value = ps; sessionStorage.removeItem('preselect_service'); }
+ if (ppid) { window._selectedProviderId = parseInt(ppid); sessionStorage.removeItem('preselect_provider_id'); }
+ if (pp && ppid) {
+ // Provider was pre-selected from a card — confirm the selection
+ selectProvider({ id: parseInt(ppid), name: pp, service: ps || '', city: '' });
+ sessionStorage.removeItem('preselect_provider');
+ }
+ if (user.name) document.getElementById('b_name').value = user.name;
+
+ // default date = tomorrow
+ const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+ document.getElementById('b_date').value = tomorrow.toISOString().split('T')[0];
+
+ // Close dropdown on outside click
+ document.addEventListener('click', (e) => {
+ if (!document.getElementById('providerSearchWrap')?.contains(e.target)) {
+ closeProviderDropdown();
+ }
+ });
+
+ // When service changes, clear provider selection and auto-show providers for that category
+ document.getElementById('b_service')?.addEventListener('change', (e) => {
+ clearProviderSelection();
+ const service = e.target.value;
+ const providerInput = document.getElementById('b_provider');
+ const providerHint = document.getElementById('providerHint');
+ if (service) {
+ // Enable the provider input and update placeholder
+ if (providerInput) {
+ providerInput.disabled = false;
+ providerInput.placeholder = 'Click to select a ' + service + ' provider';
+ }
+ // Auto-fetch and show available providers for the selected service
+ setTimeout(() => {
+ fetchAndShowProviders('').then(() => {
+ // Update the hint with the count
+ const count = _providerSearchCache.length;
+ if (providerHint) {
+ const hintText = document.getElementById('providerHintText');
+ if (hintText) {
+ hintText.textContent = count > 0
+ ? count + ' ' + service + ' provider' + (count > 1 ? 's' : '') + ' available — click to choose'
+ : 'No ' + service + ' providers registered yet — choose "Any Available"';
+ }
+ providerHint.classList.add('visible');
+ }
+ // Auto-open the dropdown so user sees providers immediately
+ if (count > 0) {
+ renderProviderDropdown('');
+ }
+ });
+ }, 150);
+ } else {
+ // No service selected — disable provider input
+ if (providerInput) {
+ providerInput.disabled = true;
+ providerInput.placeholder = '← First select a service';
+ }
+ if (providerHint) providerHint.classList.remove('visible');
+ }
+ });
+
+ renderBookings('all');
+ loadCustomerStats();
+
+ // ── CUSTOMER NOTIFICATION POLLING (uses shared function from script.js) ──
+ startNotificationPolling({
+ role: 'customer',
+ bookingsEndpoint: '/bookings',
+ onRefresh: () => renderBookings(_bookingsFilter || 'all')
+ });
+ });
+
+ // ── Filter bookings ──
+ function filterBookings(status) {
+ ['all', 'pending', 'accepted', 'completed', 'cancelled'].forEach(t => {
+ document.getElementById('tab-' + t)?.classList.toggle('active', t === status);
+ });
+ renderBookings(status);
+ }
+
+ // ── Pre-fill from provider card (Recommended Providers section) ──
+ function prefillBooking(service, provider, providerId) {
+ document.getElementById('b_service').value = service;
+ selectProvider({ id: providerId, name: provider, service: service, city: '' });
+ navigateTo('book-service');
+ }
+
+ // ── Clear form ──
+ function clearBookingForm() {
+ ['b_service', 'b_address', 'b_notes'].forEach(id => {
+ const el = document.getElementById(id);
+ if (el) el.value = '';
+ });
+ clearProviderSelection();
+ }
+
+ /* ══════════════════════════════════════════
+ PROVIDER AUTOCOMPLETE LOGIC
+ ══════════════════════════════════════════ */
+
+ let _providerSearchCache = []; // providers fetched for current service
+ let _providerSearchTimer = null; // debounce timer
+ let _dropdownHighlight = -1; // keyboard nav index
+ let _providerConfirmed = false; // true only when user explicitly picked from dropdown
+
+ const ICONS = {
+ Electrician: '⚡', Plumber: '', Driver: '', Maid: '', Chef: '',
+ Tutor: '', Carpenter: '', Painter: '', 'AC Repair': '',
+ Gardener: '', 'Pet Care': '', Security: ''
+ };
+ function getServiceIcon(s) { return ICONS[s] || ''; }
+
+ // Called when user types in provider search box
+ function onProviderSearch(value) {
+ _providerConfirmed = false;
+ window._selectedProviderId = null;
+ clearValidationMsg();
+ _dropdownHighlight = -1;
+ clearTimeout(_providerSearchTimer);
+ _providerSearchTimer = setTimeout(() => fetchAndShowProviders(value.trim()), 250);
+ }
+
+ // Called on focus — show dropdown
+ function onProviderSearchFocus() {
+ if (_providerConfirmed) return;
+ const q = document.getElementById('b_provider')?.value?.trim() || '';
+ fetchAndShowProviders(q);
+ }
+
+ // Keyboard navigation
+ function onProviderSearchKey(e) {
+ const dropdown = document.getElementById('providerDropdown');
+ const opts = dropdown?.querySelectorAll('.provider-opt, .provider-any-opt');
+ if (!opts || !opts.length) return;
+ if (e.key === 'ArrowDown') {
+ e.preventDefault();
+ _dropdownHighlight = Math.min(_dropdownHighlight + 1, opts.length - 1);
+ updateHighlight(opts);
+ } else if (e.key === 'ArrowUp') {
+ e.preventDefault();
+ _dropdownHighlight = Math.max(_dropdownHighlight - 1, 0);
+ updateHighlight(opts);
+ } else if (e.key === 'Enter') {
+ e.preventDefault();
+ if (_dropdownHighlight >= 0 && opts[_dropdownHighlight]) opts[_dropdownHighlight].click();
+ } else if (e.key === 'Escape') {
+ closeProviderDropdown();
+ }
+ }
+
+ function updateHighlight(opts) {
+ opts.forEach((o, i) => o.classList.toggle('highlighted', i === _dropdownHighlight));
+ if (_dropdownHighlight >= 0) opts[_dropdownHighlight].scrollIntoView({ block: 'nearest' });
+ }
+
+ async function fetchAndShowProviders(query) {
+ const service = document.getElementById('b_service')?.value || '';
+ let url = API_URL + '/providers';
+ if (service) url += '?service=' + encodeURIComponent(service);
+ try {
+ const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+ const data = await res.json();
+ _providerSearchCache = data.success ? (data.providers || []) : [];
+ } catch (e) {
+ _providerSearchCache = [];
+ }
+ renderProviderDropdown(query);
+ }
+
+ function renderProviderDropdown(query) {
+ const dropdown = document.getElementById('providerDropdown');
+ if (!dropdown) return;
+ const q = (query || '').toLowerCase();
+ const service = document.getElementById('b_service')?.value || '';
+
+ // Filter by query
+ const filtered = q
+ ? _providerSearchCache.filter(p =>
+ p.name.toLowerCase().includes(q) ||
+ (p.city || '').toLowerCase().includes(q) ||
+ (p.service || '').toLowerCase().includes(q)
+ )
+ : _providerSearchCache;
+
+ let html = '';
+
+ // Count header
+ const totalCount = _providerSearchCache.length;
+ const shownCount = filtered.length;
+ const serviceLabel = service || 'All Services';
+ if (service) {
+ html += `<div class="provider-dropdown-header">${getServiceIcon(service)} ${shownCount} ${escapeHtml(serviceLabel)} provider${shownCount !== 1 ? 's' : ''} available</div>`;
+ }
+
+ // "Any Available Provider" always on top
+ html += `
+ <div class="provider-any-opt" onclick="selectAnyProvider()">
+ <div class="provider-opt-avatar">🎯</div>
+ <div>
+ <div class="provider-opt-name">Any Available Provider</div>
+ <div class="provider-opt-meta">We'll assign the best match for your service</div>
+ </div>
+ </div>`;
+
+ if (!filtered.length && q) {
+ html += `<div class="provider-empty-opt"> No verified provider found for "<strong>${escapeHtml(query)}</strong>"<br><span style="font-size:11px;margin-top:4px;display:block;">Try a different name or select Any Available Provider above</span></div>`;
+ } else {
+ filtered.slice(0, 12).forEach(p => {
+ const safeP = JSON.stringify(p).replace(/"/g, '&quot;');
+ html += `
+ <div class="provider-opt" onclick="selectProvider(JSON.parse(this.dataset.p))" data-p="${safeP}">
+ <div class="provider-opt-avatar">${getServiceIcon(p.service)}</div>
+ <div style="flex:1;min-width:0;">
+ <div class="provider-opt-name">${escapeHtml(p.name)}</div>
+ <div class="provider-opt-meta">${escapeHtml(p.service || '')}${p.city ? ' · ' + escapeHtml(p.city) : ''}</div>
+ </div>
+ <div class="provider-opt-badge">✓ Verified</div>
+ </div>`;
+ });
+ }
+
+ dropdown.innerHTML = html;
+ dropdown.classList.add('open');
+ document.getElementById('providerChevron')?.classList.add('open');
+ _dropdownHighlight = -1;
+ }
+
+ function closeProviderDropdown() {
+ document.getElementById('providerDropdown')?.classList.remove('open');
+ document.getElementById('providerChevron')?.classList.remove('open');
+ }
+
+ // Clicking the input toggles the dropdown (like a select)
+ function onProviderInputClick() {
+ if (_providerConfirmed) return;
+ const dropdown = document.getElementById('providerDropdown');
+ if (dropdown?.classList.contains('open')) {
+ closeProviderDropdown();
+ } else {
+ const q = document.getElementById('b_provider')?.value?.trim() || '';
+ fetchAndShowProviders(q);
+ }
+ }
+
+ // User selected a specific verified provider
+ function selectProvider(p) {
+ _providerConfirmed = true;
+ window._selectedProviderId = p.id || null;
+
+ const input = document.getElementById('b_provider');
+ const pill = document.getElementById('providerSelectedPill');
+ const pillIcon = document.getElementById('providerPillIcon');
+ const pillText = document.getElementById('providerPillText');
+
+ if (input) { input.value = p.name; input.style.display = 'none'; }
+ if (pillIcon) pillIcon.textContent = getServiceIcon(p.service);
+ if (pillText) pillText.textContent = p.name + (p.city ? ' · ' + p.city : '') + ' · ✓ Verified';
+ if (pill) pill.style.display = 'block';
+
+ setValidationMsg('success', '✓ Provider confirmed — you\'re good to go!');
+ closeProviderDropdown();
+ }
+
+ // User selected "Any Available Provider"
+ function selectAnyProvider() {
+ _providerConfirmed = true;
+ window._selectedProviderId = null;
+
+ const input = document.getElementById('b_provider');
+ const pill = document.getElementById('providerSelectedPill');
+ const pillIcon = document.getElementById('providerPillIcon');
+ const pillText = document.getElementById('providerPillText');
+
+ if (input) { input.value = ''; input.style.display = 'none'; }
+ if (pillIcon) pillIcon.textContent = '🎯';
+ if (pillText) pillText.textContent = 'Any Available Provider';
+ if (pill) pill.style.display = 'block';
+
+ setValidationMsg('success', '✓ We\'ll assign the best available provider for your service');
+ closeProviderDropdown();
+ }
+
+ // Clear selection — go back to search
+ function clearProviderSelection() {
+ _providerConfirmed = false;
+ window._selectedProviderId = null;
+
+ const input = document.getElementById('b_provider');
+ const pill = document.getElementById('providerSelectedPill');
+ const service = document.getElementById('b_service')?.value || '';
+ if (input) {
+ input.value = '';
+ input.style.display = '';
+ // Keep disabled state in sync with service selection
+ if (!service) {
+ input.disabled = true;
+ input.placeholder = '← First select a service';
+ }
+ }
+ if (pill) pill.style.display = 'none';
+ clearValidationMsg();
+ closeProviderDropdown();
+ }
+
+ function setValidationMsg(type, msg) {
+ const el = document.getElementById('providerValidationMsg');
+ if (!el) return;
+ el.className = type;
+ el.textContent = msg;
+ }
+
+ function clearValidationMsg() {
+ const el = document.getElementById('providerValidationMsg');
+ if (el) { el.className = ''; el.textContent = ''; }
+ }
+
+ /* ═══════════════════════════════════════
+ SEARCH & FILTER PROVIDERS
+ ═══════════════════════════════════════ */
+ let _searchDebounce = null;
+ function debounceProviderSearch(q) {
+ clearTimeout(_searchDebounce);
+ _searchDebounce = setTimeout(() => {
+ // Auto-navigate to overview so results are visible
+ if (_currentPage !== 'overview') navigateTo('overview');
+ applyProviderFilters();
+ }, 300);
+ }
+
+ function applyProviderFilters() {
+ const q = (document.getElementById('navSearchInput')?.value || '').trim();
+ const sort = document.getElementById('sortSelect')?.value || 'rating';
+ const city = (document.getElementById('navLocationInput')?.value || '').trim();
+ const activeFilter = document.querySelector('#dashboardProviderFilterBar .tab-btn.active')?.textContent?.trim();
+ const service = (activeFilter && activeFilter !== 'All') ? activeFilter : '';
+
+ let url = API_URL + '/providers?sort=' + encodeURIComponent(sort);
+ if (service) url += '&service=' + encodeURIComponent(service);
+ if (q) url += '&q=' + encodeURIComponent(q);
+ if (city) url += '&city=' + encodeURIComponent(city);
+
+ const container = document.getElementById('recommendedProvidersList');
+ if (!container) return;
+
+ // If not on overview, switch
+ if (_currentPage !== 'overview') navigateTo('overview');
+
+ fetch(url)
+ .then(r => r.json())
+ .then(data => {
+ if (!data.success || !data.providers?.length) {
+ container.innerHTML = '<div class="loader-box">No providers match your search. Try different filters.</div>';
+ // Still scroll to show the empty message
+ scrollToProviders();
+ return;
+ }
+ container.innerHTML = data.providers.slice(0, 12).map(p => `
+ <div class="provider-card">
+ <div class="provider-header">
+ <div class="provider-avatar">${serviceIcon(p.service)}</div>
+ <div>
+ <div class="provider-name">${escapeHtml(p.name)}</div>
+ <div class="provider-type">${escapeHtml(p.service || 'Professional')}${p.username ? ' · <span style="color:var(--primary-light);">@' + escapeHtml(p.username) + '</span>' : ''}</div>
+ </div>
+ </div>
+ <div class="provider-detail"> ${escapeHtml(p.city || p.location || 'India')}${p.pincode ? ' · ' + escapeHtml(p.pincode) : ''}</div>
+ ${providerPriceHtml(p)}
+ ${providerRatingHtml(p)}
+ ${providerStatsHtml(p)}
+ <div class="provider-badge">✓ Verified</div>
+ <button class="btn btn-primary btn-block btn-sm" onclick="prefillBooking('${(p.service || '').replace(/'/g, "\\\\'")}', '${(p.name || '').replace(/'/g, "\\\\'")}', ${p.id})">Book Now</button>
+ </div>
+ `).join('');
+ // Scroll to providers section so user sees results immediately
+ scrollToProviders();
+ })
+ .catch(() => {});
+ }
+
+ function scrollToProviders() {
+ const section = document.getElementById('recommendedProvidersSection');
+ if (section) {
+ section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+ }
+ }
+
+ /* ═══════════════════════════════════════
+ CUSTOMER STATS & LOYALTY POINTS
+ ═══════════════════════════════════════ */
+ async function loadCustomerStats() {
+ try {
+ const res = await apiFetch(API_URL + '/customer/stats', {
+ headers: { 'Authorization': 'Bearer ' + getToken() }
+ });
+ const data = await res.json();
+ if (data.success && data.stats) {
+ const pts = data.stats.loyalty_points || 0;
+ const badge = document.getElementById('loyaltyBadge');
+ const ptsEl = document.getElementById('loyaltyPoints');
+ if (pts > 0 && badge && ptsEl) {
+ ptsEl.textContent = pts;
+ badge.style.display = '';
+ }
+ }
+ } catch(e) { /* silent */ }
+ }
+
+ /* ═══════════════════════════════════════
+ SPA NAVIGATION — switch dashboard pages
+ ═══════════════════════════════════════ */
+ let _currentPage = 'overview';
+
+ function navigateTo(pageName) {
+ _currentPage = pageName;
+
+ // Hide all pages, show target
+ document.querySelectorAll('.dashboard-page').forEach(p => p.classList.remove('active'));
+ const target = document.getElementById('page-' + pageName);
+ if (target) target.classList.add('active');
+
+ // Update profile panel nav links
+ document.querySelectorAll('.profile-nav-link').forEach(link => {
+ link.classList.toggle('active', link.dataset.page === pageName);
+ });
+
+ // Load content for the page
+ if (pageName === 'bookings') {
+ renderBookings(_bookingsFilter || 'all');
+ // Also activate the "bookings" sub-tab
+ document.querySelectorAll('.dashboard-section-tab').forEach(btn => btn.classList.remove('active'));
+ document.querySelectorAll('.dashboard-section-panel').forEach(p => p.classList.remove('active'));
+ const bTab = document.querySelector('.dashboard-section-tab');
+ const bPanel = document.getElementById('panel-bookings');
+ if (bTab) bTab.classList.add('active');
+ if (bPanel) bPanel.classList.add('active');
+ }
+ if (pageName === 'messages') loadMessageThreadsFull();
+ if (pageName === 'history') loadBookingHistoryFull();
+ if (pageName === 'notifications') renderInlineNotificationsFull();
+ if (pageName === 'settings') loadSettingsPage();
+ if (pageName === 'overview') {
+ renderBookings(_bookingsFilter || 'all');
+ if (typeof loadDashboardProviders === 'function') loadDashboardProviders();
+ }
+
+ // Close profile panel if open
+ closeProfilePanel();
+
+ // Scroll to top of main content
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ }
+
+ // Keep old switchDashboardTab for in-page sub-tabs (Active/Messages/History/Notifications within bookings page)
+ function switchDashboardTab(tabName) {
+ // Update tab buttons
+ document.querySelectorAll('.dashboard-section-tab').forEach(btn => {
+ btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tabName));
+ });
+ // Show/hide panels
+ document.querySelectorAll('.dashboard-section-panel').forEach(panel => {
+ panel.classList.remove('active');
+ });
+ const panel = document.getElementById('panel-' + tabName);
+ if (panel) panel.classList.add('active');
+
+ // Load content for the panel
+ if (tabName === 'messages') loadMessageThreads();
+ if (tabName === 'history') loadBookingHistory();
+ if (tabName === 'notifications') renderInlineNotifications();
+ }
+
+ /* ═══════════════════════════════════════
+ PROFILE PANEL
+ ═══════════════════════════════════════ */
+ function openProfilePanel() {
+ document.getElementById('profilePanel')?.classList.add('open');
+ document.getElementById('profilePanelOverlay')?.classList.add('open');
+ }
+ function closeProfilePanel() {
+ document.getElementById('profilePanel')?.classList.remove('open');
+ document.getElementById('profilePanelOverlay')?.classList.remove('open');
+ }
+
+ /* ═══════════════════════════════════════
+ MESSAGES TAB
+ ═══════════════════════════════════════ */
+ async function loadMessageThreads() {
+ const container = document.getElementById('messageThreadsList');
+ if (!container) return;
+ container.innerHTML = '<div class="loader-box">Loading conversations…</div>';
+
+ await fetchBookingsFromAPI();
+ const bookings = getBookings().filter(b => b.status !== 'Cancelled');
+
+ if (!bookings.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No conversations</h4>
+ <p>Book a service to start chatting with providers.</p>
+ </div>`;
+ return;
+ }
+
+ // Load last message for each booking
+ const threads = [];
+ for (const b of bookings) {
+ try {
+ const res = await fetch(API_URL + '/chats/' + b.id, {
+ headers: { 'Authorization': 'Bearer ' + getToken() },
+ signal: AbortSignal.timeout(3000)
+ });
+ const data = await res.json();
+ const msgs = (data.success && data.messages) ? data.messages : [];
+ const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+ threads.push({ booking: b, lastMsg, msgCount: msgs.length });
+ } catch(e) {
+ threads.push({ booking: b, lastMsg: null, msgCount: 0 });
+ }
+ }
+
+ // Sort by most recent message
+ threads.sort((a, b) => {
+ const ta = a.lastMsg ? new Date(a.lastMsg.created_at).getTime() : 0;
+ const tb = b.lastMsg ? new Date(b.lastMsg.created_at).getTime() : 0;
+ return tb - ta;
+ });
+
+ container.innerHTML = threads.map(t => {
+ const b = t.booking;
+ const preview = t.lastMsg
+ ? escapeHtml((t.lastMsg.sender_name || 'You') + ': ' + (t.lastMsg.message || '').substring(0, 50))
+ : 'No messages yet — tap to start chatting';
+ const timeStr = t.lastMsg ? timeAgo(t.lastMsg.created_at) : '';
+ return `
+ <div class="message-thread-card" onclick="openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'})">
+ <div class="message-thread-avatar">${serviceIcon(b.service)}</div>
+ <div class="message-thread-info">
+ <div class="message-thread-name">${escapeHtml(b.provider || 'Any Provider')} · ${escapeHtml(b.service)}</div>
+ <div class="message-thread-preview">${preview}</div>
+ </div>
+ <div class="message-thread-time">${timeStr}</div>
+ </div>`;
+ }).join('');
+ }
+
+ /* ═══════════════════════════════════════
+ BOOKING HISTORY TAB (Completed + Cancelled)
+ ═══════════════════════════════════════ */
+ async function loadBookingHistory() {
+ const container = document.getElementById('bookingHistoryList');
+ if (!container) return;
+ container.innerHTML = '<div class="loader-box">Loading history…</div>';
+
+ await fetchBookingsFromAPI();
+ const history = getBookings()
+ .filter(b => b.status === 'Completed' || b.status === 'Cancelled')
+ .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+ if (!history.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon">📀</div>
+ <h4>No past bookings</h4>
+ <p>Your completed and cancelled bookings will appear here.</p>
+ </div>`;
+ return;
+ }
+
+ container.innerHTML = history.map(b => {
+ const isCompleted = b.status === 'Completed';
+ const statusColor = isCompleted ? 'var(--success)' : 'var(--danger)';
+ const statusIcon = isCompleted ? '' : '';
+ const dateStr = typeof formatDate === 'function' ? formatDate(b.booking_date) : (b.booking_date || '');
+ return `
+ <div class="history-card">
+ <div class="history-card-icon">${serviceIcon(b.service)}</div>
+ <div class="history-card-info">
+ <div class="history-card-title">${escapeHtml(b.service)} · ${escapeHtml(b.provider || 'Pool Provider')}</div>
+ <div class="history-card-meta">${dateStr} · ₹${b.amount || '499'} · ${b.payment_status === 'Paid' ? ' Paid' : ' Unpaid'}</div>
+ </div>
+ <div class="history-card-status" style="color:${statusColor}">${statusIcon} ${b.status}</div>
+ </div>`;
+ }).join('');
+ }
+
+ /* ═══════════════════════════════════════
+ INLINE NOTIFICATIONS TAB
+ ═══════════════════════════════════════ */
+ function renderInlineNotifications() {
+ const container = document.getElementById('inlineNotifList');
+ if (!container) return;
+
+ const notifs = typeof getNotifications === 'function' ? getNotifications() : [];
+
+ if (!notifs.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No notifications</h4>
+ <p>Booking updates, reschedules, and messages will appear here.</p>
+ </div>`;
+ return;
+ }
+
+ container.innerHTML = `
+ <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+ <span style="font-size:13px; color:var(--text-muted);">${notifs.length} notification${notifs.length !== 1 ? 's' : ''}</span>
+ <button class="btn btn-ghost btn-sm" onclick="if(typeof markAllRead==='function'){markAllRead();renderInlineNotifications();}">Mark all read</button>
+ </div>
+ ` + notifs.map(n => `
+ <div class="notif-item ${n.read ? '' : 'notif-item--unread'}" onclick="if(typeof markNotifRead==='function'){markNotifRead('${n.id}');renderInlineNotifications();}">
+ <div class="notif-item-icon">${notifIcon(n.type)}</div>
+ <div class="notif-item-body">
+ <div class="notif-item-title">${escapeHtml(n.title)}</div>
+ <div class="notif-item-time">${typeof timeAgo === 'function' ? timeAgo(n.timestamp) : ''}</div>
+ </div>
+ ${!n.read ? '<div class="notif-item-dot"></div>' : ''}
+ </div>
+ `).join('');
+ }
+
+ /* ═══════════════════════════════════════
+ FULL-PAGE LOADERS (for SPA pages)
+ ═══════════════════════════════════════ */
+
+ // Full-page messages (page-messages)
+ async function loadMessageThreadsFull() {
+ const container = document.getElementById('messageThreadsListFull');
+ if (!container) return;
+ container.innerHTML = '<div class="loader-box">Loading conversations…</div>';
+
+ await fetchBookingsFromAPI();
+ const bookings = getBookings().filter(b => b.status !== 'Cancelled');
+
+ if (!bookings.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No conversations</h4>
+ <p>Book a service to start chatting with providers.</p>
+ </div>`;
+ return;
+ }
+
+ const threads = [];
+ for (const b of bookings) {
+ try {
+ const res = await fetch(API_URL + '/chats/' + b.id, {
+ headers: { 'Authorization': 'Bearer ' + getToken() },
+ signal: AbortSignal.timeout(3000)
+ });
+ const data = await res.json();
+ const msgs = (data.success && data.messages) ? data.messages : [];
+ const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+ threads.push({ booking: b, lastMsg, msgCount: msgs.length });
+ } catch(e) {
+ threads.push({ booking: b, lastMsg: null, msgCount: 0 });
+ }
+ }
+
+ threads.sort((a, b) => {
+ if (a.lastMsg && b.lastMsg) return new Date(b.lastMsg.created_at) - new Date(a.lastMsg.created_at);
+ if (a.lastMsg) return -1;
+ if (b.lastMsg) return 1;
+ return b.booking.id - a.booking.id;
+ });
+
+ container.innerHTML = threads.map(t => {
+ const b = t.booking;
+ const preview = t.lastMsg ? (t.lastMsg.message || '').substring(0, 60) + (t.lastMsg.message?.length > 60 ? '…' : '') : 'No messages yet';
+ const timeStr = t.lastMsg ? (typeof formatChatDateTime === 'function' ? formatChatDateTime(t.lastMsg.created_at) : '') : '';
+ const icon = serviceIcon(b.service);
+ return `
+ <div class="history-card" style="cursor:pointer;" onclick="navigateTo('bookings');setTimeout(()=>openChatDrawer(${b.id}, '${escapeHtml((b.provider || 'Provider').replace(/'/g, "\\\\'"))}', '${escapeHtml((b.service || '').replace(/'/g, "\\\\'"))}', ${b.provider_id || 'null'}), 200)">
+ <div class="history-card-icon">${icon}</div>
+ <div class="history-card-info">
+ <div class="history-card-title">${escapeHtml(b.provider || 'Pool Provider')} · ${escapeHtml(b.service)}</div>
+ <div class="history-card-meta">${escapeHtml(preview)}</div>
+ </div>
+ <div style="text-align:right;font-size:11px;color:var(--text-muted);flex-shrink:0;">
+ ${t.msgCount > 0 ? '<span style="color:#818cf8;font-weight:600;">' + t.msgCount + ' msgs</span>' : ''}
+ ${timeStr ? '<br>' + timeStr : ''}
+ </div>
+ </div>`;
+ }).join('');
+ }
+
+ // Full-page booking history (page-history)
+ async function loadBookingHistoryFull() {
+ const container = document.getElementById('bookingHistoryListFull');
+ if (!container) return;
+ container.innerHTML = '<div class="loader-box">Loading history…</div>';
+
+ await fetchBookingsFromAPI();
+ const bookings = getBookings().filter(b => b.status === 'Completed' || b.status === 'Cancelled');
+
+ if (!bookings.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon">📜</div>
+ <h4>No past bookings</h4>
+ <p>Your completed and cancelled bookings will appear here.</p>
+ </div>`;
+ return;
+ }
+
+ container.innerHTML = bookings.map(b => {
+ const dateStr = b.booking_date ? new Date(b.booking_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+ const statusColor = b.status === 'Completed' ? '#10b981' : '#ef4444';
+ const statusIcon = b.status === 'Completed' ? '' : '';
+ return `
+ <div class="history-card">
+ <div class="history-card-icon">${serviceIcon(b.service)}</div>
+ <div class="history-card-info">
+ <div class="history-card-title">${escapeHtml(b.service)} · ${escapeHtml(b.provider || 'Pool Provider')}</div>
+ <div class="history-card-meta">${dateStr} · ₹${b.amount || '499'} · ${b.payment_status === 'Paid' ? ' Paid' : ' Unpaid'}</div>
+ </div>
+ <div class="history-card-status" style="color:${statusColor}">${statusIcon} ${b.status}</div>
+ </div>`;
+ }).join('');
+ }
+
+ // Full-page notifications (page-notifications)
+ function renderInlineNotificationsFull() {
+ const container = document.getElementById('inlineNotifListFull');
+ if (!container) return;
+
+ const notifs = typeof getNotifications === 'function' ? getNotifications() : [];
+
+ if (!notifs.length) {
+ container.innerHTML = `
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No notifications</h4>
+ <p>Booking updates, reschedules, and messages will appear here.</p>
+ </div>`;
+ return;
+ }
+
+ container.innerHTML = `
+ <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+ <button class="btn btn-ghost btn-sm" onclick="markAllRead();renderInlineNotificationsFull();">Mark all read</button>
+ </div>
+ ` + notifs.map(n => `
+ <div class="notif-item ${n.read ? '' : 'notif-item--unread'}" onclick="if(typeof markNotifRead==='function'){markNotifRead('${n.id}');renderInlineNotificationsFull();}">
+ <div class="notif-item-icon">${notifIcon(n.type)}</div>
+ <div class="notif-item-body">
+ <div class="notif-item-title">${escapeHtml(n.title)}</div>
+ <div class="notif-item-time">${typeof timeAgo === 'function' ? timeAgo(n.timestamp) : ''}</div>
+ </div>
+ ${!n.read ? '<div class="notif-item-dot"></div>' : ''}
+ </div>
+ `).join('');
+ }
+
+ /* ═══════════════════════════════════════
+ SETTINGS FUNCTIONS
+ ═══════════════════════════════════════ */
+
+ // Load settings page with current profile data
+ async function loadSettingsPage() {
+ try {
+ const res = await fetch(API_URL + '/profile', {
+ headers: { 'Authorization': 'Bearer ' + getToken() }
+ });
+ const data = await res.json();
+ if (data.success && data.user) {
+ document.getElementById('settings_name').value = data.user.name || '';
+ document.getElementById('settings_email').value = data.user.email || '';
+ document.getElementById('settings_phone').value = data.user.phone || '';
+ }
+ } catch(e) {
+ // Pre-fill from localStorage as fallback
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ document.getElementById('settings_name').value = user.name || '';
+ document.getElementById('settings_email').value = user.email || '';
+ document.getElementById('settings_phone').value = user.phone || '';
+ }
+
+ // Theme toggle state
+ const theme = localStorage.getItem('ss_theme') || 'dark';
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', theme === 'light');
+
+ // Message privacy state
+ const privacy = localStorage.getItem('ss_msg_privacy') || 'everyone';
+ setMsgPrivacy(privacy, true);
+ }
+
+ // Save profile
+ async function saveProfile() {
+ const name = document.getElementById('settings_name').value.trim();
+ const email = document.getElementById('settings_email').value.trim();
+ const phone = document.getElementById('settings_phone').value.trim();
+ const msgEl = document.getElementById('profileMsg');
+
+ if (!name || name.length < 2) return showSettingsMsg(msgEl, 'error', 'Name must be at least 2 characters');
+ if (!email || !email.includes('@')) return showSettingsMsg(msgEl, 'error', 'Please enter a valid email');
+ if (phone && !/^[0-9]{10}$/.test(phone)) return showSettingsMsg(msgEl, 'error', 'Phone must be 10 digits');
+
+ try {
+ const res = await fetch(API_URL + '/profile', {
+ method: 'PUT',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'Authorization': 'Bearer ' + getToken()
+ },
+ body: JSON.stringify({ name, email, phone: phone || undefined })
+ });
+ const data = await res.json();
+ if (data.success) {
+ showSettingsMsg(msgEl, 'success', ' Profile updated successfully!');
+ // Update localStorage and UI
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ user.name = name;
+ user.email = email;
+ user.phone = phone;
+ localStorage.setItem('ss_user', JSON.stringify(user));
+ // Update navbar and profile panel
+ document.getElementById('userName').textContent = name;
+ document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('profileName').textContent = name;
+ document.getElementById('profileEmail').textContent = email;
+ } else {
+ showSettingsMsg(msgEl, 'error', data.message || 'Update failed');
+ }
+ } catch(e) {
+ showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
+ }
+ }
+
+ // Change password
+ async function changePassword() {
+ const current = document.getElementById('settings_current_pwd').value;
+ const newPwd = document.getElementById('settings_new_pwd').value;
+ const confirm = document.getElementById('settings_confirm_pwd').value;
+ const msgEl = document.getElementById('passwordMsg');
+
+ if (!current) return showSettingsMsg(msgEl, 'error', 'Enter your current password');
+ if (newPwd.length < 6) return showSettingsMsg(msgEl, 'error', 'New password must be at least 6 characters');
+ if (newPwd !== confirm) return showSettingsMsg(msgEl, 'error', 'Passwords do not match');
+
+ try {
+ const res = await fetch(API_URL + '/change-password', {
+ method: 'PUT',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'Authorization': 'Bearer ' + getToken()
+ },
+ body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+ });
+ const data = await res.json();
+ if (data.success) {
+ showSettingsMsg(msgEl, 'success', ' Password changed successfully!');
+ document.getElementById('settings_current_pwd').value = '';
+ document.getElementById('settings_new_pwd').value = '';
+ document.getElementById('settings_confirm_pwd').value = '';
+ } else {
+ showSettingsMsg(msgEl, 'error', data.message || 'Password change failed');
+ }
+ } catch(e) {
+ showSettingsMsg(msgEl, 'error', 'Network error. Please try again.');
+ }
+ }
+
+ // Theme toggle
+ function toggleTheme() {
+ const html = document.documentElement;
+ const current = html.getAttribute('data-theme') || 'dark';
+ const next = current === 'dark' ? 'light' : 'dark';
+ html.setAttribute('data-theme', next);
+ localStorage.setItem('ss_theme', next);
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', next === 'light');
+ }
+
+ // Apply saved theme on load
+ (function applyTheme() {
+ const saved = localStorage.getItem('ss_theme');
+ if (saved) document.documentElement.setAttribute('data-theme', saved);
+ // Also set toggle state if settings page is visible
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', saved === 'light');
+ })();
+
+ // Message privacy
+ function setMsgPrivacy(value, silent) {
+ document.querySelectorAll('.radio-option[data-privacy]').forEach(opt => {
+ opt.classList.toggle('selected', opt.dataset.privacy === value);
+ });
+ if (!silent) {
+ localStorage.setItem('ss_msg_privacy', value);
+ if (typeof showToast === 'function') showToast('Privacy updated: ' + value, 'success');
+ }
+ }
+
+ // Show settings message
+ function showSettingsMsg(el, type, text) {
+ if (!el) return;
+ el.className = 'settings-msg ' + type;
+ el.textContent = text;
+ el.style.display = 'block';
+ setTimeout(() => { el.style.display = 'none'; }, 5000);
+ }
+ </script>
+
+ <!-- Notification Center Drawer -->
+ <div class="notif-drawer" id="notifCenterDrawer">
+ <div class="notif-drawer-header">
+ <h3> Notifications</h3>
+ <div class="notif-drawer-actions">
+ <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+ <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
+ </div>
+ </div>
+ <div class="notif-drawer-body" id="notifCenterList"></div>
+ </div>
+
+ <!-- Profile Panel Overlay -->
+ <div class="profile-panel-overlay" id="profilePanelOverlay" onclick="closeProfilePanel()"></div>
+
+ <!-- Profile Side Panel -->
+ <div class="profile-panel" id="profilePanel">
+ <div class="profile-panel-header">
+ <button class="profile-panel-close" onclick="closeProfilePanel()">&times;</button>
+ <div class="profile-panel-avatar" id="profileAvatar">U</div>
+ <div class="profile-panel-name" id="profileName">User</div>
+ <div class="profile-panel-email" id="profileEmail">user@email.com</div>
+ <div class="profile-panel-role"> Customer</div>
+ </div>
+ <div class="profile-panel-nav">
+ <button class="profile-nav-link active" data-page="overview" onclick="navigateTo('overview')">
+ <span class="nav-icon"></span> Dashboard
+ </button>
+ <button class="profile-nav-link" data-page="bookings" onclick="navigateTo('bookings')">
+ <span class="nav-icon"></span> My Bookings
+ </button>
+ <button class="profile-nav-link" data-page="messages" onclick="navigateTo('messages')">
+ <span class="nav-icon"></span> Messages
+ </button>
+ <button class="profile-nav-link" data-page="history" onclick="navigateTo('history')">
+ <span class="nav-icon">📜</span> Booking History
+ </button>
+ <button class="profile-nav-link" data-page="notifications" onclick="navigateTo('notifications')">
+ <span class="nav-icon"></span> Notifications
+ <span class="nav-badge notif-badge-count" style="display:none;">0</span>
+ </button>
+ <button class="profile-nav-link" data-page="book-service" onclick="navigateTo('book-service')">
+ <span class="nav-icon"></span> Book a Service
+ </button>
+ <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
+ <span class="nav-icon"></span> Settings
+ </button>
+ </div>
+ <div class="profile-panel-footer">
+ <button class="btn btn-ghost" onclick="logout()"> Logout</button>
+ </div>
+ </div>
 
 </body>
 

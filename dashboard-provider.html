@@ -2,869 +2,869 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provider Dashboard – ServiceSphere</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .bookings-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Provider Dashboard – ServiceSphere</title>
+ <link rel="stylesheet" href="css/style.css">
+ <style>
+ .bookings-list {
+ display: flex;
+ flex-direction: column;
+ gap: 14px;
+ }
 
-    .provider-profile-card {
-      background: var(--surface-1);
-      border: 1px solid var(--dark-border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      margin-bottom: 36px;
-    }
+ .provider-profile-card {
+ background: var(--surface-1);
+ border: 1px solid var(--dark-border);
+ border-radius: var(--radius-lg);
+ padding: 28px;
+ display: flex;
+ align-items: center;
+ gap: 24px;
+ margin-bottom: 36px;
+ }
 
-    .profile-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
-      background: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-    }
+ .profile-avatar {
+ width: 56px;
+ height: 56px;
+ border-radius: 14px;
+ background: var(--primary);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 24px;
+ font-weight: 700;
+ color: #fff;
+ flex-shrink: 0;
+ }
 
-    .profile-info h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      letter-spacing: -0.02em;
-    }
+ .profile-info h3 {
+ font-size: 18px;
+ font-weight: 700;
+ margin-bottom: 4px;
+ letter-spacing: -0.02em;
+ }
 
-    .profile-info span {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+ .profile-info span {
+ font-size: 13px;
+ color: var(--text-secondary);
+ }
 
-    .profile-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.08);
-      color: var(--success);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 3px 10px;
-      border-radius: 99px;
-      margin-top: 8px;
-    }
-  </style>
+ .profile-badge {
+ display: inline-flex;
+ align-items: center;
+ gap: 6px;
+ background: rgba(16, 185, 129, 0.08);
+ color: var(--success);
+ font-size: 12px;
+ font-weight: 500;
+ padding: 3px 10px;
+ border-radius: 99px;
+ margin-top: 8px;
+ }
+ </style>
 </head>
 
 <body>
-  <div class="toast-container" id="toastContainer"></div>
+ <div class="toast-container" id="toastContainer"></div>
 
-  <!-- NAVBAR -->
-  <header class="navbar">
-    <a href="index.html" class="navbar-brand">
-      <div class="logo-icon">⚡</div>
-      ServiceSphere
-    </a>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="navbar-actions">
-      <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
-        🔔
-        <span class="notif-badge-count" style="display:none;">0</span>
-      </button>
-      <button class="navbar-profile-btn" onclick="openProfilePanel()" aria-label="Open profile menu">
-        <div class="user-avatar" id="userAvatar">P</div>
-        <span class="profile-name" id="userName">Provider</span>
-      </button>
-    </div>
-  </header>
+ <!-- NAVBAR -->
+ <header class="navbar">
+ <a href="index.html" class="navbar-brand">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </a>
+ <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu">
+ <span></span><span></span><span></span>
+ </button>
+ <div class="navbar-actions">
+ <button class="notif-bell" onclick="openNotifCenter()" aria-label="Notifications">
+ 
+ <span class="notif-badge-count" style="display:none;">0</span>
+ </button>
+ <button class="navbar-profile-btn" onclick="openProfilePanel()" aria-label="Open profile menu">
+ <div class="user-avatar" id="userAvatar">P</div>
+ <span class="profile-name" id="userName">Provider</span>
+ </button>
+ </div>
+ </header>
 
-  <!-- Mobile Navigation Overlay -->
-  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
-  <nav class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-header">
-      <a href="index.html" class="navbar-brand">
-        <div class="logo-icon">⚡</div>
-        ServiceSphere
-      </a>
-      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
-    </div>
-    <a href="#" onclick="navigateTo('overview');closeMobileNav();return false;">🏠 Dashboard</a>
-    <a href="#" onclick="navigateTo('bookings');closeMobileNav();return false;">📋 Bookings</a>
-    <a href="#" onclick="navigateTo('calendar');closeMobileNav();return false;">📅 Calendar</a>
-    <a href="#" onclick="navigateTo('reviews');closeMobileNav();return false;">⭐ Reviews</a>
-    <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;">⚙️ Settings</a>
-    <div class="mobile-nav-actions">
-      <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
-    </div>
-  </nav>
-  <script>
-    function openMobileNav() {
-      document.getElementById('mobileNav').classList.add('open');
-      document.getElementById('mobileNavOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeMobileNav() {
-      document.getElementById('mobileNav').classList.remove('open');
-      document.getElementById('mobileNavOverlay').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-    document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
-    document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
-    document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
-  </script>
+ <!-- Mobile Navigation Overlay -->
+ <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+ <nav class="mobile-nav" id="mobileNav">
+ <div class="mobile-nav-header">
+ <a href="index.html" class="navbar-brand">
+ <div class="logo-icon">⚡</div>
+ ServiceSphere
+ </a>
+ <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&times;</button>
+ </div>
+ <a href="#" onclick="navigateTo('overview');closeMobileNav();return false;"> Dashboard</a>
+ <a href="#" onclick="navigateTo('bookings');closeMobileNav();return false;"> Bookings</a>
+ <a href="#" onclick="navigateTo('calendar');closeMobileNav();return false;"> Calendar</a>
+ <a href="#" onclick="navigateTo('reviews');closeMobileNav();return false;"> Reviews</a>
+ <a href="#" onclick="navigateTo('settings');closeMobileNav();return false;"> Settings</a>
+ <div class="mobile-nav-actions">
+ <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+ </div>
+ </nav>
+ <script>
+ function openMobileNav() {
+ document.getElementById('mobileNav').classList.add('open');
+ document.getElementById('mobileNavOverlay').classList.add('open');
+ document.body.style.overflow = 'hidden';
+ }
+ function closeMobileNav() {
+ document.getElementById('mobileNav').classList.remove('open');
+ document.getElementById('mobileNavOverlay').classList.remove('open');
+ document.body.style.overflow = '';
+ }
+ document.getElementById('hamburgerBtn').addEventListener('click', openMobileNav);
+ document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
+ document.getElementById('mobileNavOverlay').addEventListener('click', closeMobileNav);
+ </script>
 
-  <!-- MAIN -->
-  <main class="dashboard-layout">
+ <!-- MAIN -->
+ <main class="dashboard-layout">
 
-    <div id="verificationBanner" class="verification-banner" style="display:none;"></div>
+ <div id="verificationBanner" class="verification-banner" style="display:none;"></div>
 
-    <!-- ══════ PAGE: Overview ══════ -->
-    <div class="dashboard-page active" id="page-overview">
+ <!-- ══════ PAGE: Overview ══════ -->
+ <div class="dashboard-page active" id="page-overview">
 
-    <!-- Provider Profile Card -->
-    <div class="provider-profile-card" id="profile">
-      <div class="profile-avatar" id="profileAvatar">P</div>
-      <div class="profile-info" style="flex:1;">
-        <h3 id="profileName">Provider Name</h3>
-        <span id="profileService">Service Category</span><br>
-        <span id="profileLocation" style="font-size:13px; color:var(--text-muted);">📍 Location</span>
-        <div class="profile-badge" id="profileBadge">✓ Verified Provider</div>
-      </div>
-      <!-- Pricing Section -->
-      <div id="pricingSection" style="
-        min-width: 180px;
-        background: rgba(16,185,129,0.06);
-        border: 1px solid rgba(16,185,129,0.15);
-        border-radius: var(--radius-md);
-        padding: 16px;
-        text-align: center;
-      ">
-        <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">💰 Your Rate</div>
-        <div id="currentPriceDisplay" style="font-size:24px; font-weight:800; color:var(--success); margin-bottom:8px;">₹499</div>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <span style="color:var(--text-muted); font-weight:600;">₹</span>
-          <input type="number" id="priceInput" min="49" max="99999" step="1" placeholder="499"
-            style="
-              flex:1;
-              background: var(--dark-card);
-              border: 1px solid var(--dark-border);
-              border-radius: 6px;
-              padding: 6px 8px;
-              font-size: 14px;
-              color: #fff;
-              width: 80px;
-              text-align: center;
-            ">
-          <button class="btn btn-sm" onclick="saveProviderPrice()" id="savePriceBtn"
-            style="background:var(--success); color:#fff; padding:6px 12px; font-size:12px; white-space:nowrap;">
-            Save
-          </button>
-        </div>
-        <div id="priceMsg" style="font-size:11px; margin-top:4px; min-height:16px;"></div>
-      </div>
-    </div>
+ <!-- Provider Profile Card -->
+ <div class="provider-profile-card" id="profile">
+ <div class="profile-avatar" id="profileAvatar">P</div>
+ <div class="profile-info" style="flex:1;">
+ <h3 id="profileName">Provider Name</h3>
+ <span id="profileService">Service Category</span><br>
+ <span id="profileLocation" style="font-size:13px; color:var(--text-muted);"> Location</span>
+ <div class="profile-badge" id="profileBadge">✓ Verified Provider</div>
+ </div>
+ <!-- Pricing Section -->
+ <div id="pricingSection" style="
+ min-width: 180px;
+ background: rgba(16,185,129,0.06);
+ border: 1px solid rgba(16,185,129,0.15);
+ border-radius: var(--radius-md);
+ padding: 16px;
+ text-align: center;
+ ">
+ <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;"> Your Rate</div>
+ <div id="currentPriceDisplay" style="font-size:24px; font-weight:800; color:var(--success); margin-bottom:8px;">₹499</div>
+ <div style="display:flex; gap:6px; align-items:center;">
+ <span style="color:var(--text-muted); font-weight:600;">₹</span>
+ <input type="number" id="priceInput" min="49" max="99999" step="1" placeholder="499"
+ style="
+ flex:1;
+ background: var(--dark-card);
+ border: 1px solid var(--dark-border);
+ border-radius: 6px;
+ padding: 6px 8px;
+ font-size: 14px;
+ color: #fff;
+ width: 80px;
+ text-align: center;
+ ">
+ <button class="btn btn-sm" onclick="saveProviderPrice()" id="savePriceBtn"
+ style="background:var(--success); color:#fff; padding:6px 12px; font-size:12px; white-space:nowrap;">
+ Save
+ </button>
+ </div>
+ <div id="priceMsg" style="font-size:11px; margin-top:4px; min-height:16px;"></div>
+ </div>
+ </div>
 
-    <!-- Stats -->
-    <div class="stats-row" style="margin-bottom:36px;">
-      <div class="stat-card">
-        <div class="icon-box" style="background:rgba(245,158,11,0.15);">⏳</div>
-        <div>
-          <div class="num" id="pendingCnt">0</div>
-          <div class="lbl">Pending Requests</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-box" style="background:rgba(99,102,241,0.15);">🔵</div>
-        <div>
-          <div class="num" id="acceptedCnt">0</div>
-          <div class="lbl">Accepted</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-box" style="background:rgba(16,185,129,0.15);">✅</div>
-        <div>
-          <div class="num" id="completedCnt">0</div>
-          <div class="lbl">Completed</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="icon-box" style="background:rgba(239,68,68,0.15);">❌</div>
-        <div>
-          <div class="num" id="cancelledCnt">0</div>
-          <div class="lbl">Cancelled</div>
-        </div>
-      </div>
-    </div>
+ <!-- Stats -->
+ <div class="stats-row" style="margin-bottom:36px;">
+ <div class="stat-card">
+ <div class="icon-box" style="background:rgba(245,158,11,0.15);"></div>
+ <div>
+ <div class="num" id="pendingCnt">0</div>
+ <div class="lbl">Pending Requests</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="icon-box" style="background:rgba(99,102,241,0.15);"></div>
+ <div>
+ <div class="num" id="acceptedCnt">0</div>
+ <div class="lbl">Accepted</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="icon-box" style="background:rgba(16,185,129,0.15);"></div>
+ <div>
+ <div class="num" id="completedCnt">0</div>
+ <div class="lbl">Completed</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="icon-box" style="background:rgba(239,68,68,0.15);"></div>
+ <div>
+ <div class="num" id="cancelledCnt">0</div>
+ <div class="lbl">Cancelled</div>
+ </div>
+ </div>
+ </div>
 
-    <!-- ── Earnings Dashboard ── -->
-    <div style="margin-bottom:36px;">
-      <div class="section-title">💰 Earnings Dashboard</div>
-      <div class="earnings-grid" id="earningsGrid">
-        <div class="earnings-card">
-          <span class="earnings-value" id="earnTotal">₹0</span>
-          <span class="earnings-label">Total Earned</span>
-        </div>
-        <div class="earnings-card">
-          <span class="earnings-value" id="earnMonth">₹0</span>
-          <span class="earnings-label">This Month</span>
-        </div>
-        <div class="earnings-card">
-          <span class="earnings-value" id="earnJobs">0</span>
-          <span class="earnings-label">Completed Jobs</span>
-        </div>
-        <div class="earnings-card">
-          <span class="earnings-value" id="earnRate" style="color:var(--primary-light);">0%</span>
-          <span class="earnings-label">Accept Rate</span>
-        </div>
-      </div>
-    </div>
+ <!-- ── Earnings Dashboard ── -->
+ <div style="margin-bottom:36px;">
+ <div class="section-title"> Earnings Dashboard</div>
+ <div class="earnings-grid" id="earningsGrid">
+ <div class="earnings-card">
+ <span class="earnings-value" id="earnTotal">₹0</span>
+ <span class="earnings-label">Total Earned</span>
+ </div>
+ <div class="earnings-card">
+ <span class="earnings-value" id="earnMonth">₹0</span>
+ <span class="earnings-label">This Month</span>
+ </div>
+ <div class="earnings-card">
+ <span class="earnings-value" id="earnJobs">0</span>
+ <span class="earnings-label">Completed Jobs</span>
+ </div>
+ <div class="earnings-card">
+ <span class="earnings-value" id="earnRate" style="color:var(--primary-light);">0%</span>
+ <span class="earnings-label">Accept Rate</span>
+ </div>
+ </div>
+ </div>
 
-    <!-- ── Availability Schedule ── -->
-    <div style="margin-bottom:36px;">
-      <div class="section-title">🕐 Set Your Availability</div>
-      <div class="availability-grid" id="availabilityGrid"></div>
-      <div style="margin-top:12px; display:flex; gap:8px;">
-        <button class="btn btn-primary btn-sm" onclick="saveAvailability()" id="saveAvailBtn">💾 Save Schedule</button>
-        <span id="availMsg" style="font-size:12px; color:var(--text-muted); align-self:center;"></span>
-      </div>
-    </div>
+ <!-- ── Availability Schedule ── -->
+ <div style="margin-bottom:36px;">
+ <div class="section-title"> Set Your Availability</div>
+ <div class="availability-grid" id="availabilityGrid"></div>
+ <div style="margin-top:12px; display:flex; gap:8px;">
+ <button class="btn btn-primary btn-sm" onclick="saveAvailability()" id="saveAvailBtn"> Save Schedule</button>
+ <span id="availMsg" style="font-size:12px; color:var(--text-muted); align-self:center;"></span>
+ </div>
+ </div>
 
-    </div><!-- /page-overview -->
+ </div><!-- /page-overview -->
 
-    <!-- ══════ PAGE: Calendar ══════ -->
-    <div class="dashboard-page" id="page-calendar">
-    <!-- ── Booking Calendar ── -->
-    <div id="calendarSection" style="margin-bottom:36px;">
-      <div class="section-title">📅 Booking Calendar</div>
-      <div class="booking-calendar" id="providerCalendar">
-        <div class="cal-header">
-          <button class="cal-nav-btn" onclick="navigateCalendar(-1)" title="Previous month">‹</button>
-          <div class="cal-month-label" id="calMonthLabel">June 2026</div>
-          <button class="cal-nav-btn" onclick="navigateCalendar(1)" title="Next month">›</button>
-        </div>
-        <div class="cal-weekdays">
-          <div>Sun</div>
-          <div>Mon</div>
-          <div>Tue</div>
-          <div>Wed</div>
-          <div>Thu</div>
-          <div>Fri</div>
-          <div>Sat</div>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-legend">
-          <span><span class="cal-dot cal-dot--pending"></span> Pending</span>
-          <span><span class="cal-dot cal-dot--accepted"></span> Accepted</span>
-          <span><span class="cal-dot cal-dot--completed"></span> Completed</span>
-          <span><span class="cal-dot cal-dot--cancelled"></span> Cancelled</span>
-        </div>
-        <div class="cal-active-filter" id="calActiveFilter" style="display:none;">
-          <span id="calFilterLabel">Showing: 18 Jun 2026</span>
-          <button class="btn btn-ghost btn-sm" onclick="clearCalendarFilter()" style="font-size:11px;">✕ Show
-            All</button>
-        </div>
-      </div>
-    </div>
+ <!-- ══════ PAGE: Calendar ══════ -->
+ <div class="dashboard-page" id="page-calendar">
+ <!-- ── Booking Calendar ── -->
+ <div id="calendarSection" style="margin-bottom:36px;">
+ <div class="section-title"> Booking Calendar</div>
+ <div class="booking-calendar" id="providerCalendar">
+ <div class="cal-header">
+ <button class="cal-nav-btn" onclick="navigateCalendar(-1)" title="Previous month">‹</button>
+ <div class="cal-month-label" id="calMonthLabel">June 2026</div>
+ <button class="cal-nav-btn" onclick="navigateCalendar(1)" title="Next month">›</button>
+ </div>
+ <div class="cal-weekdays">
+ <div>Sun</div>
+ <div>Mon</div>
+ <div>Tue</div>
+ <div>Wed</div>
+ <div>Thu</div>
+ <div>Fri</div>
+ <div>Sat</div>
+ </div>
+ <div class="cal-grid" id="calGrid"></div>
+ <div class="cal-legend">
+ <span><span class="cal-dot cal-dot--pending"></span> Pending</span>
+ <span><span class="cal-dot cal-dot--accepted"></span> Accepted</span>
+ <span><span class="cal-dot cal-dot--completed"></span> Completed</span>
+ <span><span class="cal-dot cal-dot--cancelled"></span> Cancelled</span>
+ </div>
+ <div class="cal-active-filter" id="calActiveFilter" style="display:none;">
+ <span id="calFilterLabel">Showing: 18 Jun 2026</span>
+ <button class="btn btn-ghost btn-sm" onclick="clearCalendarFilter()" style="font-size:11px;">✕ Show
+ All</button>
+ </div>
+ </div>
+ </div>
 
-    </div><!-- /page-calendar -->
+ </div><!-- /page-calendar -->
 
-    <!-- ══════ PAGE: Bookings ══════ -->
-    <div class="dashboard-page" id="page-bookings">
-    <!-- Bookings Section -->
-    <div id="bookings">
-      <div class="section-title">
-        📋 Booking Requests
-        <span class="cnt" id="pendingBadge" style="background:var(--warning);color:#000;">0</span>
-      </div>
+ <!-- ══════ PAGE: Bookings ══════ -->
+ <div class="dashboard-page" id="page-bookings">
+ <!-- Bookings Section -->
+ <div id="bookings">
+ <div class="section-title">
+ Booking Requests
+ <span class="cnt" id="pendingBadge" style="background:var(--warning);color:#000;">0</span>
+ </div>
 
-      <!-- Tab Filter -->
-      <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
-        <button class="tab-btn active" id="tab-all" onclick="filterProviderBookings('all')" role="tab"
-          aria-selected="true">All</button>
-        <button class="tab-btn" id="tab-pending" onclick="filterProviderBookings('pending')" role="tab"
-          aria-selected="false">Pending</button>
-        <button class="tab-btn" id="tab-accepted" onclick="filterProviderBookings('accepted')" role="tab"
-          aria-selected="false">Accepted</button>
-        <button class="tab-btn" id="tab-completed" onclick="filterProviderBookings('completed')" role="tab"
-          aria-selected="false">Completed</button>
-        <button class="tab-btn" id="tab-cancelled" onclick="filterProviderBookings('cancelled')" role="tab"
-          aria-selected="false">Cancelled</button>
-      </div>
+ <!-- Tab Filter -->
+ <div class="tab-bar" style="margin-bottom:24px;" role="tablist" aria-label="Filter bookings by status">
+ <button class="tab-btn active" id="tab-all" onclick="filterProviderBookings('all')" role="tab"
+ aria-selected="true">All</button>
+ <button class="tab-btn" id="tab-pending" onclick="filterProviderBookings('pending')" role="tab"
+ aria-selected="false">Pending</button>
+ <button class="tab-btn" id="tab-accepted" onclick="filterProviderBookings('accepted')" role="tab"
+ aria-selected="false">Accepted</button>
+ <button class="tab-btn" id="tab-completed" onclick="filterProviderBookings('completed')" role="tab"
+ aria-selected="false">Completed</button>
+ <button class="tab-btn" id="tab-cancelled" onclick="filterProviderBookings('cancelled')" role="tab"
+ aria-selected="false">Cancelled</button>
+ </div>
 
-      <div class="bookings-list" id="providerBookingsList" aria-live="polite" aria-label="Booking requests">
-        <div class="empty-state">
-          <div class="icon">📭</div>
-          <h4>No booking requests yet</h4>
-          <p>When customers book your service, they'll appear here.</p>
-        </div>
-      </div>
-    </div>
+ <div class="bookings-list" id="providerBookingsList" aria-live="polite" aria-label="Booking requests">
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h4>No booking requests yet</h4>
+ <p>When customers book your service, they'll appear here.</p>
+ </div>
+ </div>
+ </div>
 
-    </div><!-- /page-bookings -->
+ </div><!-- /page-bookings -->
 
-    <!-- ══════ PAGE: Reviews ══════ -->
-    <div class="dashboard-page" id="page-reviews">
-    <div class="dashboard-card">
-      <div class="section-title">⭐ My Reviews</div>
-      <div class="my-reviews-header" id="myReviewsHeader" style="display:none;">
-        <div class="my-reviews-avg">
-          <span class="my-reviews-avg-number" id="myAvgRating">0</span>
-          <div>
-            <div id="myAvgStars"></div>
-            <div class="my-reviews-avg-detail" id="myReviewCount">0 reviews</div>
-          </div>
-        </div>
-      </div>
-      <div id="myReviewsList"></div>
-    </div>
-    </div><!-- /page-reviews -->
+ <!-- ══════ PAGE: Reviews ══════ -->
+ <div class="dashboard-page" id="page-reviews">
+ <div class="dashboard-card">
+ <div class="section-title"> My Reviews</div>
+ <div class="my-reviews-header" id="myReviewsHeader" style="display:none;">
+ <div class="my-reviews-avg">
+ <span class="my-reviews-avg-number" id="myAvgRating">0</span>
+ <div>
+ <div id="myAvgStars"></div>
+ <div class="my-reviews-avg-detail" id="myReviewCount">0 reviews</div>
+ </div>
+ </div>
+ </div>
+ <div id="myReviewsList"></div>
+ </div>
+ </div><!-- /page-reviews -->
 
-    <!-- ══════ PAGE: Settings ══════ -->
-    <div class="dashboard-page" id="page-settings">
-      <div class="section-title">⚙️ Settings</div>
-      <div class="settings-grid">
-        <div class="settings-card">
-          <div class="settings-card-title">👤 Profile Information</div>
-          <div class="settings-card-desc">Update your personal details</div>
-          <div class="settings-form-group">
-            <label>Full Name</label>
-            <input type="text" id="settings_name" placeholder="Your name">
-          </div>
-          <div class="settings-form-group">
-            <label>Email Address</label>
-            <input type="email" id="settings_email" placeholder="your@email.com">
-          </div>
-          <div class="settings-form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="settings_phone" placeholder="10-digit mobile number" maxlength="10">
-          </div>
-          <div class="settings-actions">
-            <button class="btn btn-primary" onclick="saveProfile()">💾 Save Changes</button>
-          </div>
-          <div class="settings-msg" id="profileMsg"></div>
-        </div>
-        <div class="settings-card">
-          <div class="settings-card-title">🔒 Change Password</div>
-          <div class="settings-card-desc">Update your account password</div>
-          <div class="settings-form-group">
-            <label>Current Password</label>
-            <input type="password" id="settings_current_pwd" placeholder="Enter current password">
-          </div>
-          <div class="settings-form-group">
-            <label>New Password</label>
-            <input type="password" id="settings_new_pwd" placeholder="At least 6 characters">
-          </div>
-          <div class="settings-form-group">
-            <label>Confirm New Password</label>
-            <input type="password" id="settings_confirm_pwd" placeholder="Re-enter new password">
-          </div>
-          <div class="settings-actions">
-            <button class="btn btn-primary" onclick="changePassword()">🔑 Update Password</button>
-          </div>
-          <div class="settings-msg" id="passwordMsg"></div>
-        </div>
-        <div class="settings-card">
-          <div class="settings-card-title">🎨 Appearance</div>
-          <div class="settings-card-desc">Customize the look and feel</div>
-          <div class="toggle-switch">
-            <div class="toggle-switch-label">
-              <span class="title">☀️ Light Mode</span>
-              <span class="desc">Switch between dark and light theme</span>
-            </div>
-            <div class="toggle-track" id="themeToggle" onclick="toggleTheme()"></div>
-          </div>
-        </div>
-      </div>
-    </div><!-- /page-settings -->
+ <!-- ══════ PAGE: Settings ══════ -->
+ <div class="dashboard-page" id="page-settings">
+ <div class="section-title"> Settings</div>
+ <div class="settings-grid">
+ <div class="settings-card">
+ <div class="settings-card-title"> Profile Information</div>
+ <div class="settings-card-desc">Update your personal details</div>
+ <div class="settings-form-group">
+ <label>Full Name</label>
+ <input type="text" id="settings_name" placeholder="Your name">
+ </div>
+ <div class="settings-form-group">
+ <label>Email Address</label>
+ <input type="email" id="settings_email" placeholder="your@email.com">
+ </div>
+ <div class="settings-form-group">
+ <label>Phone Number</label>
+ <input type="tel" id="settings_phone" placeholder="10-digit mobile number" maxlength="10">
+ </div>
+ <div class="settings-actions">
+ <button class="btn btn-primary" onclick="saveProfile()"> Save Changes</button>
+ </div>
+ <div class="settings-msg" id="profileMsg"></div>
+ </div>
+ <div class="settings-card">
+ <div class="settings-card-title"> Change Password</div>
+ <div class="settings-card-desc">Update your account password</div>
+ <div class="settings-form-group">
+ <label>Current Password</label>
+ <input type="password" id="settings_current_pwd" placeholder="Enter current password">
+ </div>
+ <div class="settings-form-group">
+ <label>New Password</label>
+ <input type="password" id="settings_new_pwd" placeholder="At least 6 characters">
+ </div>
+ <div class="settings-form-group">
+ <label>Confirm New Password</label>
+ <input type="password" id="settings_confirm_pwd" placeholder="Re-enter new password">
+ </div>
+ <div class="settings-actions">
+ <button class="btn btn-primary" onclick="changePassword()"> Update Password</button>
+ </div>
+ <div class="settings-msg" id="passwordMsg"></div>
+ </div>
+ <div class="settings-card">
+ <div class="settings-card-title"> Appearance</div>
+ <div class="settings-card-desc">Customize the look and feel</div>
+ <div class="toggle-switch">
+ <div class="toggle-switch-label">
+ <span class="title"> Light Mode</span>
+ <span class="desc">Switch between dark and light theme</span>
+ </div>
+ <div class="toggle-track" id="themeToggle" onclick="toggleTheme()"></div>
+ </div>
+ </div>
+ </div>
+ </div><!-- /page-settings -->
 
-  </main>
+ </main>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <div class="logo-icon">⚡</div> ServiceSphere
-      </div>
-      <div class="footer-links"><a href="index.html">Home</a></div>
-      <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
-    </div>
-  </footer>
+ <footer>
+ <div class="footer-inner">
+ <div class="footer-brand">
+ <div class="logo-icon">⚡</div> ServiceSphere
+ </div>
+ <div class="footer-links"><a href="index.html">Home</a></div>
+ <div class="footer-bottom">&copy; 2026 ServiceSphere. All rights reserved.</div>
+ </div>
+ </footer>
 
-  <!-- Reschedule Modal -->
-  <div class="modal-overlay" id="rescheduleModal">
-    <div class="modal" style="max-width:400px;">
-      <h3>📅 Reschedule Booking</h3>
-      <div class="sub">Pick a new date and time for this booking.</div>
-      <input type="hidden" id="rescheduleBookingId">
-      <div class="form-group">
-        <label for="rescheduleDate">New Date</label>
-        <input type="date" id="rescheduleDate" class="form-input" required>
-      </div>
-      <div class="form-group">
-        <label for="rescheduleTime">New Time</label>
-        <input type="time" id="rescheduleTime" class="form-input" required>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeRescheduleModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitReschedule()" id="rescheduleSubmitBtn">✓ Confirm
-          Reschedule</button>
-      </div>
-    </div>
-  </div>
+ <!-- Reschedule Modal -->
+ <div class="modal-overlay" id="rescheduleModal">
+ <div class="modal" style="max-width:400px;">
+ <h3> Reschedule Booking</h3>
+ <div class="sub">Pick a new date and time for this booking.</div>
+ <input type="hidden" id="rescheduleBookingId">
+ <div class="form-group">
+ <label for="rescheduleDate">New Date</label>
+ <input type="date" id="rescheduleDate" class="form-input" required>
+ </div>
+ <div class="form-group">
+ <label for="rescheduleTime">New Time</label>
+ <input type="time" id="rescheduleTime" class="form-input" required>
+ </div>
+ <div class="modal-actions">
+ <button class="btn btn-ghost" onclick="closeRescheduleModal()">Cancel</button>
+ <button class="btn btn-primary" onclick="submitReschedule()" id="rescheduleSubmitBtn">✓ Confirm
+ Reschedule</button>
+ </div>
+ </div>
+ </div>
 
-  <div class="chat-drawer" id="chatDrawer">
-    <div class="chat-header">
-      <div class="chat-partner-info">
-        <div class="chat-status-dot"></div>
-        <div>
-          <div class="chat-partner-name" id="chatPartnerName">Customer</div>
-          <div class="chat-partner-service" id="chatPartnerService">Service</div>
-        </div>
-      </div>
-      <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
-    </div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-input-area">
-      <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…"
-        onkeydown="if(event.key==='Enter') sendChatMessage()">
-      <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
-    </div>
-  </div>
+ <div class="chat-drawer" id="chatDrawer">
+ <div class="chat-header">
+ <div class="chat-partner-info">
+ <div class="chat-status-dot"></div>
+ <div>
+ <div class="chat-partner-name" id="chatPartnerName">Customer</div>
+ <div class="chat-partner-service" id="chatPartnerService">Service</div>
+ </div>
+ </div>
+ <button class="chat-close-btn" onclick="closeChatDrawer()" title="Close">✕</button>
+ </div>
+ <div class="chat-messages" id="chatMessages"></div>
+ <div class="chat-input-area">
+ <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…"
+ onkeydown="if(event.key==='Enter') sendChatMessage()">
+ <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">➤</button>
+ </div>
+ </div>
 
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/reviews.js"></script>
-  <script src="js/bookings.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/payments.js"></script>
-  <script src="js/providers.js"></script>
-  <script src="js/notif-center.js"></script>
-  <script src="js/notifications.js"></script>
-  <script src="js/chatbot.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      checkAuth('provider');
+ <script src="js/utils.js"></script>
+ <script src="js/auth.js"></script>
+ <script src="js/reviews.js"></script>
+ <script src="js/bookings.js"></script>
+ <script src="js/chat.js"></script>
+ <script src="js/payments.js"></script>
+ <script src="js/providers.js"></script>
+ <script src="js/notif-center.js"></script>
+ <script src="js/notifications.js"></script>
+ <script src="js/chatbot.js"></script>
+ <script>
+ window.addEventListener('DOMContentLoaded', () => {
+ checkAuth('provider');
 
-      const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-      const name = user.name || 'Provider';
-      const vs = user.verification_status;
-      const username = user.username || '';
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ const name = user.name || 'Provider';
+ const vs = user.verification_status;
+ const username = user.username || '';
 
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('profileName').innerHTML = escapeHtml(name) + (username ? ' <span style="color:var(--primary-light);font-size:14px;font-weight:400;">@' + escapeHtml(username) + '</span>' : '');
-      document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('profileService').textContent = user.service || 'Service Provider';
-      document.getElementById('profileLocation').textContent = '📍 ' + (user.location || user.city || 'Location not set');
+ document.getElementById('userName').textContent = name;
+ document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('profileName').innerHTML = escapeHtml(name) + (username ? ' <span style="color:var(--primary-light);font-size:14px;font-weight:400;">@' + escapeHtml(username) + '</span>' : '');
+ document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('profileService').textContent = user.service || 'Service Provider';
+ document.getElementById('profileLocation').textContent = ' ' + (user.location || user.city || 'Location not set');
 
-      const badge = document.getElementById('profileBadge');
-      const banner = document.getElementById('verificationBanner');
-      if (vs === 'approved') {
-        badge.textContent = '✓ Verified Provider';
-        badge.style.background = 'rgba(16,185,129,0.15)';
-        badge.style.color = 'var(--success)';
-      } else if (vs === 'pending') {
-        badge.textContent = '⏳ Pending Verification';
-        badge.style.background = 'rgba(245,158,11,0.15)';
-        badge.style.color = 'var(--warning)';
-        banner.style.display = 'block';
-        banner.className = 'verification-banner pending';
-        banner.innerHTML = '⏳ Your account is under review. Upload was received — admin approval within 24–48 hours. You can view requests but cannot accept until verified.';
-      } else {
-        badge.textContent = 'Verified';
-      }
+ const badge = document.getElementById('profileBadge');
+ const banner = document.getElementById('verificationBanner');
+ if (vs === 'approved') {
+ badge.textContent = '✓ Verified Provider';
+ badge.style.background = 'rgba(16,185,129,0.15)';
+ badge.style.color = 'var(--success)';
+ } else if (vs === 'pending') {
+ badge.textContent = ' Pending Verification';
+ badge.style.background = 'rgba(245,158,11,0.15)';
+ badge.style.color = 'var(--warning)';
+ banner.style.display = 'block';
+ banner.className = 'verification-banner pending';
+ banner.innerHTML = ' Your account is under review. Upload was received — admin approval within 24–48 hours. You can view requests but cannot accept until verified.';
+ } else {
+ badge.textContent = 'Verified';
+ }
 
-      renderProviderBookings('all');
-      renderProviderCalendar();
-      loadMyReviews();
-      loadProviderPrice();
-      loadProviderEarnings();
-      loadProviderAvailability();
+ renderProviderBookings('all');
+ renderProviderCalendar();
+ loadMyReviews();
+ loadProviderPrice();
+ loadProviderEarnings();
+ loadProviderAvailability();
 
-      // ── PROVIDER NOTIFICATION POLLING (uses shared function from script.js) ──
-      startNotificationPolling({
-        role: 'provider',
-        bookingsEndpoint: '/provider-bookings',
-        onRefresh: () => renderProviderBookings(_providerBookingsFilter || 'all')
-      });
-    });
+ // ── PROVIDER NOTIFICATION POLLING (uses shared function from script.js) ──
+ startNotificationPolling({
+ role: 'provider',
+ bookingsEndpoint: '/provider-bookings',
+ onRefresh: () => renderProviderBookings(_providerBookingsFilter || 'all')
+ });
+ });
 
-    /* ── Pricing Functions ── */
-    async function loadProviderPrice() {
-      const user = getUser();
-      if (!user || !user.id) return;
-      try {
-        const res = await fetch(API_URL + '/provider/' + user.id, { credentials: 'include' });
-        const data = await res.json();
-        if (data.success && data.provider) {
-          const price = parseFloat(data.provider.service_price);
-          const display = document.getElementById('currentPriceDisplay');
-          const input = document.getElementById('priceInput');
-          if (price && price > 0) {
-            if (display) display.textContent = '₹' + price.toFixed(0);
-            if (input) input.value = price.toFixed(0);
-          } else {
-            if (display) display.textContent = '₹499';
-            if (input) input.placeholder = '499';
-          }
-        }
-      } catch(e) { console.warn('Could not load pricing', e); }
-    }
+ /* ── Pricing Functions ── */
+ async function loadProviderPrice() {
+ const user = getUser();
+ if (!user || !user.id) return;
+ try {
+ const res = await fetch(API_URL + '/provider/' + user.id, { credentials: 'include' });
+ const data = await res.json();
+ if (data.success && data.provider) {
+ const price = parseFloat(data.provider.service_price);
+ const display = document.getElementById('currentPriceDisplay');
+ const input = document.getElementById('priceInput');
+ if (price && price > 0) {
+ if (display) display.textContent = '₹' + price.toFixed(0);
+ if (input) input.value = price.toFixed(0);
+ } else {
+ if (display) display.textContent = '₹499';
+ if (input) input.placeholder = '499';
+ }
+ }
+ } catch(e) { console.warn('Could not load pricing', e); }
+ }
 
-    /* ── Earnings Dashboard ── */
-    async function loadProviderEarnings() {
-      try {
-        const res = await apiFetch(API_URL + '/provider/earnings', {
-          headers: { 'Authorization': 'Bearer ' + getToken() }
-        });
-        const data = await res.json();
-        if (data.success && data.earnings) {
-          const e = data.earnings;
-          const el = id => document.getElementById(id);
-          if (el('earnTotal')) el('earnTotal').textContent = '₹' + (e.total_earned || 0).toLocaleString('en-IN');
-          if (el('earnMonth')) el('earnMonth').textContent = '₹' + (e.earned_this_month || 0).toLocaleString('en-IN');
-          if (el('earnJobs')) el('earnJobs').textContent = e.completed_jobs || 0;
-          if (el('earnRate')) el('earnRate').textContent = (e.acceptance_rate || 0) + '%';
-        }
-      } catch(e) { console.warn('Earnings load failed', e); }
-    }
+ /* ── Earnings Dashboard ── */
+ async function loadProviderEarnings() {
+ try {
+ const res = await apiFetch(API_URL + '/provider/earnings', {
+ headers: { 'Authorization': 'Bearer ' + getToken() }
+ });
+ const data = await res.json();
+ if (data.success && data.earnings) {
+ const e = data.earnings;
+ const el = id => document.getElementById(id);
+ if (el('earnTotal')) el('earnTotal').textContent = '₹' + (e.total_earned || 0).toLocaleString('en-IN');
+ if (el('earnMonth')) el('earnMonth').textContent = '₹' + (e.earned_this_month || 0).toLocaleString('en-IN');
+ if (el('earnJobs')) el('earnJobs').textContent = e.completed_jobs || 0;
+ if (el('earnRate')) el('earnRate').textContent = (e.acceptance_rate || 0) + '%';
+ }
+ } catch(e) { console.warn('Earnings load failed', e); }
+ }
 
-    /* ── Availability Schedule ── */
-    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    let _availabilityData = [];
+ /* ── Availability Schedule ── */
+ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+ let _availabilityData = [];
 
-    async function loadProviderAvailability() {
-      const user = getUser();
-      if (!user || !user.id) return;
-      const grid = document.getElementById('availabilityGrid');
-      if (!grid) return;
+ async function loadProviderAvailability() {
+ const user = getUser();
+ if (!user || !user.id) return;
+ const grid = document.getElementById('availabilityGrid');
+ if (!grid) return;
 
-      try {
-        const res = await fetch(API_URL + '/provider/' + user.id + '/availability');
-        const data = await res.json();
-        _availabilityData = data.success ? (data.availability || []) : [];
-      } catch(e) { _availabilityData = []; }
+ try {
+ const res = await fetch(API_URL + '/provider/' + user.id + '/availability');
+ const data = await res.json();
+ _availabilityData = data.success ? (data.availability || []) : [];
+ } catch(e) { _availabilityData = []; }
 
-      renderAvailabilityGrid();
-    }
+ renderAvailabilityGrid();
+ }
 
-    function renderAvailabilityGrid() {
-      const grid = document.getElementById('availabilityGrid');
-      if (!grid) return;
+ function renderAvailabilityGrid() {
+ const grid = document.getElementById('availabilityGrid');
+ if (!grid) return;
 
-      grid.innerHTML = DAY_NAMES.map((day, i) => {
-        const slot = _availabilityData.find(a => a.day_of_week === i);
-        const isOn = slot ? !!slot.is_available : (i >= 1 && i <= 6); // defaults: Mon-Sat on
-        const start = slot?.start_time?.substring(0,5) || '09:00';
-        const end = slot?.end_time?.substring(0,5) || '18:00';
-        return `
-          <div class="avail-row" data-day="${i}">
-            <div class="avail-day">${day.substring(0,3)}</div>
-            <input type="time" class="avail-start" value="${start}" ${!isOn ? 'disabled' : ''}>
-            <input type="time" class="avail-end" value="${end}" ${!isOn ? 'disabled' : ''}>
-            <label class="avail-toggle">
-              <input type="checkbox" class="avail-check" ${isOn ? 'checked' : ''} onchange="toggleAvailDay(this, ${i})">
-              <span class="avail-toggle-slider"></span>
-            </label>
-          </div>`;
-      }).join('');
-    }
+ grid.innerHTML = DAY_NAMES.map((day, i) => {
+ const slot = _availabilityData.find(a => a.day_of_week === i);
+ const isOn = slot ? !!slot.is_available : (i >= 1 && i <= 6); // defaults: Mon-Sat on
+ const start = slot?.start_time?.substring(0,5) || '09:00';
+ const end = slot?.end_time?.substring(0,5) || '18:00';
+ return `
+ <div class="avail-row" data-day="${i}">
+ <div class="avail-day">${day.substring(0,3)}</div>
+ <input type="time" class="avail-start" value="${start}" ${!isOn ? 'disabled' : ''}>
+ <input type="time" class="avail-end" value="${end}" ${!isOn ? 'disabled' : ''}>
+ <label class="avail-toggle">
+ <input type="checkbox" class="avail-check" ${isOn ? 'checked' : ''} onchange="toggleAvailDay(this, ${i})">
+ <span class="avail-toggle-slider"></span>
+ </label>
+ </div>`;
+ }).join('');
+ }
 
-    function toggleAvailDay(checkbox, dayIdx) {
-      const row = checkbox.closest('.avail-row');
-      const startInput = row.querySelector('.avail-start');
-      const endInput = row.querySelector('.avail-end');
-      startInput.disabled = !checkbox.checked;
-      endInput.disabled = !checkbox.checked;
-    }
+ function toggleAvailDay(checkbox, dayIdx) {
+ const row = checkbox.closest('.avail-row');
+ const startInput = row.querySelector('.avail-start');
+ const endInput = row.querySelector('.avail-end');
+ startInput.disabled = !checkbox.checked;
+ endInput.disabled = !checkbox.checked;
+ }
 
-    async function saveAvailability() {
-      const btn = document.getElementById('saveAvailBtn');
-      const msg = document.getElementById('availMsg');
-      const rows = document.querySelectorAll('.avail-row');
-      const schedule = [];
+ async function saveAvailability() {
+ const btn = document.getElementById('saveAvailBtn');
+ const msg = document.getElementById('availMsg');
+ const rows = document.querySelectorAll('.avail-row');
+ const schedule = [];
 
-      rows.forEach(row => {
-        const day = parseInt(row.dataset.day);
-        const isOn = row.querySelector('.avail-check').checked;
-        const start = row.querySelector('.avail-start').value || '09:00';
-        const end = row.querySelector('.avail-end').value || '18:00';
-        schedule.push({ day_of_week: day, start_time: start, end_time: end, is_available: isOn });
-      });
+ rows.forEach(row => {
+ const day = parseInt(row.dataset.day);
+ const isOn = row.querySelector('.avail-check').checked;
+ const start = row.querySelector('.avail-start').value || '09:00';
+ const end = row.querySelector('.avail-end').value || '18:00';
+ schedule.push({ day_of_week: day, start_time: start, end_time: end, is_available: isOn });
+ });
 
-      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
-      try {
-        const res = await apiFetch(API_URL + '/provider/availability', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-          body: JSON.stringify({ schedule })
-        });
-        const data = await res.json();
-        if (data.success) {
-          if (msg) { msg.textContent = '✅ Schedule saved!'; msg.style.color = 'var(--success)'; }
-          showToast('Availability updated!', 'success');
-        } else {
-          if (msg) { msg.textContent = data.message || 'Error'; msg.style.color = 'var(--error)'; }
-        }
-      } catch(e) {
-        if (msg) { msg.textContent = 'Server error'; msg.style.color = 'var(--error)'; }
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = '💾 Save Schedule'; }
-        setTimeout(() => { if (msg) msg.textContent = ''; }, 4000);
-      }
-    }
+ if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+ try {
+ const res = await apiFetch(API_URL + '/provider/availability', {
+ method: 'PUT',
+ headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+ body: JSON.stringify({ schedule })
+ });
+ const data = await res.json();
+ if (data.success) {
+ if (msg) { msg.textContent = ' Schedule saved!'; msg.style.color = 'var(--success)'; }
+ showToast('Availability updated!', 'success');
+ } else {
+ if (msg) { msg.textContent = data.message || 'Error'; msg.style.color = 'var(--error)'; }
+ }
+ } catch(e) {
+ if (msg) { msg.textContent = 'Server error'; msg.style.color = 'var(--error)'; }
+ } finally {
+ if (btn) { btn.disabled = false; btn.textContent = ' Save Schedule'; }
+ setTimeout(() => { if (msg) msg.textContent = ''; }, 4000);
+ }
+ }
 
-    async function saveProviderPrice() {
-      const input = document.getElementById('priceInput');
-      const price = parseFloat(input?.value);
-      const msg = document.getElementById('priceMsg');
+ async function saveProviderPrice() {
+ const input = document.getElementById('priceInput');
+ const price = parseFloat(input?.value);
+ const msg = document.getElementById('priceMsg');
 
-      if (!price || price < 49 || price > 99999) {
-        if (msg) { msg.textContent = '₹49 – ₹99,999 allowed'; msg.style.color = 'var(--error)'; }
-        return;
-      }
+ if (!price || price < 49 || price > 99999) {
+ if (msg) { msg.textContent = '₹49 – ₹99,999 allowed'; msg.style.color = 'var(--error)'; }
+ return;
+ }
 
-      const btn = document.getElementById('savePriceBtn');
-      if (btn) { btn.disabled = true; btn.textContent = '...'; }
+ const btn = document.getElementById('savePriceBtn');
+ if (btn) { btn.disabled = true; btn.textContent = '...'; }
 
-      try {
-        const res = await apiFetch(API_URL + '/provider/price', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-          body: JSON.stringify({ price })
-        });
-        const data = await res.json();
-        if (data.success) {
-          const display = document.getElementById('currentPriceDisplay');
-          if (display) display.textContent = '₹' + price.toFixed(0);
-          if (msg) { msg.textContent = '✅ Saved!'; msg.style.color = 'var(--success)'; }
-          showToast('Price updated to ₹' + price.toFixed(0), 'success');
-          setTimeout(() => { if (msg) msg.textContent = ''; }, 3000);
-        } else {
-          if (msg) { msg.textContent = data.message || 'Error'; msg.style.color = 'var(--error)'; }
-        }
-      } catch(e) {
-        if (msg) { msg.textContent = 'Server error'; msg.style.color = 'var(--error)'; }
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
-      }
-    }
+ try {
+ const res = await apiFetch(API_URL + '/provider/price', {
+ method: 'PUT',
+ headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+ body: JSON.stringify({ price })
+ });
+ const data = await res.json();
+ if (data.success) {
+ const display = document.getElementById('currentPriceDisplay');
+ if (display) display.textContent = '₹' + price.toFixed(0);
+ if (msg) { msg.textContent = ' Saved!'; msg.style.color = 'var(--success)'; }
+ showToast('Price updated to ₹' + price.toFixed(0), 'success');
+ setTimeout(() => { if (msg) msg.textContent = ''; }, 3000);
+ } else {
+ if (msg) { msg.textContent = data.message || 'Error'; msg.style.color = 'var(--error)'; }
+ }
+ } catch(e) {
+ if (msg) { msg.textContent = 'Server error'; msg.style.color = 'var(--error)'; }
+ } finally {
+ if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+ }
+ }
 
-    function filterProviderBookings(status) {
-      ['all', 'pending', 'accepted', 'completed', 'cancelled'].forEach(t => {
-        document.getElementById('tab-' + t)?.classList.toggle('active', t === status);
-      });
-      renderProviderBookings(status);
-    }
+ function filterProviderBookings(status) {
+ ['all', 'pending', 'accepted', 'completed', 'cancelled'].forEach(t => {
+ document.getElementById('tab-' + t)?.classList.toggle('active', t === status);
+ });
+ renderProviderBookings(status);
+ }
 
-    /* ═══════════════════════════════════════
-       SPA NAVIGATION
-    ═══════════════════════════════════════ */
-    let _currentPage = 'overview';
+ /* ═══════════════════════════════════════
+ SPA NAVIGATION
+ ═══════════════════════════════════════ */
+ let _currentPage = 'overview';
 
-    function navigateTo(pageName) {
-      _currentPage = pageName;
-      document.querySelectorAll('.dashboard-page').forEach(p => p.classList.remove('active'));
-      const target = document.getElementById('page-' + pageName);
-      if (target) target.classList.add('active');
+ function navigateTo(pageName) {
+ _currentPage = pageName;
+ document.querySelectorAll('.dashboard-page').forEach(p => p.classList.remove('active'));
+ const target = document.getElementById('page-' + pageName);
+ if (target) target.classList.add('active');
 
-      document.querySelectorAll('.profile-nav-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.page === pageName);
-      });
+ document.querySelectorAll('.profile-nav-link').forEach(link => {
+ link.classList.toggle('active', link.dataset.page === pageName);
+ });
 
-      if (pageName === 'bookings') renderProviderBookings(_providerBookingsFilter || 'all');
-      if (pageName === 'calendar') renderProviderCalendar();
-      if (pageName === 'reviews') loadMyReviews();
-      if (pageName === 'settings') loadSettingsPage();
-      if (pageName === 'overview') {
-        renderProviderBookings(_providerBookingsFilter || 'all');
-        renderProviderCalendar();
-      }
+ if (pageName === 'bookings') renderProviderBookings(_providerBookingsFilter || 'all');
+ if (pageName === 'calendar') renderProviderCalendar();
+ if (pageName === 'reviews') loadMyReviews();
+ if (pageName === 'settings') loadSettingsPage();
+ if (pageName === 'overview') {
+ renderProviderBookings(_providerBookingsFilter || 'all');
+ renderProviderCalendar();
+ }
 
-      closeProfilePanel();
-      window.scrollTo({ top: 0 });
-    }
+ closeProfilePanel();
+ window.scrollTo({ top: 0 });
+ }
 
-    function openProfilePanel() {
-      document.getElementById('profilePanel').classList.add('open');
-      document.getElementById('profilePanelOverlay').classList.add('open');
-      // Populate panel
-      const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-      const name = user.name || 'Provider';
-      document.getElementById('panelAvatar').textContent = name.charAt(0).toUpperCase();
-      document.getElementById('panelName').textContent = name;
-      document.getElementById('panelEmail').textContent = user.email || '';
-    }
-    function closeProfilePanel() {
-      document.getElementById('profilePanel')?.classList.remove('open');
-      document.getElementById('profilePanelOverlay')?.classList.remove('open');
-    }
+ function openProfilePanel() {
+ document.getElementById('profilePanel').classList.add('open');
+ document.getElementById('profilePanelOverlay').classList.add('open');
+ // Populate panel
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ const name = user.name || 'Provider';
+ document.getElementById('panelAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('panelName').textContent = name;
+ document.getElementById('panelEmail').textContent = user.email || '';
+ }
+ function closeProfilePanel() {
+ document.getElementById('profilePanel')?.classList.remove('open');
+ document.getElementById('profilePanelOverlay')?.classList.remove('open');
+ }
 
-    /* ═══════════════════════════════════════
-       SETTINGS FUNCTIONS
-    ═══════════════════════════════════════ */
-    async function loadSettingsPage() {
-      try {
-        const res = await fetch(API_URL + '/profile', {
-          headers: { 'Authorization': 'Bearer ' + getToken() }
-        });
-        const data = await res.json();
-        if (data.success && data.user) {
-          document.getElementById('settings_name').value = data.user.name || '';
-          document.getElementById('settings_email').value = data.user.email || '';
-          document.getElementById('settings_phone').value = data.user.phone || '';
-        }
-      } catch(e) {
-        const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-        document.getElementById('settings_name').value = user.name || '';
-        document.getElementById('settings_email').value = user.email || '';
-        document.getElementById('settings_phone').value = user.phone || '';
-      }
-      const theme = localStorage.getItem('ss_theme') || 'dark';
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', theme === 'light');
-    }
+ /* ═══════════════════════════════════════
+ SETTINGS FUNCTIONS
+ ═══════════════════════════════════════ */
+ async function loadSettingsPage() {
+ try {
+ const res = await fetch(API_URL + '/profile', {
+ headers: { 'Authorization': 'Bearer ' + getToken() }
+ });
+ const data = await res.json();
+ if (data.success && data.user) {
+ document.getElementById('settings_name').value = data.user.name || '';
+ document.getElementById('settings_email').value = data.user.email || '';
+ document.getElementById('settings_phone').value = data.user.phone || '';
+ }
+ } catch(e) {
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ document.getElementById('settings_name').value = user.name || '';
+ document.getElementById('settings_email').value = user.email || '';
+ document.getElementById('settings_phone').value = user.phone || '';
+ }
+ const theme = localStorage.getItem('ss_theme') || 'dark';
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', theme === 'light');
+ }
 
-    async function saveProfile() {
-      const name = document.getElementById('settings_name').value.trim();
-      const email = document.getElementById('settings_email').value.trim();
-      const phone = document.getElementById('settings_phone').value.trim();
-      const msgEl = document.getElementById('profileMsg');
-      if (!name || name.length < 2) return showSettingsMsg(msgEl, 'error', 'Name must be at least 2 characters');
-      if (!email || !email.includes('@')) return showSettingsMsg(msgEl, 'error', 'Please enter a valid email');
-      if (phone && !/^[0-9]{10}$/.test(phone)) return showSettingsMsg(msgEl, 'error', 'Phone must be 10 digits');
-      try {
-        const res = await fetch(API_URL + '/profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-          body: JSON.stringify({ name, email, phone: phone || undefined })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showSettingsMsg(msgEl, 'success', '✅ Profile updated!');
-          const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
-          user.name = name; user.email = email; user.phone = phone;
-          localStorage.setItem('ss_user', JSON.stringify(user));
-          document.getElementById('userName').textContent = name;
-          document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-          document.getElementById('panelAvatar').textContent = name.charAt(0).toUpperCase();
-          document.getElementById('panelName').textContent = name;
-          document.getElementById('panelEmail').textContent = email;
-          document.getElementById('profileName').innerHTML = escapeHtml(name);
-          document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-        } else {
-          showSettingsMsg(msgEl, 'error', data.message || 'Update failed');
-        }
-      } catch(e) { showSettingsMsg(msgEl, 'error', 'Network error'); }
-    }
+ async function saveProfile() {
+ const name = document.getElementById('settings_name').value.trim();
+ const email = document.getElementById('settings_email').value.trim();
+ const phone = document.getElementById('settings_phone').value.trim();
+ const msgEl = document.getElementById('profileMsg');
+ if (!name || name.length < 2) return showSettingsMsg(msgEl, 'error', 'Name must be at least 2 characters');
+ if (!email || !email.includes('@')) return showSettingsMsg(msgEl, 'error', 'Please enter a valid email');
+ if (phone && !/^[0-9]{10}$/.test(phone)) return showSettingsMsg(msgEl, 'error', 'Phone must be 10 digits');
+ try {
+ const res = await fetch(API_URL + '/profile', {
+ method: 'PUT',
+ headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+ body: JSON.stringify({ name, email, phone: phone || undefined })
+ });
+ const data = await res.json();
+ if (data.success) {
+ showSettingsMsg(msgEl, 'success', ' Profile updated!');
+ const user = JSON.parse(localStorage.getItem('ss_user') || '{}');
+ user.name = name; user.email = email; user.phone = phone;
+ localStorage.setItem('ss_user', JSON.stringify(user));
+ document.getElementById('userName').textContent = name;
+ document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('panelAvatar').textContent = name.charAt(0).toUpperCase();
+ document.getElementById('panelName').textContent = name;
+ document.getElementById('panelEmail').textContent = email;
+ document.getElementById('profileName').innerHTML = escapeHtml(name);
+ document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+ } else {
+ showSettingsMsg(msgEl, 'error', data.message || 'Update failed');
+ }
+ } catch(e) { showSettingsMsg(msgEl, 'error', 'Network error'); }
+ }
 
-    async function changePassword() {
-      const current = document.getElementById('settings_current_pwd').value;
-      const newPwd = document.getElementById('settings_new_pwd').value;
-      const confirm = document.getElementById('settings_confirm_pwd').value;
-      const msgEl = document.getElementById('passwordMsg');
-      if (!current) return showSettingsMsg(msgEl, 'error', 'Enter current password');
-      if (newPwd.length < 6) return showSettingsMsg(msgEl, 'error', 'Min 6 characters');
-      if (newPwd !== confirm) return showSettingsMsg(msgEl, 'error', 'Passwords do not match');
-      try {
-        const res = await fetch(API_URL + '/change-password', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-          body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showSettingsMsg(msgEl, 'success', '✅ Password changed!');
-          document.getElementById('settings_current_pwd').value = '';
-          document.getElementById('settings_new_pwd').value = '';
-          document.getElementById('settings_confirm_pwd').value = '';
-        } else {
-          showSettingsMsg(msgEl, 'error', data.message || 'Failed');
-        }
-      } catch(e) { showSettingsMsg(msgEl, 'error', 'Network error'); }
-    }
+ async function changePassword() {
+ const current = document.getElementById('settings_current_pwd').value;
+ const newPwd = document.getElementById('settings_new_pwd').value;
+ const confirm = document.getElementById('settings_confirm_pwd').value;
+ const msgEl = document.getElementById('passwordMsg');
+ if (!current) return showSettingsMsg(msgEl, 'error', 'Enter current password');
+ if (newPwd.length < 6) return showSettingsMsg(msgEl, 'error', 'Min 6 characters');
+ if (newPwd !== confirm) return showSettingsMsg(msgEl, 'error', 'Passwords do not match');
+ try {
+ const res = await fetch(API_URL + '/change-password', {
+ method: 'PUT',
+ headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+ body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+ });
+ const data = await res.json();
+ if (data.success) {
+ showSettingsMsg(msgEl, 'success', ' Password changed!');
+ document.getElementById('settings_current_pwd').value = '';
+ document.getElementById('settings_new_pwd').value = '';
+ document.getElementById('settings_confirm_pwd').value = '';
+ } else {
+ showSettingsMsg(msgEl, 'error', data.message || 'Failed');
+ }
+ } catch(e) { showSettingsMsg(msgEl, 'error', 'Network error'); }
+ }
 
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('ss_theme', next);
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', next === 'light');
-    }
+ function toggleTheme() {
+ const html = document.documentElement;
+ const current = html.getAttribute('data-theme') || 'dark';
+ const next = current === 'dark' ? 'light' : 'dark';
+ html.setAttribute('data-theme', next);
+ localStorage.setItem('ss_theme', next);
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', next === 'light');
+ }
 
-    (function applyTheme() {
-      const saved = localStorage.getItem('ss_theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      const toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.classList.toggle('active', saved === 'light');
-    })();
+ (function applyTheme() {
+ const saved = localStorage.getItem('ss_theme');
+ if (saved) document.documentElement.setAttribute('data-theme', saved);
+ const toggle = document.getElementById('themeToggle');
+ if (toggle) toggle.classList.toggle('active', saved === 'light');
+ })();
 
-    function showSettingsMsg(el, type, text) {
-      if (!el) return;
-      el.className = 'settings-msg ' + type;
-      el.textContent = text;
-      el.style.display = 'block';
-      setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
-  </script>
+ function showSettingsMsg(el, type, text) {
+ if (!el) return;
+ el.className = 'settings-msg ' + type;
+ el.textContent = text;
+ el.style.display = 'block';
+ setTimeout(() => { el.style.display = 'none'; }, 5000);
+ }
+ </script>
 
-  <!-- Notification Center Drawer -->
-  <div class="notif-drawer" id="notifCenterDrawer">
-    <div class="notif-drawer-header">
-      <h3>🔔 Notifications</h3>
-      <div class="notif-drawer-actions">
-        <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
-        <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
-      </div>
-    </div>
-    <div class="notif-drawer-body" id="notifCenterList"></div>
-  </div>
+ <!-- Notification Center Drawer -->
+ <div class="notif-drawer" id="notifCenterDrawer">
+ <div class="notif-drawer-header">
+ <h3> Notifications</h3>
+ <div class="notif-drawer-actions">
+ <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+ <button class="notif-drawer-close" onclick="closeNotifCenter()">&times;</button>
+ </div>
+ </div>
+ <div class="notif-drawer-body" id="notifCenterList"></div>
+ </div>
 
-  <!-- Profile Panel Overlay -->
-  <div class="profile-panel-overlay" id="profilePanelOverlay" onclick="closeProfilePanel()"></div>
+ <!-- Profile Panel Overlay -->
+ <div class="profile-panel-overlay" id="profilePanelOverlay" onclick="closeProfilePanel()"></div>
 
-  <!-- Profile Side Panel -->
-  <div class="profile-panel" id="profilePanel">
-    <div class="profile-panel-header">
-      <button class="profile-panel-close" onclick="closeProfilePanel()">&times;</button>
-      <div class="profile-panel-avatar" id="panelAvatar">P</div>
-      <div class="profile-panel-name" id="panelName">Provider</div>
-      <div class="profile-panel-email" id="panelEmail">provider@email.com</div>
-      <div class="profile-panel-role">🛠️ Service Provider</div>
-    </div>
-    <div class="profile-panel-nav">
-      <button class="profile-nav-link active" data-page="overview" onclick="navigateTo('overview')">
-        <span class="nav-icon">🏠</span> Dashboard
-      </button>
-      <button class="profile-nav-link" data-page="bookings" onclick="navigateTo('bookings')">
-        <span class="nav-icon">📋</span> Bookings
-      </button>
-      <button class="profile-nav-link" data-page="calendar" onclick="navigateTo('calendar')">
-        <span class="nav-icon">📅</span> Calendar
-      </button>
-      <button class="profile-nav-link" data-page="reviews" onclick="navigateTo('reviews')">
-        <span class="nav-icon">⭐</span> Reviews
-      </button>
-      <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
-        <span class="nav-icon">⚙️</span> Settings
-      </button>
-    </div>
-    <div class="profile-panel-footer">
-      <button class="btn btn-ghost" onclick="logout()">🚪 Logout</button>
-    </div>
-  </div>
+ <!-- Profile Side Panel -->
+ <div class="profile-panel" id="profilePanel">
+ <div class="profile-panel-header">
+ <button class="profile-panel-close" onclick="closeProfilePanel()">&times;</button>
+ <div class="profile-panel-avatar" id="panelAvatar">P</div>
+ <div class="profile-panel-name" id="panelName">Provider</div>
+ <div class="profile-panel-email" id="panelEmail">provider@email.com</div>
+ <div class="profile-panel-role"> Service Provider</div>
+ </div>
+ <div class="profile-panel-nav">
+ <button class="profile-nav-link active" data-page="overview" onclick="navigateTo('overview')">
+ <span class="nav-icon"></span> Dashboard
+ </button>
+ <button class="profile-nav-link" data-page="bookings" onclick="navigateTo('bookings')">
+ <span class="nav-icon"></span> Bookings
+ </button>
+ <button class="profile-nav-link" data-page="calendar" onclick="navigateTo('calendar')">
+ <span class="nav-icon"></span> Calendar
+ </button>
+ <button class="profile-nav-link" data-page="reviews" onclick="navigateTo('reviews')">
+ <span class="nav-icon"></span> Reviews
+ </button>
+ <button class="profile-nav-link" data-page="settings" onclick="navigateTo('settings')">
+ <span class="nav-icon"></span> Settings
+ </button>
+ </div>
+ <div class="profile-panel-footer">
+ <button class="btn btn-ghost" onclick="logout()"> Logout</button>
+ </div>
+ </div>
 
 </body>
 
